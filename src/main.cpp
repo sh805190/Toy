@@ -62,6 +62,16 @@ int main(int argc, char* argv[]) {
     std::cout << "ref:\t" << toString(symbol) << std::endl;
   }
 
+  /*
+  //any circular reference passed to toString will segfault
+  Symbol s, r;
+  s.type = symbolType::ARRAY;
+  r.type = symbolType::REFERENCE;
+  *r.value = &s;
+  *s.value = {r};
+  std::cout << toString(s) << std::endl;
+  */
+
   //test keywords & operators
   for (int i = 5; i < 50; i++) {
     Symbol symbol;
