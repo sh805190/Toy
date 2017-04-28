@@ -31,8 +31,12 @@ int main(int argc, char* argv[]) {
 
   //test function
   {
-    //TODO: functions
-    std::cout << "func:\t" << "Coming soon" << std::endl;
+    Symbol symbol;
+
+    symbol.type = symbolType::FUNCTION;
+    //TODO: set a function
+
+    std::cout << "func:\t" << toString(symbol) << std::endl;
   }
 
   //test number
@@ -100,8 +104,13 @@ std::string toString(Symbol symbol) {
       return ret;
     }
 
-//    case symbolType::FUNCTION:
-        //TODO: tokenisation
+    case symbolType::FUNCTION: {
+      std::string ret;
+      for (auto& it : symbol.value->function) {
+        ret += toString(it);
+      }
+      return ret;
+    }
 
     case symbolType::NUMBER:
         return std::to_string(symbol.value->number);
@@ -166,5 +175,105 @@ std::string toString(Symbol symbol) {
 }
 
 Symbol parseString(std::string) {
-  //
+  //TODO: incomplete
+}
+
+int tokenize(std::string str, std::list<Symbol>& target) {
+  while(str.size()) {
+    //TODO: incomplete
+  }
+
+  return 0;
+}
+
+inline Symbol popToken(std::string& str) {
+  char c;
+  switch(c = popFront(str)) {
+    //operators
+    case '(': return symbolType::PARENTHESIS_LEFT;
+    case ')': return symbolType::PARENTHESIS_RIGHT;
+    case '=':
+      if (str[0] == '=') {
+        popFront(str);
+        return symbolType::COMPARITOR;
+      }
+      else {
+       return symbolType::ASSIGNMENT;
+      }
+    case '+': return symbolType::ADDITION;
+    case '-': return symbolType::SUBTRACTION;
+    case '*': return symbolType::MULTIPLICATION;
+    case '/':
+      if (str[0] == '/') {
+        popFront(str);
+        return symbolType::COMMENT;
+      }
+      else {
+       return symbolType::DIVISION;
+      }
+    case '%': return symbolType::MODULUS;
+    case '!': return symbolType::NOT;
+    case '&':
+      if (str[0] == '&') {
+        popFront(str);
+        return symbolType::AND;
+      }
+      else {
+       return symbolType::REFERENCE_MARK;
+      }
+    case '|':
+      if (str[0] == '|') {
+        popFront(str);
+        return symbolType::OR;
+      }
+      else {
+       return symbolType::PIPE;
+      }
+    case '<':
+      if (str[0] == '=') {
+        popFront(str);
+        return symbolType::LESS_THAN_OR_EQUAL;
+      }
+      else {
+       return symbolType::LESS_THAN;
+      }
+    case '>':
+      if (str[0] == '=') {
+        popFront(str);
+        return symbolType::GREATER_THAN_OR_EQUAL;
+      }
+      else {
+       return symbolType::GREATER_THAN;
+      }
+    case '{': return symbolType::BRACE_LEFT;
+    case '}': return symbolType::BRACE_RIGHT;
+    case '[': return symbolType::BRACKET_LEFT;
+    case ']': return symbolType::BRACKET_RIGHT;
+    case '.': return symbolType::CONCATENATION;
+    case ':': return symbolType::SEPARATOR;
+    case '"': return symbolType::QUOTE;
+    case ','; return symbolType::COMMA;
+
+    default:
+      str = std::string() + c + str;
+      if (isalpha(c) || c == '_') {
+        std::string word;
+        while(isalnum(str[0]) || str[0] == '_') {
+          word += popFront(str);
+        }
+
+        //find the keyword
+        //TODO: incomplete
+      }
+      if (isdigit(c)) {
+        //TODO: incomplete
+      }
+  }
+  return -1;
+}
+
+char popFront(std::string& str) {
+  char ret = str[0];
+  str = str.substr(1, str.size()-1);
+  return ret;
 }
