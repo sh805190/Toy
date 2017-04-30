@@ -3,7 +3,7 @@
 #include <iostream>
 
 std::string toString(Symbol);
-Symbol parseString(std::string);
+//Symbol parseString(std::string);
 
 int main(int argc, char* argv[]) {
   //test array
@@ -123,54 +123,15 @@ std::string toString(Symbol symbol) {
     case symbolType::STRING:
       return symbol.value->string;
 
-    //reserved keywords
-    case symbolType::BREAK: return "break";
-    case symbolType::CASE: return "case";
-    case symbolType::CONTINUE: return "continue";
-    case symbolType::DEFAULT: return "default";
-    case symbolType::ELSE: return "else";
-    case symbolType::FOR: return "for";
-    case symbolType::GOTO: return "goto";
-    case symbolType::IF: return "if";
-    case symbolType::MAIN: return "main";
-    case symbolType::MODULE: return "module";
-    case symbolType::PRELOAD: return "preload";
-    case symbolType::RETURN: return "return";
-    case symbolType::SWITCH: return "switch";
-    case symbolType::UNDEFINED: return "undefined";
-    case symbolType::USE: return "use";
-    case symbolType::VAR: return "var";
-    case symbolType::WHILE: return "while";
-
-    //operators
-    case symbolType::PARENTHESIS_LEFT: return "(";
-    case symbolType::PARENTHESIS_RIGHT: return ")";
-    case symbolType::ASSIGNMENT: return "=";
-    case symbolType::ADDITION: return "+";
-    case symbolType::SUBTRACTION: return "-";
-    case symbolType::MULTIPLICATION: return "*";
-    case symbolType::DIVISION: return "/";
-    case symbolType::MODULUS: return "%";
-    case symbolType::COMPARITOR: return "==";
-    case symbolType::NOT: return "!";
-    case symbolType::AND: return "&&";
-    case symbolType::OR: return "||";
-    case symbolType::LESS_THAN: return "<";
-    case symbolType::GREATER_THAN: return ">";
-    case symbolType::LESS_THAN_OR_EQUAL: return "<=";
-    case symbolType::GREATER_THAN_OR_EQUAL: return ">=";
-    case symbolType::BRACE_LEFT: return "{";
-    case symbolType::BRACE_RIGHT: return "}";
-    case symbolType::BRACKET_LEFT: return "[";
-    case symbolType::BRACKET_RIGHT: return "]";
-    case symbolType::REFERENCE_MARK: return "&";
-    case symbolType::CONCATENATION: return ".";
-    case symbolType::SEPARATOR: return ":";
-    case symbolType::QUOTE: return "\"";
-    case symbolType::COMMA: return ",";
-
+    //keywords & operators
     default:
-      return "unknown";
+      if (symbol.type < symbolType::SYMBOL_LAST) {
+        return symbolConst.at(symbol.type);
+      }
+      else {
+        //unknown symbol
+        return "unknown";
+      }
   };
 }
 
@@ -184,92 +145,6 @@ int tokenize(std::string str, std::list<Symbol>& target) {
   }
 
   return 0;
-}
-
-inline Symbol popToken(std::string& str) {
-  char c;
-  switch(c = popFront(str)) {
-    //operators
-    case '(': return symbolType::PARENTHESIS_LEFT;
-    case ')': return symbolType::PARENTHESIS_RIGHT;
-    case '=':
-      if (str[0] == '=') {
-        popFront(str);
-        return symbolType::COMPARITOR;
-      }
-      else {
-       return symbolType::ASSIGNMENT;
-      }
-    case '+': return symbolType::ADDITION;
-    case '-': return symbolType::SUBTRACTION;
-    case '*': return symbolType::MULTIPLICATION;
-    case '/':
-      if (str[0] == '/') {
-        popFront(str);
-        return symbolType::COMMENT;
-      }
-      else {
-       return symbolType::DIVISION;
-      }
-    case '%': return symbolType::MODULUS;
-    case '!': return symbolType::NOT;
-    case '&':
-      if (str[0] == '&') {
-        popFront(str);
-        return symbolType::AND;
-      }
-      else {
-       return symbolType::REFERENCE_MARK;
-      }
-    case '|':
-      if (str[0] == '|') {
-        popFront(str);
-        return symbolType::OR;
-      }
-      else {
-       return symbolType::PIPE;
-      }
-    case '<':
-      if (str[0] == '=') {
-        popFront(str);
-        return symbolType::LESS_THAN_OR_EQUAL;
-      }
-      else {
-       return symbolType::LESS_THAN;
-      }
-    case '>':
-      if (str[0] == '=') {
-        popFront(str);
-        return symbolType::GREATER_THAN_OR_EQUAL;
-      }
-      else {
-       return symbolType::GREATER_THAN;
-      }
-    case '{': return symbolType::BRACE_LEFT;
-    case '}': return symbolType::BRACE_RIGHT;
-    case '[': return symbolType::BRACKET_LEFT;
-    case ']': return symbolType::BRACKET_RIGHT;
-    case '.': return symbolType::CONCATENATION;
-    case ':': return symbolType::SEPARATOR;
-    case '"': return symbolType::QUOTE;
-    case ','; return symbolType::COMMA;
-
-    default:
-      str = std::string() + c + str;
-      if (isalpha(c) || c == '_') {
-        std::string word;
-        while(isalnum(str[0]) || str[0] == '_') {
-          word += popFront(str);
-        }
-
-        //find the keyword
-        //TODO: incomplete
-      }
-      if (isdigit(c)) {
-        //TODO: incomplete
-      }
-  }
-  return -1;
 }
 
 char popFront(std::string& str) {

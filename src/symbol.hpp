@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -60,7 +61,69 @@ enum symbolType {
   CONCATENATION,
   SEPARATOR,
   QUOTE,
-  COMMA
+  COMMA,
+  PIPE,
+
+  COMMENT,
+  SYMBOL_LAST
+};
+
+const std::map<symbolType, const char*> symbolConst = {
+  //var types
+  {ARRAY, ""},
+  {FUNCTION, ""},
+  {NUMBER, ""},
+  {REFERENCE, ""},
+  {STRING, ""},
+
+  //reserved keywords
+  {BREAK, "break"},
+  {CASE, "case"},
+  {CONTINUE, "continue"},
+  {DEFAULT, "default"},
+  {ELSE, "else"},
+  {FOR, "for"},
+  {GOTO, "goto"},
+  {IF, "if"},
+  {MAIN, "main"},
+  {MODULE, "module"},
+  {PRELOAD, "preload"},
+  {RETURN, "return"},
+  {SWITCH, "switch"},
+  {UNDEFINED, "undefined"},
+  {USE, "use"},
+  {VAR, "var"},
+  {WHILE, "while"},
+
+  //operators
+  {PARENTHESIS_LEFT, "("},
+  {PARENTHESIS_RIGHT, ")"},
+  {ASSIGNMENT, "="},
+  {ADDITION, "+"},
+  {SUBTRACTION, "-"},
+  {MULTIPLICATION, "*"},
+  {DIVISION, "/"},
+  {MODULUS, "%"},
+  {COMPARITOR, "=="},
+  {NOT, "!"},
+  {AND, "&&"},
+  {OR, "||"},
+  {LESS_THAN, "<"},
+  {GREATER_THAN, ">"},
+  {LESS_THAN_OR_EQUAL, "<="},
+  {GREATER_THAN_OR_EQUAL, ">="},
+  {BRACE_LEFT, "{"},
+  {BRACE_RIGHT, "}"},
+  {BRACKET_LEFT, "["},
+  {BRACKET_RIGHT, "]"},
+  {REFERENCE_MARK, "&"},
+  {CONCATENATION, "."},
+  {SEPARATOR, ":"},
+  {QUOTE, "\""},
+  {COMMA, ","},
+  {PIPE, "|"},
+
+  {COMMENT, "//"}
 };
 
 struct symbolValue {
@@ -75,6 +138,7 @@ struct symbolValue {
   }
 
   symbolValue& operator=(std::initializer_list<Symbol> il) {
+    //TODO: functions
     array = il;
     return *this;
   }
