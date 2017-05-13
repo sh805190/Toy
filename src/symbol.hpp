@@ -158,7 +158,7 @@ struct symbolValue {
   std::shared_ptr<Symbol> reference;
 };
 
-//the symbol class proper
+//the symbol struct proper
 struct Symbol {
   Symbol() {
     value = std::make_shared<symbolValue>();

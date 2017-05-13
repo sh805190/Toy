@@ -1,19 +1,9 @@
 #include "../src/symbol.hpp"
 
-#include <functional>
-#include <iostream>
-
-//unit test utilities
-static int unitCount = 0;
-static int failCount = 0;
-void unit(std::string name, std::function<bool()> f) {
-  std::cout << name << "\t\t" <<
-  (f() ? (unitCount++, "OK") : (failCount++, "fail"))
-  << std::endl;
-}
+#include "unit.hpp"
 
 //start the test
-int main(int argc, char* argv[]) {
+int toString_test(int argc, char* argv[]) {
 
   //test number
   unit("number", []() -> bool {
@@ -81,18 +71,14 @@ int main(int argc, char* argv[]) {
 
   //test keywords & operators
   for (int i = 5; i < symbolType::SYMBOL_LAST; i++) {
-    unit("", [i]() -> bool {
-      Symbol symbol;
-      symbol.type = symbolType(i);
+    Symbol symbol;
+    symbol.type = symbolType(i);
 
-      std::cout << toString(symbol);
-
+    unit(toString(symbol), [symbol,i]() -> bool {
       return !toString(symbol)
         .compare(symbolConst.at(symbolType(i)));
     });
   }
-
-  std::cout << "Total fails: " << failCount << std::endl;
 
   return 0;
 }
