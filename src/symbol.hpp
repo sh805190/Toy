@@ -9,6 +9,7 @@
 //forward declarations
 class Symbol;
 
+//symbolType
 enum symbolType {
   //var types
   ARRAY,
@@ -68,6 +69,7 @@ enum symbolType {
   SYMBOL_LAST
 };
 
+//symbol constants
 const std::map<symbolType, const char*> symbolConst = {
   //var types
   {ARRAY, ""},
@@ -126,6 +128,7 @@ const std::map<symbolType, const char*> symbolConst = {
   {COMMENT, "//"}
 };
 
+//symbol value, stored as a shared pointer
 struct symbolValue {
   symbolValue& operator=(double d) {
     number = d;
@@ -155,6 +158,7 @@ struct symbolValue {
   std::shared_ptr<Symbol> reference;
 };
 
+//the symbol class proper
 struct Symbol {
   Symbol() {
     value = std::make_shared<symbolValue>();
@@ -166,3 +170,6 @@ struct Symbol {
   symbolType type;
   std::shared_ptr<symbolValue> value;
 };
+
+//symbol functions
+std::string toString(Symbol symbol);
