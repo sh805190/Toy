@@ -12,6 +12,9 @@ all: $(OUTDIR)
 debug: export CXXFLAGS+=-g
 debug: clean all
 
+test: clean all
+	$(MAKE) -C test
+
 $(OUTDIR):
 	mkdir $(OUTDIR)
 
