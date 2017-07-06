@@ -17,6 +17,9 @@ enum TokenType {
   OR, RETURN, SWITCH, TRUE, UNDEFINED, USE, VAR,
   WHILE,
 
+  //literal types
+  IDENTIFIER, NUMBER, STRING,
+
   //program terminator
-  EOF
+  END_OF_FILE
 };
