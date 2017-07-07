@@ -1,3 +1,6 @@
-/* Hello world */
+//Hello world
+use "standard";
 
-[ hello world ]
+var main = function() {
+  print("Hello world");
+}

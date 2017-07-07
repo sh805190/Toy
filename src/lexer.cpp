@@ -181,7 +181,7 @@ void Lexer::ScanString() {
   Advance();
 
   //finally
-  std::string s = source.substr(start+1, current-start-1);
+  std::string s = source.substr(start+1, current-start-2); //-2 for the quotes
   AddToken(STRING, s);
 }
 
