@@ -94,18 +94,21 @@ char Lexer::Advance() {
 void Lexer::EatComments() {
   if (source[current - 1] == '/') {
     //eat one line
-    while(source[current] != '\n' && source[current] != '\0')
-      current++;
-    line++;
+    while(source[current] != '\n' && !IsAtEnd())
+      Advance();
+    if (source[current] == '\n') {
+      Advance();
+      line++;
+    }
   }
   else {
     //eat nested multiline comments
     for (;;) {
       if (Match('/') && Match('*')) EatComments();
-      if (Match('*') && Match('/')) return;
-      if (Match('\n')) line++;
-      if (Match('\0')) return;
-      current++;
+      else if (Match('*') && Match('/')) return;
+      else if (Match('\n')) line++;
+      else if (Match('\0')) return;
+      else Advance();
     }
   }
 }
@@ -125,7 +128,7 @@ bool Lexer::IsDigit(char c) {
 bool Lexer::Match(char expected) {
   //consume the match if true
   if (source[current] == expected) {
-    current++;
+    Advance();
     return true;
   }
   return false;
@@ -164,7 +167,7 @@ void Lexer::ScanString() {
   int ln = line; //for error handling
 
   //read the string
-  while(source[current] != '"') {
+  while(!IsAtEnd() && source[current] != '"') {
     if (source[current] == '\n') line++; //allow multiline strings
     Advance();
   }
