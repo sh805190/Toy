@@ -14,6 +14,13 @@ Literal::Literal(std::string s): type(Literal::Type::STRING) {
   str = s;
 }
 
+Literal& Literal::operator=(const Literal& rhs) {
+  this->type = rhs.type;
+  this->number = rhs.number;
+  this->str = rhs.str;
+  return *this;
+}
+
 Literal::Type Literal::GetType() {
   return type;
 }

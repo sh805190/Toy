@@ -9,8 +9,10 @@
 //token in the AST tree
 class Token {
 public:
-  Token() = delete;
+  Token() = default;
   Token(TokenType type, std::string lexeme, Literal literal, int line);
+
+  Token& operator=(const Token&);
 
   TokenType GetType();
   std::string GetLexeme();
@@ -24,5 +26,5 @@ private:
   TokenType type;
   std::string lexeme;
   Literal literal;
-  const int line;
+  int line;
 };

@@ -13,6 +13,8 @@ public:
   Literal(double);
   Literal(std::string);
 
+  Literal& operator=(const Literal&);
+
   Type GetType();
 
   double SetNumber(double);
@@ -25,7 +27,7 @@ public:
   std::string ToString();
 
 private:
-  const Type type;
+  Type type;
   double number = 0;
   std::string str;
 };

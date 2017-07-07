@@ -6,6 +6,14 @@ Token::Token(TokenType argType, std::string argLexeme, Literal argLiteral, int a
   //EMPTY
 }
 
+Token& Token::operator=(const Token& rhs) {
+  this->type = rhs.type;
+  this->lexeme = rhs.lexeme;
+  this->literal = rhs.literal;
+  this->line = rhs.line;
+  return *this;
+}
+
 TokenType Token::GetType() {
   return type;
 }
