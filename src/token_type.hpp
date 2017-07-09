@@ -19,7 +19,7 @@ enum TokenType {
   WHILE,
 
   //literal types
-  IDENTIFIER, NUMBER, STRING,
+  IDENTIFIER, BOOLEAN, NUMBER, STRING,
 
   //program terminator
   END_OF_FILE

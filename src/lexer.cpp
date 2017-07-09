@@ -6,7 +6,7 @@ Lexer::Lexer(std::string s): source(s) {
   //
 }
 
-std::vector<Token> Lexer::GetTokenList() {
+std::vector<Token> Lexer::GetTokenVector() {
   tokenVector.clear();
 
   while(!IsAtEnd()) {
@@ -14,12 +14,12 @@ std::vector<Token> Lexer::GetTokenList() {
     ScanToken();
   }
 
-  tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", 0, line));
+  tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", "", line));
   return tokenVector;
 }
 
 void Lexer::ScanToken() {
-  char c = Advance();
+  char c = Advance(); //work while pointing to the next character
   switch(c) {
     //single chars
     case '(': AddToken(LEFT_PAREN); break;
@@ -79,7 +79,7 @@ void Lexer::ScanToken() {
 
 //helpers
 void Lexer::AddToken(TokenType type) {
-  AddToken(type, -1);
+  AddToken(type, "");
 }
 
 void Lexer::AddToken(TokenType type, Literal literal) {

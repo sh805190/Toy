@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
     defineAST(os, "Expr", {
 //      {"Array", "Token lb, std::list<Literal> literalList, Token rb"},
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
-      {"Grouping", "std::list<Stmt*> stmtList"},
+      {"Grouping", "Expr* inner"},
       {"Unary", "Token op, Expr* rhs"},
       {"Value", "Literal value"}
     });

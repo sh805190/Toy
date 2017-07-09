@@ -1,5 +1,11 @@
 #include "token.hpp"
 
+Token::Token():
+  type(UNDEFINED), lexeme(""), literal(""), line(-1)
+{
+  //EMPTY
+}
+
 Token::Token(TokenType argType):
   type(argType), lexeme(""), literal(""), line(-1)
 {

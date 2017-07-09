@@ -47,15 +47,15 @@ public:
 
 class Grouping: public Expr {
 public:
-  Grouping(std::list<Stmt*> stmtList) {
-    this->stmtList = stmtList;
+  Grouping(Expr* inner) {
+    this->inner = inner;
   }
 
   void Accept(ExprVisitor* visitor) override {
     visitor->Visit(this);
   }
 
-  std::list<Stmt*> stmtList;
+  Expr* inner;
 };
 
 class Unary: public Expr {

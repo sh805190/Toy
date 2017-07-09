@@ -1,12 +1,13 @@
 #include "parser.hpp"
 
 #include "error_handler.hpp"
+#include "expr_visitors.hpp"
 
 Parser::Parser(std::vector<Token> t): tokenVector(t) {
   //EMPTY
 }
 
-std::vector<Stmt*> Parser::GetStatements() {
+std::vector<Stmt*> Parser::GetStmtVector() {
   statementVector.clear();
 
   while(!IsAtEnd()) {
@@ -18,13 +19,12 @@ std::vector<Stmt*> Parser::GetStatements() {
       Synchronize();
     }
   }
-
   return statementVector;
 }
 
 //rules
 Stmt* Parser::ScanStatement() {
-  Token tok = Advance();
+  Token tok = tokenVector[current]; //work while pointing at the current token
 
   switch(tok.GetType()) {
     //all types
@@ -40,6 +40,7 @@ Stmt* Parser::ScanStatement() {
 
     //error
     case LEFT_BRACE:
+      Advance();
       throw ParserError(tok.GetLine(), "Block scoping is not allowed");
 
     //delegate
@@ -54,109 +55,158 @@ Stmt* Parser::ScanStatement() {
 //stmt types
 Stmt* Parser::ScanClass() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanIf() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanReturn() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanUse() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanVar() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanWhile() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanBreak() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanContinue() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanModule() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanExpression() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  return ScanAssignment();
 }
 
-//expr types
-Expr* Parser::ScanArray() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+//expr rules
+Expr* Parser::ScanAssignment() {
+  Expr* expr = ScanLogical();
+
+  if (Match(EQUAL)) {
+    //check the lhs expression type
+    TokenTypeGetter getter;
+    expr->Accept(&getter);
+    if (getter.GetType() != IDENTIFIER) {
+      throw ParserError(tokenVector[current-1].GetLine(), "invalid assignment target");
+    }
+
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanAssignment();
+    expr = new Binary(expr, op, rhs);
+ }
+
+  return expr;
 }
 
-Expr* Parser::ScanAssign() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+Expr* Parser::ScanLogical() {
+  Expr* expr = ScanComparison();
+
+  if (Match(AND) || Match(OR)) {
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanComparison();
+    expr = new Binary(expr, op, rhs);
+  }
+
+  return expr;
 }
 
-Expr* Parser::ScanBinary() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+Expr* Parser::ScanComparison() {
+  Expr* expr = ScanTerm();
+
+  if (Match(EQUAL_EQUAL) || Match(BANG_EQUAL) || Match(LESS) || Match(LESS_EQUAL) || Match(GREATER) || Match(GREATER_EQUAL)) {
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanTerm();
+    expr = new Binary(expr, op, rhs);
+  }
+
+  return expr;
 }
 
-Expr* Parser::ScanFunction() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+Expr* Parser::ScanTerm() {
+  Expr* expr = ScanFactor();
+
+  if (Match(PLUS) || Match(MINUS)) {
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanFactor();
+    expr = new Binary(expr, op, rhs);
+  }
+
+  return expr;
 }
 
-Expr* Parser::ScanGrouping() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
-}
+Expr* Parser::ScanFactor() {
+  Expr* expr = ScanUnary();
 
-Expr* Parser::ScanIdentifier() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
-}
+  if (Match(STAR) || Match(SLASH)) {
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanUnary();
+    expr = new Binary(expr, op, rhs);
+  }
 
-Expr* Parser::ScanLiteral() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
-}
-
-Expr* Parser::ScanReference() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  return expr;
 }
 
 Expr* Parser::ScanUnary() {
-  //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  if (Match(MINUS) || Match(BANG)) {
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanUnary();
+    return new Unary(op, rhs);
+  }
+
+  return ScanPrimary();
+}
+
+Expr* Parser::ScanPrimary() {
+  if (Match(FALSE)) return new Value(false);
+  if (Match(TRUE)) return new Value(true);
+
+  if (Match(UNDEFINED)) return new Expr();
+
+  if (Match(NUMBER) || Match(STRING)) return new Value(tokenVector[current-1].GetLiteral());
+
+  if (Match(LEFT_PAREN)) {
+    Expr* expr = ScanExpression();
+    Consume(RIGHT_PAREN, "Expected ')' after expression");
+    return new Grouping(expr);
+  }
+
+  Advance(); //skip this token
+  throw(ParserError(tokenVector[current-1].GetLine(), std::string() + "Unexpected symbol '" + tokenVector[current-1].GetLexeme() + "'"));
 }
 
 //other types
 Expr* Parser::ScanBlock() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanSpecial() {
   //TODO
-  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 //helpers
@@ -166,18 +216,18 @@ Token Parser::Advance() {
 }
 
 void Parser::Consume(Token token, std::string errmsg) {
-  if (!Match(token)) {
+  if (IsAtEnd() || !Match(token)) {
     ErrorHandler::Error(token.GetLine(), errmsg);
     Synchronize();
   }
 }
 
 bool Parser::IsAtEnd() {
-  return current >= tokenVector.size();
+  return (current >= tokenVector.size()) || (tokenVector[current].GetType() == END_OF_FILE);
 }
 
 bool Parser::Match(Token t) {
-  if (tokenVector[current].GetType() == t.GetType()) {
+  if (!IsAtEnd() && tokenVector[current].GetType() == t.GetType()) {
     Advance();
     return true;
   }
@@ -185,8 +235,6 @@ bool Parser::Match(Token t) {
 }
 
 void Parser::Synchronize() {
-  Advance();
-
   while(!IsAtEnd()) {
     if (tokenVector[current - 1].GetType() == SEMICOLON) return;
     switch(tokenVector[current].GetType()) {

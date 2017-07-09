@@ -5,17 +5,21 @@
 class Literal {
 public:
   enum class Type {
-    NUMBER, STRING
+    BOOLEAN, NUMBER, STRING, UNDEFINED
   };
 
   Literal();
   Literal(Type);
+  Literal(bool);
   Literal(double);
   Literal(std::string);
 
   Literal& operator=(const Literal&);
 
   Type GetType();
+
+  bool SetBoolean(bool);
+  bool GetBoolean();
 
   double SetNumber(double);
   double GetNumber();
@@ -28,6 +32,7 @@ public:
 
 private:
   Type type;
+  bool boolean = false;
   double number = 0;
   std::string str;
 };

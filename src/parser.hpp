@@ -10,7 +10,7 @@ public:
   Parser() = delete;
   Parser(std::vector<Token> tokens);
 
-  std::vector<Stmt*> GetStatements();
+  std::vector<Stmt*> GetStmtVector();
 
 private:
   //rules
@@ -29,16 +29,14 @@ private:
   
   Expr* ScanExpression();
 
-  //expr types
-  Expr* ScanArray();
-  Expr* ScanAssign();
-  Expr* ScanBinary();
-  Expr* ScanFunction();
-  Expr* ScanGrouping();
-  Expr* ScanIdentifier();
-  Expr* ScanLiteral();
-  Expr* ScanReference();
+  //expr rules
+  Expr* ScanAssignment();
+  Expr* ScanLogical();
+  Expr* ScanComparison();
+  Expr* ScanTerm();
+  Expr* ScanFactor();
   Expr* ScanUnary();
+  Expr* ScanPrimary();
 
   //other types
   Expr* ScanBlock();

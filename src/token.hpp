@@ -9,7 +9,7 @@
 //token in the AST tree
 class Token {
 public:
-  Token() = default;
+  Token();
   Token(TokenType type);
   Token(TokenType type, std::string lexeme, Literal literal, int line);
 

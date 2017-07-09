@@ -13,7 +13,7 @@ public:
   Lexer() = delete;
   Lexer(std::string source);
 
-  std::vector<Token> GetTokenList();
+  std::vector<Token> GetTokenVector();
 
 private:
   std::map<std::string, TokenType> keywords = {
