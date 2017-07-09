@@ -10,6 +10,7 @@
 class Token {
 public:
   Token() = default;
+  Token(TokenType type);
   Token(TokenType type, std::string lexeme, Literal literal, int line);
 
   Token& operator=(const Token&);

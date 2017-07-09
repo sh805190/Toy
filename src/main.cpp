@@ -1,4 +1,5 @@
 #include "lexer.hpp"
+#include "parser.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -19,13 +20,11 @@ int main(int argc, char* argv[]) {
 
     Lexer lexer(source);
 
-    std::list<Token> tokens = lexer.GetTokenList();
+    Parser parser(lexer.GetTokenList());
 
-    std::cout << "size: " << tokens.size() << std::endl;
+    std::list<Stmt*> statements = parser.GetStatements();
 
-    for (Token token : tokens) {
-      std::cout << token.ToString() << std::endl;
-    }
+    std::cout << "statement count: " << statements.size() << std::endl;
   }
 
   return 0; 

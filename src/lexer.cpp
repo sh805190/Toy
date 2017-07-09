@@ -6,16 +6,16 @@ Lexer::Lexer(std::string s): source(s) {
   //
 }
 
-std::list<Token> Lexer::GetTokenList() {
-  tokenList.clear();
+std::vector<Token> Lexer::GetTokenList() {
+  tokenVector.clear();
 
   while(!IsAtEnd()) {
     start = current;
     ScanToken();
   }
 
-  tokenList.push_back(Token(END_OF_FILE, "END_OF_FILE", 0, line));
-  return tokenList;
+  tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", 0, line));
+  return tokenVector;
 }
 
 void Lexer::ScanToken() {
@@ -34,6 +34,7 @@ void Lexer::ScanToken() {
     case '.': AddToken(DOT); break;
     case ':': AddToken(COLON); break;
     case ';': AddToken(SEMICOLON); break;
+    case '&': AddToken(AMPERSAND); break;
 
     case '"': ScanString(); break; //unique
 
@@ -83,7 +84,7 @@ void Lexer::AddToken(TokenType type) {
 
 void Lexer::AddToken(TokenType type, Literal literal) {
   std::string lexeme = source.substr(start, current-start);
-  tokenList.push_back(Token(type, lexeme, literal, line));
+  tokenVector.push_back(Token(type, lexeme, literal, line));
 }
 
 char Lexer::Advance() {

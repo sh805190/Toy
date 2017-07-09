@@ -6,6 +6,7 @@ enum TokenType {
   PLUS, MINUS, STAR, SLASH,
   BANG, EQUAL, LESS, GREATER,
   DOT, COLON, SEMICOLON, QUOTE,
+  AMPERSAND,
 
   //two character operators
   BANG_EQUAL, EQUAL_EQUAL,

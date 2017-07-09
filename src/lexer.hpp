@@ -4,16 +4,16 @@
 #include "token_type.hpp"
 #include "token.hpp"
 
-#include <list>
 #include <map>
 #include <string>
+#include <vector>
 
 class Lexer {
 public:
   Lexer() = delete;
   Lexer(std::string source);
 
-  std::list<Token> GetTokenList();
+  std::vector<Token> GetTokenList();
 
 private:
   std::map<std::string, TokenType> keywords = {
@@ -41,7 +41,7 @@ private:
   };
 
   const std::string source;
-  std::list<Token> tokenList;
+  std::vector<Token> tokenVector;
   int current = 0;
   int start = 0;
   int line = 1;
