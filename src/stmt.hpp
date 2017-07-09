@@ -1,14 +1,13 @@
-#ifndef __StmtGUARD
-#define __StmtGUARD
+#pragma once
+
+class Stmt;
+class Expression;
 
 #include "expr.hpp"
 #include "stmt.hpp"
 #include "token.hpp"
 
 #include <list>
-
-class Stmt;
-class Expression;
 
 class StmtVisitor {
 public:
@@ -25,7 +24,7 @@ public:
 
 class Expression: public Stmt {
 public:
-  Expression(Expr expr) {
+  Expression(Expr* expr) {
     this->expr = expr;
   }
 
@@ -33,7 +32,5 @@ public:
     visitor->Visit(this);
   }
 
-  Expr expr;
+  Expr* expr;
 };
-
-#endif

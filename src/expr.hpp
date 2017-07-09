@@ -1,17 +1,16 @@
-#ifndef __ExprGUARD
-#define __ExprGUARD
-
-#include "expr.hpp"
-#include "stmt.hpp"
-#include "token.hpp"
-
-#include <list>
+#pragma once
 
 class Expr;
 class Binary;
 class Grouping;
 class Unary;
 class Value;
+
+#include "expr.hpp"
+#include "stmt.hpp"
+#include "token.hpp"
+
+#include <list>
 
 class ExprVisitor {
 public:
@@ -31,7 +30,7 @@ public:
 
 class Binary: public Expr {
 public:
-  Binary(Expr lhs, Token op, Expr rhs) {
+  Binary(Expr* lhs, Token op, Expr* rhs) {
     this->lhs = lhs;
     this->op = op;
     this->rhs = rhs;
@@ -41,14 +40,14 @@ public:
     visitor->Visit(this);
   }
 
-  Expr lhs;
+  Expr* lhs;
   Token op;
-  Expr rhs;
+  Expr* rhs;
 };
 
 class Grouping: public Expr {
 public:
-  Grouping(std::list<Stmt> stmtList) {
+  Grouping(std::list<Stmt*> stmtList) {
     this->stmtList = stmtList;
   }
 
@@ -56,12 +55,12 @@ public:
     visitor->Visit(this);
   }
 
-  std::list<Stmt> stmtList;
+  std::list<Stmt*> stmtList;
 };
 
 class Unary: public Expr {
 public:
-  Unary(Token op, Expr rhs) {
+  Unary(Token op, Expr* rhs) {
     this->op = op;
     this->rhs = rhs;
   }
@@ -71,7 +70,7 @@ public:
   }
 
   Token op;
-  Expr rhs;
+  Expr* rhs;
 };
 
 class Value: public Expr {
@@ -86,5 +85,3 @@ public:
 
   Literal value;
 };
-
-#endif

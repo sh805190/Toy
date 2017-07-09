@@ -101,16 +101,7 @@ std::vector<std::string> splitString(std::string s, std::string delim) {
 
 void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<std::string, std::string>> data) {
   //print the basics
-  os << "#ifndef __" << baseName << "GUARD" << std::endl;
-  os << "#define __" << baseName << "GUARD" << std::endl;
-  os << std::endl;
-
-  os << "#include \"expr.hpp\"" << std::endl;
-  os << "#include \"stmt.hpp\"" << std::endl;
-  os << "#include \"token.hpp\"" << std::endl;
-  os << std::endl;
-
-  os << "#include <list>" << std::endl;
+  os << "#pragma once" << std::endl;
   os << std::endl;
 
   //forward declare the AST classes
@@ -118,6 +109,14 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   for (auto& p : data) {
     os << "class " << p.first << ";" << std::endl;
   }
+
+  os << std::endl;
+  os << "#include \"expr.hpp\"" << std::endl;
+  os << "#include \"stmt.hpp\"" << std::endl;
+  os << "#include \"token.hpp\"" << std::endl;
+  os << std::endl;
+
+  os << "#include <list>" << std::endl;
   os << std::endl;
 
   //print the visitor class
@@ -168,8 +167,6 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
     //close the class
     os << "};" << std::endl;
   }
-  //close the guard
-  os << std::endl << "#endif" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -190,16 +187,16 @@ int main(int argc, char* argv[]) {
   if (!strcmp(argv[1], "expr")) {
     defineAST(os, "Expr", {
 //      {"Array", "Token lb, std::list<Literal> literalList, Token rb"},
-      {"Binary", "Expr lhs, Token op, Expr rhs"},
-      {"Grouping", "std::list<Stmt> stmtList"},
-      {"Unary", "Token op, Expr rhs"},
+      {"Binary", "Expr* lhs, Token op, Expr* rhs"},
+      {"Grouping", "std::list<Stmt*> stmtList"},
+      {"Unary", "Token op, Expr* rhs"},
       {"Value", "Literal value"}
     });
   }
   //Stmt
   else if (!strcmp(argv[1], "stmt")) {
     defineAST(os, "Stmt", {
-      {"Expression", "Expr expr"}
+      {"Expression", "Expr* expr"}
     });
   }
 
