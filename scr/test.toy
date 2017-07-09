@@ -1,6 +1,6 @@
 //Hello world
 use "standard";
-{}
+
 var main = function() {
-  print("Hello world");
+  print("Hello world\n");
 }

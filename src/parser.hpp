@@ -10,7 +10,7 @@ public:
   Parser() = delete;
   Parser(std::vector<Token> tokens);
 
-  std::list<Stmt*> GetStatements();
+  std::vector<Stmt*> GetStatements();
 
 private:
   //rules
@@ -50,8 +50,9 @@ private:
   bool IsAtEnd();
   bool Match(Token);
   void Synchronize();
-
-  std::vector<Token> tokens;
+ 
+  std::vector<Stmt*> statementVector;
+  std::vector<Token> tokenVector;
   int current = 0;
 
   class ParserError {

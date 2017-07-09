@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     Parser parser(lexer.GetTokenList());
 
-    std::list<Stmt*> statements = parser.GetStatements();
+    std::vector<Stmt*> statements = parser.GetStatements();
 
     std::cout << "statement count: " << statements.size() << std::endl;
   }

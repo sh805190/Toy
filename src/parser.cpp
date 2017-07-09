@@ -2,16 +2,16 @@
 
 #include "error_handler.hpp"
 
-Parser::Parser(std::vector<Token> t): tokens(t) {
+Parser::Parser(std::vector<Token> t): tokenVector(t) {
   //EMPTY
 }
 
-std::list<Stmt*> Parser::GetStatements() {
-  std::list<Stmt*> statements;
+std::vector<Stmt*> Parser::GetStatements() {
+  statementVector.clear();
 
   while(!IsAtEnd()) {
     try {
-      statements.push_back(ScanStatement());
+      statementVector.push_back(ScanStatement());
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
@@ -19,7 +19,7 @@ std::list<Stmt*> Parser::GetStatements() {
     }
   }
 
-  return statements;
+  return statementVector;
 }
 
 //rules
@@ -54,115 +54,115 @@ Stmt* Parser::ScanStatement() {
 //stmt types
 Stmt* Parser::ScanClass() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanIf() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanReturn() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanUse() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanVar() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanWhile() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanBreak() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanContinue() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanModule() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanExpression() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 //expr types
 Expr* Parser::ScanArray() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanAssign() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanBinary() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanFunction() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanGrouping() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanIdentifier() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanLiteral() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanReference() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanUnary() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 //other types
 Expr* Parser::ScanBlock() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanSpecial() {
   //TODO
-  throw ParserError(tokens[current-1].GetLine(), std::string() + "'" + tokens[current-1].GetLexeme() + "' not yet implemented");
+  throw ParserError(tokenVector[current-1].GetLine(), std::string() + "'" + tokenVector[current-1].GetLexeme() + "' not yet implemented");
 }
 
 //helpers
 Token Parser::Advance() {
   current++;
-  return tokens[current - 1];
+  return tokenVector[current - 1];
 }
 
 void Parser::Consume(Token token, std::string errmsg) {
@@ -173,11 +173,11 @@ void Parser::Consume(Token token, std::string errmsg) {
 }
 
 bool Parser::IsAtEnd() {
-  return current >= tokens.size();
+  return current >= tokenVector.size();
 }
 
 bool Parser::Match(Token t) {
-  if (tokens[current].GetType() == t.GetType()) {
+  if (tokenVector[current].GetType() == t.GetType()) {
     Advance();
     return true;
   }
@@ -188,8 +188,8 @@ void Parser::Synchronize() {
   Advance();
 
   while(!IsAtEnd()) {
-    if (tokens[current - 1].GetType() == SEMICOLON) return;
-    switch(tokens[current].GetType()) {
+    if (tokenVector[current - 1].GetType() == SEMICOLON) return;
+    switch(tokenVector[current].GetType()) {
       case BREAK:
       case CASE:
       case CLASS:
