@@ -38,6 +38,13 @@ void ASTReaderPrefix::Visit(Grouping* expr) {
   std::cout << ")";
 }
 
+void ASTReaderPrefix::Visit(Logical* expr) {
+  std::cout << expr->op.GetLexeme() << " ";
+  Print(expr->lhs);
+  std::cout << " ";
+  Print(expr->rhs);
+}
+
 void ASTReaderPrefix::Visit(Unary* expr) {
   std::cout << expr->op.GetLexeme();
   Print(expr->rhs);
@@ -79,6 +86,13 @@ void ASTReaderPostfix::Visit(Grouping* expr) {
   std::cout << "(";
   Print(expr->inner);
   std::cout << ")";
+}
+
+void ASTReaderPostfix::Visit(Logical* expr) {
+  Print(expr->lhs);
+  std::cout << " ";
+  Print(expr->rhs);
+  std::cout << " " << expr->op.GetLexeme();
 }
 
 void ASTReaderPostfix::Visit(Unary* expr) {

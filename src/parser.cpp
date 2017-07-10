@@ -117,6 +117,7 @@ Expr* Parser::ScanAssignment() {
 
     Token op = tokenVector[current-1];
     Expr* rhs = ScanAssignment();
+    //TODO: assignment
     expr = new Binary(expr, op, rhs);
  }
 
@@ -129,7 +130,7 @@ Expr* Parser::ScanLogical() {
   if (Match(AND) || Match(OR)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanComparison();
-    expr = new Binary(expr, op, rhs);
+    expr = new Logical(expr, op, rhs);
   }
 
   return expr;

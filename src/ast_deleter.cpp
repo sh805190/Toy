@@ -34,6 +34,12 @@ void ASTDeleter::Visit(Grouping* expr) {
   delete expr;
 }
 
+void ASTDeleter::Visit(Logical* expr) {
+  DeleteAST(expr->lhs);
+  DeleteAST(expr->rhs);
+  delete expr;
+}
+
 void ASTDeleter::Visit(Unary* expr) {
   DeleteAST(expr->rhs);
   delete expr;

@@ -95,11 +95,48 @@ void Interpreter::Visit(Binary* expr) {
       CheckOperandsAreNumbers(expr->op, lhs, rhs);
       result = lhs.GetNumber() * rhs.GetNumber();
     break;
+
+    default:
+      throw InterpreterError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
   }
 }
 
 void Interpreter::Visit(Grouping* expr) {
   Evaluate(expr->inner);
+}
+
+void Interpreter::Visit(Logical* expr) {
+  Literal lhs;
+  Literal rhs;
+
+  //evaluate the first side
+  Evaluate(expr->lhs);
+
+  switch(expr->op.GetType()) {
+    //equality operators
+    case AND:
+      if (IsTruthy(result)) {
+        Evaluate(expr->rhs);
+        result = IsTruthy(result);
+      }
+      else {
+        result = false;
+      }
+    break;
+
+    case OR:
+      if (IsTruthy(result)) {
+        result = true;
+      }
+      else {
+        Evaluate(expr->rhs);
+        result = IsTruthy(result);
+      }
+    break;
+
+    default:
+      throw InterpreterError(expr->op.GetLine(), std::string() + "Unexpected logical operator '" + expr->op.GetLexeme() + "'");
+  }
 }
 
 void Interpreter::Visit(Unary* expr) {

@@ -17,6 +17,10 @@ public:
     type = LEFT_PAREN;
   }
 
+  void Visit(Logical* expr) {
+    type = expr->op.GetType();
+  }
+
   void Visit(Unary* expr) {
     type = expr->op.GetType();
   }

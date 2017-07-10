@@ -20,6 +20,7 @@ public:
   void Visit(Expr*) override;
   void Visit(Binary*) override;
   void Visit(Grouping*) override;
+  void Visit(Logical*) override;
   void Visit(Unary*) override;
   void Visit(Value*) override;
 };
@@ -35,6 +36,7 @@ public:
   void Visit(Expr*) override;
   void Visit(Binary*) override;
   void Visit(Grouping*) override;
+  void Visit(Logical*) override;
   void Visit(Unary*) override;
   void Visit(Value*) override;
 };

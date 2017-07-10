@@ -3,6 +3,7 @@
 class Expr;
 class Binary;
 class Grouping;
+class Logical;
 class Unary;
 class Value;
 
@@ -17,6 +18,7 @@ public:
   virtual void Visit(Expr*) = 0;
   virtual void Visit(Binary*) = 0;
   virtual void Visit(Grouping*) = 0;
+  virtual void Visit(Logical*) = 0;
   virtual void Visit(Unary*) = 0;
   virtual void Visit(Value*) = 0;
 };
@@ -56,6 +58,23 @@ public:
   }
 
   Expr* inner;
+};
+
+class Logical: public Expr {
+public:
+  Logical(Expr* lhs, Token op, Expr* rhs) {
+    this->lhs = lhs;
+    this->op = op;
+    this->rhs = rhs;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Expr* lhs;
+  Token op;
+  Expr* rhs;
 };
 
 class Unary: public Expr {

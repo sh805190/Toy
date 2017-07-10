@@ -189,6 +189,7 @@ int main(int argc, char* argv[]) {
 //      {"Array", "Token lb, std::list<Literal> literalList, Token rb"},
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Grouping", "Expr* inner"},
+      {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},
       {"Value", "Literal value"}
     });
