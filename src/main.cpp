@@ -1,3 +1,4 @@
+#include "ast_deleter.hpp"
 #include "ast_reader.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
@@ -7,7 +8,8 @@
 
 void runPrompt() {
   char buffer[1024];
-  ASTReaderPrefix reader;
+  ASTReaderPostfix reader;
+  ASTDeleter deleter;
 
   for (;;) {
     std::cout << ">";
@@ -19,6 +21,7 @@ void runPrompt() {
     for (Stmt* stmt : statements) {
       reader.Print(stmt);
       std::cout << std::endl;
+      deleter.DeleteAST(stmt);
     }
   }
 }
@@ -41,6 +44,15 @@ int main(int argc, char* argv[]) {
     std::vector<Stmt*> statements = parser.GetStmtVector();
 
     std::cout << "statement count: " << statements.size() << std::endl;
+
+    ASTReaderPostfix reader;
+    ASTDeleter deleter;
+
+    for (Stmt* stmt : statements) {
+      reader.Print(stmt);
+      std::cout << std::endl;
+      deleter.DeleteAST(stmt);
+    }
   }
 
   return 0; 

@@ -4,7 +4,9 @@
 
 //prefix methods
 void ASTReaderPrefix::Print(Stmt* stmt) {
+  std::cout << "(";
   stmt->Accept(this);
+  std::cout << ")";
 }
 
 void ASTReaderPrefix::Print(Expr* expr) {
@@ -31,8 +33,9 @@ void ASTReaderPrefix::Visit(Binary* expr) {
 }
 
 void ASTReaderPrefix::Visit(Grouping* expr) {
-  std::cout << "grouping ";
+  std::cout << "(";
   Print(expr->inner);
+  std::cout << ")";
 }
 
 void ASTReaderPrefix::Visit(Unary* expr) {
@@ -73,8 +76,9 @@ void ASTReaderPostfix::Visit(Binary* expr) {
 }
 
 void ASTReaderPostfix::Visit(Grouping* expr) {
+  std::cout << "(";
   Print(expr->inner);
-  std::cout << " grouping";
+  std::cout << ")";
 }
 
 void ASTReaderPostfix::Visit(Unary* expr) {

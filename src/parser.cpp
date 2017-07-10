@@ -16,6 +16,7 @@ std::vector<Stmt*> Parser::GetStmtVector() {
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
+      Advance();
       Synchronize();
     }
   }

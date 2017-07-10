@@ -22,7 +22,7 @@ ifeq ($(OS),Windows_NT)
 else ifeq ($(shell uname), Linux)
 	find . -type f -name '*.o' -exec rm -f -r -v {} \;
 	find . -type f -name '*.a' -exec rm -f -r -v {} \;
-#	rm $(OUTDIR)/* -f
+	rm $(OUTDIR)/* -f
 	find . -empty -type d -delete
 endif
 

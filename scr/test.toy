@@ -2,4 +2,5 @@ use "standard";
 
 var main = function() {
   print("Hello world\n");
+  return 0;
 }

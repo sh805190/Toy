@@ -1,4 +1,4 @@
-/* A breif rundown of the visitor pattern
+/* A brief rundown of the visitor pattern
 
 #include <iostream>
 
