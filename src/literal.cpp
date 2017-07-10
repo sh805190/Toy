@@ -68,8 +68,14 @@ std::string Literal::ToString() {
   switch(type) {
     case Type::BOOLEAN:
       return boolean ? "true" : "false";
-    case Type::NUMBER:
-      return std::to_string(number);
+    case Type::NUMBER: {
+      std::string s = std::to_string(number);
+      s = s.substr(0, s.find_last_not_of('0') + 1);
+      if (s[s.size()-1] == '.') {
+        s = s.substr(0, s.size() - 1);
+      }
+      return s;
+    }
     case Type::STRING:
       return str;
   }

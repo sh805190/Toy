@@ -47,7 +47,7 @@ Stmt* Parser::ScanStatement() {
     //delegate
     default: {
       Expr* ret = ScanExpression();
-      Consume(SEMICOLON, "Expected ';' after expression");
+      Consume(SEMICOLON, "Expected ';' at end of statement");
       return new Expression(ret);
     }
   }

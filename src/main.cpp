@@ -2,6 +2,7 @@
 #include "ast_reader.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "interpreter.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -16,11 +17,12 @@ void runPrompt() {
     std::cin.getline(buffer, 1024);
     Lexer lexer(buffer);
     Parser parser(lexer.GetTokenVector());
+    Interpreter interpreter;
+
     std::vector<Stmt*> statements = parser.GetStmtVector();
 
     for (Stmt* stmt : statements) {
-      reader.Print(stmt);
-      std::cout << std::endl;
+      interpreter.Execute(stmt);
       deleter.DeleteAST(stmt);
     }
   }
