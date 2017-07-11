@@ -44,6 +44,6 @@ int Token::GetLine() {
 
 std::string Token::ToString() {
   std::string ret;
-  ret += "Token " + std::to_string(int(type)) + " " + lexeme + " " + literal.ToString() + " line " + std::to_string(line) + ";";
+  ret += "Token " + std::to_string(int(type)) + " '" + lexeme + "' " + literal.ToString() + " line " + std::to_string(line) + ";";
   return ret;
 }

@@ -5,27 +5,31 @@
 
 class TokenTypeGetter: public ExprVisitor {
 public:
-  void Visit(Expr* expr) {
+  void Visit(Expr* expr) override {
     type = UNDEFINED;
   }
 
-  void Visit(Binary* expr) {
+  void Visit(Assign* expr) override {
+    type = EQUAL;
+  }
+
+  void Visit(Binary* expr) override {
     type = expr->op.GetType();
   }
 
-  void Visit(Grouping* expr) {
+  void Visit(Grouping* expr) override {
     type = LEFT_PAREN;
   }
 
-  void Visit(Logical* expr) {
+  void Visit(Logical* expr) override {
     type = expr->op.GetType();
   }
 
-  void Visit(Unary* expr) {
+  void Visit(Unary* expr) override {
     type = expr->op.GetType();
   }
 
-  void Visit(Value* expr) {
+  void Visit(Value* expr) override {
     switch(expr->value.GetType()) {
       case Literal::Type::BOOLEAN:
         type = BOOLEAN;
@@ -39,10 +43,56 @@ public:
     }
   }
 
+  void Visit(Variable* expr) override {
+    type = IDENTIFIER;
+  }
+
   TokenType GetType() {
     return type;
   }
 
 private:
   TokenType type;
+};
+
+class TokenGetter: public ExprVisitor {
+public:
+  void Visit(Expr* expr) override {
+    token = Token(END_OF_FILE, "Na", Literal(), -1);
+  }
+
+  void Visit(Assign* expr) override {
+    token = expr->name;
+  }
+
+  void Visit(Binary* expr) override {
+    token = expr->op;
+  }
+
+  void Visit(Grouping* expr) override {
+    token = Token(END_OF_FILE, "Na", Literal(), -2);
+  }
+
+  void Visit(Logical* expr) override {
+    token = expr->op;
+  }
+
+  void Visit(Unary* expr) override {
+    token = expr->op;
+  }
+
+  void Visit(Value* expr) override {
+    token = Token(END_OF_FILE, "Na", Literal(), -3);
+  }
+
+  void Visit(Variable* expr) override {
+    token = expr->name;
+  }
+
+  Token GetToken() {
+    return token;
+  }
+
+private:
+  Token token;
 };

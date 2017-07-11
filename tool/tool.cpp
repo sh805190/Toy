@@ -187,17 +187,20 @@ int main(int argc, char* argv[]) {
   if (!strcmp(argv[1], "expr")) {
     defineAST(os, "Expr", {
 //      {"Array", "Token lb, std::list<Literal> literalList, Token rb"},
+      {"Assign", "Token name, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Grouping", "Expr* inner"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},
-      {"Value", "Literal value"}
+      {"Value", "Literal value"},
+      {"Variable", "Token name"}
     });
   }
   //Stmt
   else if (!strcmp(argv[1], "stmt")) {
     defineAST(os, "Stmt", {
-      {"Expression", "Expr* expr"}
+      {"Expression", "Expr* expr"},
+      {"Var", "Token name, Expr* initializer"}
     });
   }
 

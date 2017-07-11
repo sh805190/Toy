@@ -1,17 +1,19 @@
 #include "interpreter.hpp"
 
 #include "error_handler.hpp"
+#include "runtime_error.hpp"
 
 //TMP
 #include <iostream>
 
 void Interpreter::Execute(Stmt* stmt) {
   try {
+    result = Literal();
     stmt->Accept(this);
     //TMP
     std::cout << "INTERPRETER:" << result.ToString() << std::endl;
   }
-  catch(InterpreterError ie) {
+  catch(RuntimeError ie) {
     ErrorHandler::Error(ie.GetLine(), ie.GetErrMsg());
   }
 }
@@ -22,16 +24,33 @@ void Interpreter::Evaluate(Expr* expr) {
 
 void Interpreter::Visit(Stmt* stmt) {
   //should never happen
-  throw InterpreterError(-1, "Empty statement in AST"); 
+  throw RuntimeError(-1, "Empty statement in AST"); 
 }
 
 void Interpreter::Visit(Expression* stmt) {
   Evaluate(stmt->expr);
 }
 
+void Interpreter::Visit(Var* stmt) {
+  //define this variable
+  if (stmt->initializer != nullptr) {
+    Evaluate(stmt->initializer);
+    environment.Define(stmt->name, result);
+  } 
+  else {
+    //undefined literal
+    environment.Define(stmt->name, Literal());
+  }
+}
+
 void Interpreter::Visit(Expr* expr) {
   //empty = undefined
   result = Literal();
+}
+
+void Interpreter::Visit(Assign* expr) {
+  Evaluate(expr->value);
+  environment.Assign(expr->name, result);
 }
 
 void Interpreter::Visit(Binary* expr) {
@@ -89,7 +108,7 @@ void Interpreter::Visit(Binary* expr) {
         result = lhs.GetString() + rhs.GetString();
       }
       else {
-        throw InterpreterError(expr->op.GetLine(), std::string() + "Operands of '" + expr->op.GetLexeme() + "' must be both numbers or both strings");
+        throw RuntimeError(expr->op.GetLine(), std::string() + "Operands of '" + expr->op.GetLexeme() + "' must be both numbers or both strings");
       }
     break;
 
@@ -104,7 +123,7 @@ void Interpreter::Visit(Binary* expr) {
     break;
 
     default:
-      throw InterpreterError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
+      throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
   }
 }
 
@@ -142,7 +161,7 @@ void Interpreter::Visit(Logical* expr) {
     break;
 
     default:
-      throw InterpreterError(expr->op.GetLine(), std::string() + "Unexpected logical operator '" + expr->op.GetLexeme() + "'");
+      throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected logical operator '" + expr->op.GetLexeme() + "'");
   }
 }
 
@@ -155,7 +174,7 @@ void Interpreter::Visit(Unary* expr) {
         result = -result.GetNumber();
       }
       else {
-        throw InterpreterError(expr->op.GetLine(), "Can only negate a number");
+        throw RuntimeError(expr->op.GetLine(), "Can only negate a number");
       }
     break;
 
@@ -167,6 +186,10 @@ void Interpreter::Visit(Unary* expr) {
 
 void Interpreter::Visit(Value* expr) {
   result = expr->value;
+}
+
+void Interpreter::Visit(Variable* expr) {
+  result = environment.GetVar(expr->name);
 }
 
 //helpers
@@ -206,7 +229,7 @@ void Interpreter::CheckOperandsAreNumbers(Token op, Literal lhs, Literal rhs) {
   if (lhs.GetType() == Literal::Type::NUMBER && rhs.GetType() == Literal::Type::NUMBER) {
     return;
   }
-  throw InterpreterError(op.GetLine(), std::string() + "Operands of '" + op.GetLexeme() + "' must be numbers");
+  throw RuntimeError(op.GetLine(), std::string() + "Operands of '" + op.GetLexeme() + "' must be numbers");
 }
 
 bool Interpreter::IsTruthy(Literal literal) {

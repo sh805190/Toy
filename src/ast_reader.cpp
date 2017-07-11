@@ -21,8 +21,23 @@ void ASTReaderPrefix::Visit(Expression* stmt) {
   Print(stmt->expr);
 }
 
+void ASTReaderPrefix::Visit(Var* stmt) {
+  std::cout << "Declare " << stmt->name.GetLexeme();
+  //TODO: check back on this
+  if (stmt->initializer != nullptr) {
+    std::cout << " = (";
+    Print(stmt->initializer);
+    std::cout << ")";
+  }
+}
+
 void ASTReaderPrefix::Visit(Expr* expr) {
   std::cout << "EXPR";
+}
+
+void ASTReaderPrefix::Visit(Assign* expr) {
+  std::cout << "= " << expr->name.GetLexeme() << " ";
+  Print(expr->value);
 }
 
 void ASTReaderPrefix::Visit(Binary* expr) {
@@ -54,6 +69,10 @@ void ASTReaderPrefix::Visit(Value* expr) {
   std::cout << expr->value.ToString();
 }
 
+void ASTReaderPrefix::Visit(Variable* expr) {
+  std::cout << expr->name.GetLexeme() << "{VARIABLE}";
+}
+
 //postfix methods
 void ASTReaderPostfix::Print(Stmt* stmt) {
   stmt->Accept(this);
@@ -71,8 +90,24 @@ void ASTReaderPostfix::Visit(Expression* stmt) {
   Print(stmt->expr);
 }
 
+void ASTReaderPostfix::Visit(Var* stmt) {
+  std::cout << "Declare " << stmt->name.GetLexeme();
+  //TODO: check back on this
+  if (stmt->initializer != nullptr) {
+    std::cout << " = (";
+    Print(stmt->initializer);
+    std::cout << ")";
+  }
+}
+
 void ASTReaderPostfix::Visit(Expr* expr) {
   std::cout << "EXPR";
+}
+
+void ASTReaderPostfix::Visit(Assign* expr) {
+  std::cout << expr->name.GetLexeme() << " ";
+  Print(expr->value);
+  std::cout << " =";
 }
 
 void ASTReaderPostfix::Visit(Binary* expr) {
@@ -110,3 +145,6 @@ void ASTReaderPostfix::Visit(Value* expr) {
   std::cout << expr->value.ToString();
 }
 
+void ASTReaderPostfix::Visit(Variable* expr) {
+  std::cout << expr->name.GetLexeme() << "{VARIABLE}";
+}

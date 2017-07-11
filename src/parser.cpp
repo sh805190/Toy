@@ -13,6 +13,7 @@ std::vector<Stmt*> Parser::GetStmtVector() {
   while(!IsAtEnd()) {
     try {
       statementVector.push_back(ScanStatement());
+      Consume(SEMICOLON, "Expected ';' at end of statement");
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
@@ -46,9 +47,7 @@ Stmt* Parser::ScanStatement() {
 
     //delegate
     default: {
-      Expr* ret = ScanExpression();
-      Consume(SEMICOLON, "Expected ';' at end of statement");
-      return new Expression(ret);
+      return new Expression(ScanExpression());
     }
   }
 }
@@ -75,8 +74,15 @@ Stmt* Parser::ScanUse() {
 }
 
 Stmt* Parser::ScanVar() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Advance(); //skip var keyword
+  Token name = Advance();
+  Expr* initializer = nullptr;
+
+  if (Match(EQUAL)) {
+    initializer = ScanExpression();
+  }
+
+  return new Var(name, initializer);
 }
 
 Stmt* Parser::ScanWhile() {
@@ -109,16 +115,20 @@ Expr* Parser::ScanAssignment() {
 
   if (Match(EQUAL)) {
     //check the lhs expression type
-    TokenTypeGetter getter;
-    expr->Accept(&getter);
-    if (getter.GetType() != IDENTIFIER) {
-      throw ParserError(tokenVector[current-1].GetLine(), "invalid assignment target");
+    TokenTypeGetter typeGetter;
+    expr->Accept(&typeGetter);
+    if (typeGetter.GetType() != IDENTIFIER) {
+      throw ParserError(tokenVector[current-1].GetLine(), "Invalid assignment target");
     }
+
+    //get the variable name
+    TokenGetter tokenGetter;
+    expr->Accept(&tokenGetter);
 
     Token op = tokenVector[current-1];
     Expr* rhs = ScanAssignment();
-    //TODO: assignment
-    expr = new Binary(expr, op, rhs);
+
+    expr = new Assign(tokenGetter.GetToken(), rhs);
  }
 
   return expr;
@@ -194,6 +204,10 @@ Expr* Parser::ScanPrimary() {
     Expr* expr = ScanExpression();
     Consume(RIGHT_PAREN, "Expected ')' after expression");
     return new Grouping(expr);
+  }
+
+  if (Match(IDENTIFIER)) {
+    return new Variable(tokenVector[current-1]);
   }
 
   Advance(); //skip this token
