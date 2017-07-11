@@ -54,14 +54,11 @@ void Interpreter::Visit(Assign* expr) {
 }
 
 void Interpreter::Visit(Binary* expr) {
-  Literal lhs;
-  Literal rhs;
-
   //evaluate each side
   Evaluate(expr->lhs);
-  lhs = result;
+  Literal lhs = result;
   Evaluate(expr->rhs);
-  rhs = result;
+  Literal rhs = result;
 
   switch(expr->op.GetType()) {
     //equality operators
@@ -163,6 +160,10 @@ void Interpreter::Visit(Logical* expr) {
     default:
       throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected logical operator '" + expr->op.GetLexeme() + "'");
   }
+}
+
+void Interpreter::Visit(Reference* expr) {
+  result = environment.GetRef(expr->rhs->name);
 }
 
 void Interpreter::Visit(Unary* expr) {

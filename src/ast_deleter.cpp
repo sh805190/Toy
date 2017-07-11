@@ -52,6 +52,10 @@ void ASTDeleter::Visit(Logical* expr) {
   delete expr;
 }
 
+void ASTDeleter::Visit(Reference* expr) {
+  delete expr;
+}
+
 void ASTDeleter::Visit(Unary* expr) {
   DeleteAST(expr->rhs);
   delete expr;

@@ -5,6 +5,7 @@ class Assign;
 class Binary;
 class Grouping;
 class Logical;
+class Reference;
 class Unary;
 class Value;
 class Variable;
@@ -22,6 +23,7 @@ public:
   virtual void Visit(Binary*) = 0;
   virtual void Visit(Grouping*) = 0;
   virtual void Visit(Logical*) = 0;
+  virtual void Visit(Reference*) = 0;
   virtual void Visit(Unary*) = 0;
   virtual void Visit(Value*) = 0;
   virtual void Visit(Variable*) = 0;
@@ -94,6 +96,21 @@ public:
   Expr* lhs;
   Token op;
   Expr* rhs;
+};
+
+class Reference: public Expr {
+public:
+  Reference(Token op, Variable* rhs) {
+    this->op = op;
+    this->rhs = rhs;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Token op;
+  Variable* rhs;
 };
 
 class Unary: public Expr {

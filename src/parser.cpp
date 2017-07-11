@@ -206,6 +206,20 @@ Expr* Parser::ScanPrimary() {
     return new Grouping(expr);
   }
 
+  if (Match(AMPERSAND)) {
+    Token op = tokenVector[current-1];
+    TokenTypeGetter typeGetter;
+
+    Expr* expr = ScanExpression();
+    expr->Accept(&typeGetter);
+
+    if (typeGetter.GetType() != IDENTIFIER) {
+      throw ParserError(op.GetLine(), std::string() + "Operand of '" + op.GetLexeme() + "' must be a variable");
+    }
+
+    return new Reference(op, (Variable*)expr);
+  }
+
   if (Match(IDENTIFIER)) {
     return new Variable(tokenVector[current-1]);
   }

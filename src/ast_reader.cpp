@@ -60,6 +60,11 @@ void ASTReaderPrefix::Visit(Logical* expr) {
   Print(expr->rhs);
 }
 
+void ASTReaderPrefix::Visit(Reference* expr) {
+  std::cout << expr->op.GetLexeme();
+  Print(expr->rhs);
+}
+
 void ASTReaderPrefix::Visit(Unary* expr) {
   std::cout << expr->op.GetLexeme();
   Print(expr->rhs);
@@ -128,6 +133,11 @@ void ASTReaderPostfix::Visit(Logical* expr) {
   std::cout << " ";
   Print(expr->rhs);
   std::cout << " " << expr->op.GetLexeme();
+}
+
+void ASTReaderPostfix::Visit(Reference* expr) {
+  std::cout << expr->op.GetLexeme();
+  Print(expr->rhs);
 }
 
 void ASTReaderPostfix::Visit(Unary* expr) {
