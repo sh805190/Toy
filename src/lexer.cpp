@@ -39,10 +39,10 @@ void Lexer::ScanToken() {
     case '"': ScanString(); break; //unique
 
     //double chars
-    case '!': AddToken(Match('=') ? BANG : BANG_EQUAL); break;
-    case '=': AddToken(Match('=') ? EQUAL : EQUAL_EQUAL); break;
-    case '<': AddToken(Match('=') ? LESS : LESS_EQUAL); break;
-    case '>': AddToken(Match('=') ? GREATER : GREATER_EQUAL); break;
+    case '!': AddToken(Match('=') ? BANG_EQUAL : BANG); break;
+    case '=': AddToken(Match('=') ? EQUAL_EQUAL : EQUAL); break;
+    case '<': AddToken(Match('=') ? LESS_EQUAL : LESS); break;
+    case '>': AddToken(Match('=') ? GREATER_EQUAL : GREATER); break;
 
     //eat comments
     case '/':

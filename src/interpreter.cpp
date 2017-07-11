@@ -30,8 +30,8 @@ void Interpreter::Visit(Expression* stmt) {
 }
 
 void Interpreter::Visit(Expr* expr) {
-  //should never happen
-  throw InterpreterError(-1, "Empty expression in AST"); 
+  //empty = undefined
+  result = Literal();
 }
 
 void Interpreter::Visit(Binary* expr) {
@@ -171,22 +171,34 @@ void Interpreter::Visit(Value* expr) {
 
 //helpers
 bool Interpreter::IsEqual(Literal lhs, Literal rhs) {
-  if (lhs.GetType() == Literal::Type::BOOLEAN && rhs.GetType() == Literal::Type::BOOLEAN) {
-    return lhs.GetBoolean() == rhs.GetBoolean();
+  //check for undefined values
+  if (lhs.GetType() == Literal::Type::UNDEFINED) {
+    //'undefined' returns true only when compared to itself
+    return rhs.GetType() == Literal::Type::UNDEFINED;
+  }
+  else if (rhs.GetType() == Literal::Type::UNDEFINED) {
+    //only reaches here if lhs != undefined
+    return false;
   }
 
+  //boolean specific checks
+  else if (lhs.GetType() == Literal::Type::BOOLEAN) {
+    return lhs.GetBoolean() == IsTruthy(rhs);
+  }
+  else if (rhs.GetType() == Literal::Type::BOOLEAN) {
+    return IsTruthy(lhs) == rhs.GetBoolean();
+  }
+
+  //type specific
   else if (lhs.GetType() == Literal::Type::NUMBER && rhs.GetType() == Literal::Type::NUMBER) {
     return lhs.GetNumber() == rhs.GetNumber();
   }
-
   else if (lhs.GetType() == Literal::Type::STRING && rhs.GetType() == Literal::Type::STRING) {
     return lhs.GetString() == rhs.GetString();
   }
+  //TODO: references, objects?
 
-  else if (lhs.GetType() == Literal::Type::UNDEFINED && rhs.GetType() == Literal::Type::UNDEFINED) {
-    return true;
-  }
-
+  //catch all
   return false;
 }
 

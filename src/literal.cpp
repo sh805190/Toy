@@ -78,5 +78,8 @@ std::string Literal::ToString() {
     }
     case Type::STRING:
       return str;
+
+    default:
+      return "undefined";
   }
 }
