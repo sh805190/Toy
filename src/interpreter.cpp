@@ -81,9 +81,16 @@ void Interpreter::Visit(Binary* expr) {
       result = lhs.GetNumber() - rhs.GetNumber();
     break;
 
-    case PLUS:
-      CheckOperandsAreNumbers(expr->op, lhs, rhs);
-      result = lhs.GetNumber() + rhs.GetNumber();
+    case PLUS: //special case for the plus operator
+      if (lhs.GetType() == Literal::Type::NUMBER && rhs.GetType() == Literal::Type::NUMBER) {
+        result = lhs.GetNumber() + rhs.GetNumber();
+      }
+      else if (lhs.GetType() == Literal::Type::STRING && rhs.GetType() == Literal::Type::STRING) {
+        result = lhs.GetString() + rhs.GetString();
+      }
+      else {
+        throw InterpreterError(expr->op.GetLine(), std::string() + "Operands of '" + expr->op.GetLexeme() + "' must be both numbers or both strings");
+      }
     break;
 
     case SLASH:
