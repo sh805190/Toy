@@ -117,7 +117,7 @@ Expr* Parser::ScanAssignment() {
     //check the lhs expression type
     TokenTypeGetter typeGetter;
     expr->Accept(&typeGetter);
-    if (typeGetter.GetType() != IDENTIFIER) {
+    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != STAR) {
       throw ParserError(tokenVector[current-1].GetLine(), "Invalid assignment target");
     }
 
@@ -128,7 +128,16 @@ Expr* Parser::ScanAssignment() {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanAssignment();
 
-    expr = new Assign(tokenGetter.GetToken(), rhs);
+    if (typeGetter.GetType() == IDENTIFIER) {
+      expr = new Assign(tokenGetter.GetToken(), rhs);
+    }
+    else if (typeGetter.GetType() == STAR) {
+      //TODO: could loop here for deep dereferencing
+      Unary* unary = dynamic_cast<Unary*>(expr);
+      Variable* variable = dynamic_cast<Variable*>(unary->rhs);
+
+      expr = new Assign(Token(REFERENCE, variable->name.GetLexeme(), variable->name.GetLiteral(), variable->name.GetLine()), rhs);
+    }
  }
 
   return expr;
@@ -189,14 +198,14 @@ Expr* Parser::ScanUnary() {
     return new Unary(op, rhs);
   }
 
-  if (Match(AMPERSAND)) {
+  if (Match(AMPERSAND) || Match(STAR)) {
     Token op = tokenVector[current-1];
     Expr* expr = ScanPrimary();
 
     TokenTypeGetter typeGetter;
     expr->Accept(&typeGetter);
 
-    if (typeGetter.GetType() != IDENTIFIER) {
+    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != STAR) {
       throw ParserError(op.GetLine(), std::string() + "Operand of '" + op.GetLexeme() + "' must be a variable");
     }
 

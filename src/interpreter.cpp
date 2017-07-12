@@ -50,7 +50,21 @@ void Interpreter::Visit(Expr* expr) {
 
 void Interpreter::Visit(Assign* expr) {
   Evaluate(expr->value);
-  environment.Assign(expr->name, result);
+  if (expr->name.GetType() == IDENTIFIER) {
+    environment.Assign(expr->name, result);
+  }
+
+  else if (expr->name.GetType() == REFERENCE) {
+    //get the literal which should be a reference
+    Literal literal = environment.GetVar(expr->name);
+
+    if (literal.GetType() != Literal::Type::REFERENCE) {
+      throw RuntimeError(expr->name.GetLine(), std::string() + "Variable '" + expr->name.GetLexeme() + "' is not a reference");
+    }
+
+    //set the concrete reference
+    *(literal.GetReference()) = result;
+  }
 }
 
 void Interpreter::Visit(Binary* expr) {
