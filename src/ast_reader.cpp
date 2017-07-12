@@ -60,11 +60,6 @@ void ASTReaderPrefix::Visit(Logical* expr) {
   Print(expr->rhs);
 }
 
-void ASTReaderPrefix::Visit(Reference* expr) {
-  std::cout << expr->op.GetLexeme();
-  Print(expr->rhs);
-}
-
 void ASTReaderPrefix::Visit(Unary* expr) {
   std::cout << expr->op.GetLexeme();
   Print(expr->rhs);
@@ -135,15 +130,18 @@ void ASTReaderPostfix::Visit(Logical* expr) {
   std::cout << " " << expr->op.GetLexeme();
 }
 
-void ASTReaderPostfix::Visit(Reference* expr) {
-  std::cout << expr->op.GetLexeme();
-  Print(expr->rhs);
-}
-
 void ASTReaderPostfix::Visit(Unary* expr) {
   if (expr->op.GetType() == BANG || expr->op.GetType() == MINUS) {
     Print(expr->rhs);
     std::cout << " negate";
+  }
+  else if (expr->op.GetType() == AMPERSAND) {
+    Print(expr->rhs);
+    std::cout << " reference";
+  }
+  else if (expr->op.GetType() == STAR) {
+    Print(expr->rhs);
+    std::cout << " dereference";
   }
   else {
     Print(expr->rhs);

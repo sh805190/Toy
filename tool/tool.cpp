@@ -191,7 +191,6 @@ int main(int argc, char* argv[]) {
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Grouping", "Expr* inner"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
-      {"Reference", "Token op, Variable* rhs"},
       {"Unary", "Token op, Expr* rhs"},
       {"Value", "Literal value"},
       {"Variable", "Token name"}

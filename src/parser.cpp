@@ -189,6 +189,20 @@ Expr* Parser::ScanUnary() {
     return new Unary(op, rhs);
   }
 
+  if (Match(AMPERSAND)) {
+    Token op = tokenVector[current-1];
+    Expr* expr = ScanPrimary();
+
+    TokenTypeGetter typeGetter;
+    expr->Accept(&typeGetter);
+
+    if (typeGetter.GetType() != IDENTIFIER) {
+      throw ParserError(op.GetLine(), std::string() + "Operand of '" + op.GetLexeme() + "' must be a variable");
+    }
+
+    return new Unary(op, expr);
+  }
+
   return ScanPrimary();
 }
 
@@ -204,20 +218,6 @@ Expr* Parser::ScanPrimary() {
     Expr* expr = ScanExpression();
     Consume(RIGHT_PAREN, "Expected ')' after expression");
     return new Grouping(expr);
-  }
-
-  if (Match(AMPERSAND)) {
-    Token op = tokenVector[current-1];
-    TokenTypeGetter typeGetter;
-
-    Expr* expr = ScanExpression();
-    expr->Accept(&typeGetter);
-
-    if (typeGetter.GetType() != IDENTIFIER) {
-      throw ParserError(op.GetLine(), std::string() + "Operand of '" + op.GetLexeme() + "' must be a variable");
-    }
-
-    return new Reference(op, (Variable*)expr);
   }
 
   if (Match(IDENTIFIER)) {

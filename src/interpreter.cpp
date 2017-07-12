@@ -162,10 +162,6 @@ void Interpreter::Visit(Logical* expr) {
   }
 }
 
-void Interpreter::Visit(Reference* expr) {
-  result = environment.GetRef(expr->rhs->name);
-}
-
 void Interpreter::Visit(Unary* expr) {
   Evaluate(expr->rhs);
 
@@ -181,6 +177,14 @@ void Interpreter::Visit(Unary* expr) {
 
     case BANG:
       result = !IsTruthy(result);
+    break;
+
+    case AMPERSAND:
+      result = environment.GetRef(dynamic_cast<Variable*>(expr->rhs)->name);
+    break;
+
+    case STAR:
+      //TODO
     break;
   }
 }

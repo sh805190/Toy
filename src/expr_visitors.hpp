@@ -25,10 +25,6 @@ public:
     type = expr->op.GetType();
   }
 
-  void Visit(Reference* expr) override {
-    type = expr->op.GetType();
-  }
-
   void Visit(Unary* expr) override {
     type = expr->op.GetType();
   }
@@ -78,10 +74,6 @@ public:
   }
 
   void Visit(Logical* expr) override {
-    token = expr->op;
-  }
-
-  void Visit(Reference* expr) override {
     token = expr->op;
   }
 

@@ -24,7 +24,6 @@ public:
   void Visit(Binary*) override;
   void Visit(Grouping*) override;
   void Visit(Logical*) override;
-  void Visit(Reference*) override;
   void Visit(Unary*) override;
   void Visit(Value*) override;
   void Visit(Variable*) override;
@@ -45,7 +44,6 @@ public:
   void Visit(Binary*) override;
   void Visit(Grouping*) override;
   void Visit(Logical*) override;
-  void Visit(Reference*) override;
   void Visit(Unary*) override;
   void Visit(Value*) override;
   void Visit(Variable*) override;
