@@ -60,7 +60,7 @@ void Interpreter::Visit(Assign* expr) {
     //HACK: get the number of dereference stars
     int starCount = expr->name.GetLiteral().GetNumber();
 
-    Literal literal = environment.GetVar(expr->name); //base reference used
+    Literal literal = environment.GetVar(expr->name); //base reference before dereferencing
 
     while(starCount > 0) {
       //display
@@ -68,7 +68,7 @@ void Interpreter::Visit(Assign* expr) {
 
       //check that the literal type is a reference
       if (literal.GetType() != Literal::Type::REFERENCE) {
-        throw RuntimeError(expr->name.GetLine(), std::string() + "Variable '" + starLexeme + expr->name.GetLexeme() + "' is not a variable");
+        throw RuntimeError(expr->name.GetLine(), std::string() + "Expression '" + starLexeme + expr->name.GetLexeme() + "' is not a variable");
       }
 
       //set the concrete reference via one level of dereference
@@ -218,8 +218,27 @@ void Interpreter::Visit(Unary* expr) {
       result = environment.GetRef(dynamic_cast<Variable*>(expr->rhs)->name);
     break;
 
-    case STAR:
-      //TODO
+    case STAR: {
+      std::string starLexeme;
+      int starCount = expr->op.GetLiteral().GetNumber();
+      Literal literal = result;
+      while(starCount > 0) {
+        //display
+        starLexeme += "*";
+
+        //check that the literal type is a reference
+        if (literal.GetType() != Literal::Type::REFERENCE) {
+          Variable* variable = dynamic_cast<Variable*>(expr->rhs);
+          throw RuntimeError(variable->name.GetLine(), std::string() + "Expression '" + starLexeme + variable->name.GetLexeme() + "' is not a variable");
+        }
+
+        //one level of dereference
+        literal = *(literal.GetReference());
+
+        starCount--;
+      }
+      result = literal;
+    }
     break;
   }
 }
@@ -263,7 +282,7 @@ bool Interpreter::IsEqual(Literal lhs, Literal rhs) {
   else if (lhs.GetType() == Literal::Type::STRING && rhs.GetType() == Literal::Type::STRING) {
     return lhs.GetString() == rhs.GetString();
   }
-  //TODO: references, objects?
+  //TODO: objects?
 
   //catch all
   return false;
