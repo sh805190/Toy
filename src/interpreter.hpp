@@ -30,6 +30,7 @@ private:
   bool IsEqual(Literal, Literal);
   void CheckOperandsAreNumbers(Token op, Literal, Literal);
   bool IsTruthy(Literal);
+  Literal Dereference(Literal);
 
   //members
   Environment environment;

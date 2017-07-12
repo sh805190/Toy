@@ -112,6 +112,9 @@ void Interpreter::Visit(Binary* expr) {
     break;
 
     case PLUS: //special case for the plus operator
+      lhs = Dereference(lhs);
+      rhs = Dereference(rhs);
+
       if (lhs.GetType() == Literal::Type::NUMBER && rhs.GetType() == Literal::Type::NUMBER) {
         result = lhs.GetNumber() + rhs.GetNumber();
       }
@@ -213,6 +216,10 @@ void Interpreter::Visit(Variable* expr) {
 
 //helpers
 bool Interpreter::IsEqual(Literal lhs, Literal rhs) {
+  //dereference references
+  lhs = Dereference(lhs);
+  rhs = Dereference(rhs);
+
   //check for undefined values
   if (lhs.GetType() == Literal::Type::UNDEFINED) {
     //'undefined' returns true only when compared to itself
@@ -245,21 +252,36 @@ bool Interpreter::IsEqual(Literal lhs, Literal rhs) {
 }
 
 void Interpreter::CheckOperandsAreNumbers(Token op, Literal lhs, Literal rhs) {
+  //dereference references
+  lhs = Dereference(lhs);
+  rhs = Dereference(rhs);
+
   if (lhs.GetType() == Literal::Type::NUMBER && rhs.GetType() == Literal::Type::NUMBER) {
     return;
   }
+
   throw RuntimeError(op.GetLine(), std::string() + "Operands of '" + op.GetLexeme() + "' must be numbers");
 }
 
 bool Interpreter::IsTruthy(Literal literal) {
-  if (literal.GetType() == Literal::Type::BOOLEAN) {
-    return literal.GetBoolean();
-  }
+  //dereference references
+  literal = Dereference(literal);
 
   if (literal.GetType() == Literal::Type::UNDEFINED) {
     return false;
   }
 
+  if (literal.GetType() == Literal::Type::BOOLEAN) {
+    return literal.GetBoolean();
+  }
+
   return true;
 }
 
+Literal Interpreter::Dereference(Literal literal) {
+  //many levels of indirection
+  while (literal.GetType() == Literal::Type::REFERENCE) {
+    literal = *(literal.GetReference());
+  }
+  return literal;
+}
