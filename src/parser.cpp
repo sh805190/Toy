@@ -186,6 +186,12 @@ Expr* Parser::ScanFactor() {
 
   if (Match(STAR) || Match(SLASH)) {
     Token op = tokenVector[current-1];
+
+    //account for reference notation screwing with arithmetic
+    if (op.GetType() == STAR && op.GetLiteral().GetNumber() != 1) {
+      throw ParserError(op.GetLine(), "Too many characters in '" + op.GetLexeme() + "' (did you mean to use a reference?)");
+    }
+
     Expr* rhs = ScanUnary();
     expr = new Binary(expr, op, rhs);
   }
