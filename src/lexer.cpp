@@ -30,12 +30,12 @@ void Lexer::ScanToken() {
     case ']': AddToken(RIGHT_BRACKET); break;
     case '+': AddToken(PLUS); break;
     case '-': AddToken(MINUS); break;
-    case '*': AddToken(STAR); break;
     case '.': AddToken(DOT); break;
     case ':': AddToken(COLON); break;
     case ';': AddToken(SEMICOLON); break;
     case '&': AddToken(AMPERSAND); break;
 
+    case '*': ScanReference(); break; //unique
     case '"': ScanString(); break; //unique
 
     //double chars
@@ -162,6 +162,14 @@ void Lexer::ScanNumber() {
 
   double d = atof(source.substr(start, current-start).c_str());
   AddToken(NUMBER, d);
+}
+
+void Lexer::ScanReference() {
+  double starCount = 1; //number of levels of dereferencing needed
+  while(Match('*')) {
+    starCount++;
+  }
+  AddToken(STAR, starCount);
 }
 
 void Lexer::ScanString() {

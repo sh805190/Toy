@@ -121,24 +121,26 @@ Expr* Parser::ScanAssignment() {
       throw ParserError(tokenVector[current-1].GetLine(), "Invalid assignment target");
     }
 
-    //get the variable name
+    //get the variable token
     TokenGetter tokenGetter;
     expr->Accept(&tokenGetter);
 
     Token op = tokenVector[current-1];
     Expr* rhs = ScanAssignment();
 
+    //simple variable
     if (typeGetter.GetType() == IDENTIFIER) {
       expr = new Assign(tokenGetter.GetToken(), rhs);
     }
+    //altering a dereferenced variable
     else if (typeGetter.GetType() == STAR) {
-      //TODO: could loop here for deep dereferencing
-      Unary* unary = dynamic_cast<Unary*>(expr);
-      Variable* variable = dynamic_cast<Variable*>(unary->rhs);
+      Unary* unary = dynamic_cast<Unary*>(expr); //unary object passed up
+      Variable* variable = dynamic_cast<Variable*>(unary->rhs); //variable object it's pointing too
 
-      expr = new Assign(Token(REFERENCE, variable->name.GetLexeme(), variable->name.GetLiteral(), variable->name.GetLine()), rhs);
+      //HACK: using tokenGetter here to keep track of how deep to dereference
+      expr = new Assign(Token(REFERENCE, variable->name.GetLexeme(), tokenGetter.GetToken().GetLiteral(), variable->name.GetLine()), rhs);
     }
- }
+  }
 
   return expr;
 }
@@ -192,12 +194,14 @@ Expr* Parser::ScanFactor() {
 }
 
 Expr* Parser::ScanUnary() {
+  //negation
   if (Match(MINUS) || Match(BANG)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanUnary();
     return new Unary(op, rhs);
   }
 
+  //references
   if (Match(AMPERSAND) || Match(STAR)) {
     Token op = tokenVector[current-1];
     Expr* expr = ScanPrimary();
@@ -205,7 +209,7 @@ Expr* Parser::ScanUnary() {
     TokenTypeGetter typeGetter;
     expr->Accept(&typeGetter);
 
-    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != STAR) {
+    if (typeGetter.GetType() != IDENTIFIER) {
       throw ParserError(op.GetLine(), std::string() + "Operand of '" + op.GetLexeme() + "' must be a variable");
     }
 

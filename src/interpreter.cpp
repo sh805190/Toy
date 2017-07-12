@@ -55,15 +55,33 @@ void Interpreter::Visit(Assign* expr) {
   }
 
   else if (expr->name.GetType() == REFERENCE) {
-    //get the literal which should be a reference
-    Literal literal = environment.GetVar(expr->name);
+    std::string starLexeme;
 
-    if (literal.GetType() != Literal::Type::REFERENCE) {
-      throw RuntimeError(expr->name.GetLine(), std::string() + "Variable '" + expr->name.GetLexeme() + "' is not a reference");
+    //HACK: get the number of dereference stars
+    int starCount = expr->name.GetLiteral().GetNumber();
+
+    Literal literal = environment.GetVar(expr->name); //base reference used
+
+    while(starCount > 0) {
+      //display
+      starLexeme += "*";
+
+      //check that the literal type is a reference
+      if (literal.GetType() != Literal::Type::REFERENCE) {
+        throw RuntimeError(expr->name.GetLine(), std::string() + "Variable '" + starLexeme + expr->name.GetLexeme() + "' is not a variable");
+      }
+
+      //set the concrete reference via one level of dereference
+      if (starCount == 1) {
+        *(literal.GetReference()) = result;
+        break;
+      }
+
+      //one level of dereference
+      literal = *(literal.GetReference());
+
+      starCount--;
     }
-
-    //set the concrete reference
-    *(literal.GetReference()) = result;
   }
 }
 

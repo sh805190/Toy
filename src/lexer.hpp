@@ -59,5 +59,6 @@ private:
   bool Match(char expected);
   void ScanIdentifier();
   void ScanNumber();
+  void ScanReference();
   void ScanString();
 };
