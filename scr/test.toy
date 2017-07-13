@@ -1,27 +1,4 @@
-var i = 0;
-var j = 0;
-
-while(i < 10) {
-  "i++";
-  i = i + 1;
-  while(j < 10) { //test nested blocks
-    if (j == 2) {
-      "breaking...";
-      break;
-    }
-    "j++";
-    j = j + 1;
-  }
-
-  "Resetting j to zero";
-  j = 0;
+for (var i = 0; i < 10; i = i + 1) {
+  "i";
+  i;
 }
-
-"Final Results...";
-i;
-j;
-
-break;
-continue;
-
-

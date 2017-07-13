@@ -17,15 +17,16 @@ private:
   Stmt* ScanStatement();
 
   //stmt types
+  Stmt* ScanBreak();
   Stmt* ScanClass();
+  Stmt* ScanContinue();
+  Stmt* ScanFor();
   Stmt* ScanIf();
   Stmt* ScanReturn();
+  Stmt* ScanModule();
   Stmt* ScanUse();
   Stmt* ScanVar();
   Stmt* ScanWhile();
-  Stmt* ScanBreak();
-  Stmt* ScanContinue();
-  Stmt* ScanModule();
   
   Expr* ScanExpression();
 

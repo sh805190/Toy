@@ -30,12 +30,28 @@ Stmt* Parser::ScanStatement() {
 
   switch(tok.GetType()) {
     //all types
+    case BREAK:
+      ret = ScanBreak();
+    break;
+
     case CLASS:
       ret = ScanClass();
     break;
 
+    case CONTINUE:
+      ret = ScanContinue();
+    break;
+
+    case FOR:
+      ret = ScanFor();
+    break;
+
     case IF:
       ret = ScanIf();
+    break;
+
+    case MODULE:
+      ret = ScanModule();
     break;
 
     case RETURN:
@@ -52,18 +68,6 @@ Stmt* Parser::ScanStatement() {
 
     case WHILE:
       ret = ScanWhile();
-    break;
-
-    case BREAK:
-      ret = ScanBreak();
-    break;
-
-    case CONTINUE:
-      ret = ScanContinue();
-    break;
-
-    case MODULE:
-      ret = ScanModule();
     break;
 
     //error
@@ -86,9 +90,84 @@ Stmt* Parser::ScanStatement() {
 }
 
 //stmt types
+Stmt* Parser::ScanBreak() {
+  Advance(); //skip break keyword
+  return new Break(tokenVector[current-1].GetLine());
+}
+
 Stmt* Parser::ScanClass() {
   //TODO
   throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+}
+
+Stmt* Parser::ScanContinue() {
+  Advance(); //skip continue keyword
+  return new Continue(tokenVector[current-1].GetLine());
+}
+
+Stmt* Parser::ScanFor() {
+  Advance(); //skip for keyword
+ 
+  //heading
+  Consume(LEFT_PAREN, "Expected '(' after for keyword");
+
+  //initializer
+  Stmt* initializer = nullptr;
+  if (tokenVector[current].GetType() == VAR) {
+    initializer = ScanVar();
+  }
+  else if (tokenVector[current].GetType() != SEMICOLON) {
+    initializer = new Expression(ScanExpression());
+  }
+
+  Consume(SEMICOLON, "Expected ';' after for initializer");
+
+  //condition
+  Expr* condition = nullptr;
+  if (tokenVector[current].GetType() != SEMICOLON) {
+    condition = ScanExpression();
+  }
+  else {
+    condition = new Value(true); //empty condition means forever
+  }
+
+  Consume(SEMICOLON, "Expected ';' after for condition");
+
+  //incrementer
+  Expr* increment = nullptr;
+  if (tokenVector[current].GetType() != RIGHT_PAREN) {
+    increment = ScanExpression();
+  }
+
+  Consume(RIGHT_PAREN, "Expected ';' after for increment");
+
+  //get the block (ensures that the body of the for statement is a block object
+  Stmt* block = nullptr;
+  if (tokenVector[current].GetType() == LEFT_BRACE) {
+    block = ScanBlock();
+  }
+  else {
+    std::list<Stmt*> stmtList;
+    stmtList.push_back(ScanStatement());
+    block = new Block(stmtList);
+  }
+
+  //piece it all together
+  std::list<Stmt*> stmtList;
+
+  if (initializer) {
+    stmtList.push_back(initializer);
+  }
+  if (increment) {
+    dynamic_cast<Block*>(block)->stmtList.push_back(new Expression(increment));
+  }
+  stmtList.push_back(new While(condition, block));
+
+  //one of those
+  skipSemicolon = true;
+
+  //finally, return the full, new block object
+  return new Block(stmtList);
 }
 
 Stmt* Parser::ScanIf() {
@@ -124,6 +203,11 @@ Stmt* Parser::ScanIf() {
 
   //finally
   return new If(condition, thenBranch, elseBranch);
+}
+
+Stmt* Parser::ScanModule() {
+  //TODO
+  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanReturn() {
@@ -170,21 +254,6 @@ Stmt* Parser::ScanWhile() {
 
   //finally
   return new While(condition, branch);
-}
-
-Stmt* Parser::ScanBreak() {
-  Advance(); //skip break keyword
-  return new Break(tokenVector[current-1].GetLine());
-}
-
-Stmt* Parser::ScanContinue() {
-  Advance(); //skip continue keyword
-  return new Continue(tokenVector[current-1].GetLine());
-}
-
-Stmt* Parser::ScanModule() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Expr* Parser::ScanExpression() {
