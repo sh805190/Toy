@@ -174,12 +174,12 @@ Stmt* Parser::ScanWhile() {
 
 Stmt* Parser::ScanBreak() {
   Advance(); //skip break keyword
-  return new Break();
+  return new Break(tokenVector[current-1].GetLine());
 }
 
 Stmt* Parser::ScanContinue() {
   Advance(); //skip continue keyword
-  return new Continue();
+  return new Continue(tokenVector[current-1].GetLine());
 }
 
 Stmt* Parser::ScanModule() {

@@ -40,6 +40,10 @@ private:
   //members
   Environment environment;
   Literal result;
+
+  //block contexts
   bool breakCalled = false;
   bool continueCalled = false;
+  bool returnCalled = false;
+  int loopDepth = 0;
 };

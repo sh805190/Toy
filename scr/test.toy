@@ -1,31 +1,27 @@
 var i = 0;
-var t;
+var j = 0;
 
-while (i < 10) {
-
-
+while(i < 10) {
+  "i++";
   i = i + 1;
-
-
-  if
-  (i != 6) {
-
-
-    continue;
- }
-
-  else {
-
-    t = "HELLLLLLLLLLLLLLLLLLLLLLLLLOOOOOOOOOOOOOOOOOO NURSE!!!";
-    "What is the world coming to?";
+  while(j < 10) { //test nested blocks
+    if (j == 2) {
+      "breaking...";
+      break;
+    }
+    "j++";
+    j = j + 1;
   }
 
-
-
-  i + 1000;
-
-"during while";
-
+  "Resetting j to zero";
+  j = 0;
 }
 
-"After while";
+"Final Results...";
+i;
+j;
+
+break;
+continue;
+
+

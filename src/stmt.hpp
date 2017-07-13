@@ -36,25 +36,29 @@ public:
 
 class Break: public Stmt {
 public:
-  Break() {
+  Break(int line) {
+    this->line = line;
   }
 
   void Accept(StmtVisitor* visitor) override {
     visitor->Visit(this);
   }
 
- };
+  int line;
+};
 
 class Continue: public Stmt {
 public:
-  Continue() {
+  Continue(int line) {
+    this->line = line;
   }
 
   void Accept(StmtVisitor* visitor) override {
     visitor->Visit(this);
   }
 
- };
+  int line;
+};
 
 class Expression: public Stmt {
 public:

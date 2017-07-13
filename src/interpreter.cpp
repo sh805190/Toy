@@ -7,14 +7,20 @@
 #include <iostream>
 
 void Interpreter::Execute(Stmt* stmt) {
+  //for block contexts
+  breakCalled = false;
+  continueCalled = false;
+  returnCalled = false;
+
   try {
     result = Literal();
     stmt->Accept(this);
+
     //TMP
     std::cout << "INTERPRETER:" << result.ToString() << std::endl;
   }
-  catch(RuntimeError ie) {
-    ErrorHandler::Error(ie.GetLine(), ie.GetErrMsg());
+  catch(RuntimeError re) {
+    ErrorHandler::Error(re.GetLine(), re.GetErrMsg());
   }
 }
 
@@ -30,16 +36,25 @@ void Interpreter::Visit(Stmt* stmt) {
 void Interpreter::Visit(Block* stmt) {
   for (Stmt* ptr : stmt->stmtList) {
     Execute(ptr);
-    //return to the calling loop
-    if (continueCalled || breakCalled) break;
+
+    //stop block execution if...
+    if (breakCalled || continueCalled || returnCalled) break;
   }
 }
 
 void Interpreter::Visit(Break* stmt) {
+  if (loopDepth <= 0) {
+    throw RuntimeError(stmt->line, std::string() + "Break called with a loop depth of " + std::to_string(loopDepth));
+  }
+
   breakCalled = true;
 }
 
 void Interpreter::Visit(Continue* stmt) {
+  if (loopDepth <= 0) {
+    throw RuntimeError(stmt->line, std::string() + "Continue called with a loop depth of " + std::to_string(loopDepth));
+  }
+
   continueCalled = true;
 }
 
@@ -48,6 +63,7 @@ void Interpreter::Visit(Expression* stmt) {
 }
 
 void Interpreter::Visit(If* stmt) {
+  //determine the result
   Evaluate(stmt->condition);
 
   if (IsTruthy(result)) {
@@ -59,6 +75,7 @@ void Interpreter::Visit(If* stmt) {
       Execute(stmt->elseBranch);
     }
   }
+  //NOTE: block contexts continue outward
 }
 
 void Interpreter::Visit(Var* stmt) {
@@ -74,20 +91,38 @@ void Interpreter::Visit(Var* stmt) {
 }
 
 void Interpreter::Visit(While* stmt) {
-  for (;;) {
-    if (breakCalled) break;
-    continueCalled = false;
+  loopDepth++; //diagnostics
 
-    Evaluate(stmt->condition);
-    if (!IsTruthy(result)) {
+  for (;;) {
+    //block contexts
+    if (breakCalled) {
+      breakCalled = false;
+      loopDepth--;
       break;
     }
 
+    if (returnCalled) {
+      loopDepth--;
+      return; //don't reset the context flags
+    }
+
+    continueCalled = false;
+
+    //if continuing
+    Evaluate(stmt->condition);
+    if (!IsTruthy(result)) {
+      loopDepth--;
+      break;
+    }
+
+    //execute the loop
     Execute(stmt->branch);
   }
 
+  //reset these after a block
   breakCalled = false;
   continueCalled = false;
+  returnCalled = false;
 }
 
 void Interpreter::Visit(Expr* expr) {
