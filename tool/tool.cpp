@@ -199,6 +199,8 @@ int main(int argc, char* argv[]) {
   //Stmt
   else if (!strcmp(argv[1], "stmt")) {
     defineAST(os, "Stmt", {
+      {"Break", ""},
+      {"Continue", ""},
       {"Expression", "Expr* expr"},
       {"Block", "std::list<Stmt*> stmtList"},
       {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},

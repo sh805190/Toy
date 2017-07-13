@@ -7,18 +7,13 @@
 #include <fstream>
 #include <iostream>
 
-void runPrompt() {
-  char buffer[1024];
-  ASTDeleter deleter;
-  Interpreter interpreter;
-  ASTReaderPostfix reader;
+ASTDeleter deleter;
+ASTReaderPrefix reader;
+Interpreter interpreter;
 
-  for (;;) {
-    std::cout << ">";
-    std::cin.getline(buffer, 1024);
-    Lexer lexer(buffer);
+void run(std::string source) {
+    Lexer lexer(source);
     Parser parser(lexer.GetTokenVector());
-
     std::vector<Stmt*> statements = parser.GetStmtVector();
 
     for (Stmt* stmt : statements) {
@@ -27,6 +22,16 @@ void runPrompt() {
 //      std::cout << std::endl;
       deleter.DeleteAST(stmt);
     }
+  
+}
+
+void runPrompt() {
+  char buffer[1024];
+
+  for (;;) {
+    std::cout << ">";
+    std::cin.getline(buffer, 1024);
+    run(buffer);
   }
 }
 
@@ -36,27 +41,13 @@ int main(int argc, char* argv[]) {
   }
 
   for (int i = 1; i < argc; i++) {
-    std::ifstream is(argv[i], std::fstream::in);
     std::string source;
 
+    std::ifstream is(argv[i], std::fstream::in);
     getline(is, source, '\0');
-
     is.close();
 
-    Lexer lexer(source);
-    Parser parser(lexer.GetTokenVector());
-    std::vector<Stmt*> statements = parser.GetStmtVector();
-
-    std::cout << "statement count: " << statements.size() << std::endl;
-
-    ASTReaderPostfix reader;
-    ASTDeleter deleter;
-
-    for (Stmt* stmt : statements) {
-      reader.Print(stmt);
-      std::cout << std::endl;
-      deleter.DeleteAST(stmt);
-    }
+    run(source);
   }
 
   return 0; 

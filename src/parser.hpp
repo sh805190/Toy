@@ -52,7 +52,7 @@ private:
   std::vector<Stmt*> statementVector;
   std::vector<Token> tokenVector;
   int current = 0;
-  bool ignoreSemicolon = false;
+  bool skipSemicolon = false;
 
   class ParserError {
   public:

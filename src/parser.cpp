@@ -76,11 +76,11 @@ Stmt* Parser::ScanStatement() {
   }
 
   //finally
-  if (!ignoreSemicolon) {
+  if (!skipSemicolon) {
     Consume(SEMICOLON, "Expected ';' at end of statement");
   }
 
-  ignoreSemicolon = false;
+  skipSemicolon = false;
 
   return ret;
 }
@@ -120,7 +120,7 @@ Stmt* Parser::ScanIf() {
   }
 
   //one of those
-  ignoreSemicolon = true;
+  skipSemicolon = true;
 
   //finally
   return new If(condition, thenBranch, elseBranch);
@@ -166,20 +166,20 @@ Stmt* Parser::ScanWhile() {
   }
 
   //one of those
-  ignoreSemicolon = true;
+  skipSemicolon = true;
 
   //finally
   return new While(condition, branch);
 }
 
 Stmt* Parser::ScanBreak() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Advance(); //skip break keyword
+  return new Break();
 }
 
 Stmt* Parser::ScanContinue() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Advance(); //skip continue keyword
+  return new Continue();
 }
 
 Stmt* Parser::ScanModule() {
@@ -333,19 +333,25 @@ Expr* Parser::ScanPrimary() {
 Stmt* Parser::ScanBlock() {
   Consume(LEFT_BRACE, "Exprected '{' at beginning of a block");
 
+  //error handling
+  int ln = tokenVector[current-1].GetLine();
+
   std::list<Stmt*> stmtList;
 
   while(!IsAtEnd() && tokenVector[current].GetType() != RIGHT_BRACE) {
     //copy the main scanning loop
     try {
       stmtList.push_back(ScanStatement());
-      Consume(SEMICOLON, "Expected ';' at end of statement");
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
       Advance();
       Synchronize();
     }
+  }
+
+  if (IsAtEnd()) {
+    throw ParserError(ln, "No matching '}' for '{'");
   }
 
   Consume(RIGHT_BRACE, "Exprected '}' at end of a block");

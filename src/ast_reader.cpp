@@ -27,6 +27,14 @@ void ASTReaderPrefix::Visit(Block* stmt) {
   std::cout << "}";
 }
 
+void ASTReaderPrefix::Visit(Break* stmt) {
+  std::cout << "break";
+}
+
+void ASTReaderPrefix::Visit(Continue* stmt) {
+  std::cout << "continue";
+}
+
 void ASTReaderPrefix::Visit(Expression* stmt) {
   Print(stmt->expr);
 }
@@ -119,6 +127,14 @@ void ASTReaderPostfix::Visit(Block* stmt) {
     Print(ptr);
   }
   std::cout << "}";
+}
+
+void ASTReaderPostfix::Visit(Break* stmt) {
+  std::cout << "break";
+}
+
+void ASTReaderPostfix::Visit(Continue* stmt) {
+  std::cout << "continue";
 }
 
 void ASTReaderPostfix::Visit(Expression* stmt) {

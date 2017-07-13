@@ -24,6 +24,14 @@ void ASTDeleter::Visit(Block* stmt) {
   delete stmt;
 }
 
+void ASTDeleter::Visit(Break* stmt) {
+  delete stmt;
+}
+
+void ASTDeleter::Visit(Continue* stmt) {
+  delete stmt;
+}
+
 void ASTDeleter::Visit(Expression* stmt) {
   DeleteAST(stmt->expr);
   delete stmt;

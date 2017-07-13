@@ -30,7 +30,17 @@ void Interpreter::Visit(Stmt* stmt) {
 void Interpreter::Visit(Block* stmt) {
   for (Stmt* ptr : stmt->stmtList) {
     Execute(ptr);
+    //return to the calling loop
+    if (continueCalled || breakCalled) break;
   }
+}
+
+void Interpreter::Visit(Break* stmt) {
+  breakCalled = true;
+}
+
+void Interpreter::Visit(Continue* stmt) {
+  continueCalled = true;
 }
 
 void Interpreter::Visit(Expression* stmt) {
@@ -45,7 +55,7 @@ void Interpreter::Visit(If* stmt) {
   }
 
   else {
-    if (stmt->elseBranch) {
+    if (stmt->elseBranch != nullptr) {
       Execute(stmt->elseBranch);
     }
   }
@@ -65,12 +75,19 @@ void Interpreter::Visit(Var* stmt) {
 
 void Interpreter::Visit(While* stmt) {
   for (;;) {
+    if (breakCalled) break;
+    continueCalled = false;
+
     Evaluate(stmt->condition);
     if (!IsTruthy(result)) {
       break;
     }
+
     Execute(stmt->branch);
   }
+
+  breakCalled = false;
+  continueCalled = false;
 }
 
 void Interpreter::Visit(Expr* expr) {

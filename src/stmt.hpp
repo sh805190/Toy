@@ -1,6 +1,8 @@
 #pragma once
 
 class Stmt;
+class Break;
+class Continue;
 class Expression;
 class Block;
 class If;
@@ -16,6 +18,8 @@ class While;
 class StmtVisitor {
 public:
   virtual void Visit(Stmt*) = 0;
+  virtual void Visit(Break*) = 0;
+  virtual void Visit(Continue*) = 0;
   virtual void Visit(Expression*) = 0;
   virtual void Visit(Block*) = 0;
   virtual void Visit(If*) = 0;
@@ -29,6 +33,28 @@ public:
     visitor->Visit(this);
   }
 };
+
+class Break: public Stmt {
+public:
+  Break() {
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+ };
+
+class Continue: public Stmt {
+public:
+  Continue() {
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+ };
 
 class Expression: public Stmt {
 public:

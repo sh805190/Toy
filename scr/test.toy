@@ -1,6 +1,31 @@
-use "standard";
+var i = 0;
+var t;
 
-var main = function() {
-  print("Hello world\n");
-  return 0;
+while (i < 10) {
+
+
+  i = i + 1;
+
+
+  if
+  (i != 6) {
+
+
+    continue;
+ }
+
+  else {
+
+    t = "HELLLLLLLLLLLLLLLLLLLLLLLLLOOOOOOOOOOOOOOOOOO NURSE!!!";
+    "What is the world coming to?";
+  }
+
+
+
+  i + 1000;
+
+"during while";
+
 }
+
+"After while";

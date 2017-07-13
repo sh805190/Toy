@@ -11,6 +11,8 @@ public:
   //visit methods
   void Visit(Stmt*) override;
   void Visit(Block*) override;
+  void Visit(Break*) override;
+  void Visit(Continue*) override;
   void Visit(Expression*) override;
   void Visit(If*) override;
   void Visit(Var*) override;
