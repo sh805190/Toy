@@ -175,20 +175,15 @@ void Interpreter::Visit(Logical* expr) {
     case AND:
       if (IsTruthy(result)) {
         Evaluate(expr->rhs);
-        result = IsTruthy(result);
-      }
-      else {
-        result = false;
       }
     break;
 
     case OR:
       if (IsTruthy(result)) {
-        result = true;
+        //EMPTY
       }
       else {
         Evaluate(expr->rhs);
-        result = IsTruthy(result);
       }
     break;
 
