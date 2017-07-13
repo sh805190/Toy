@@ -6,6 +6,10 @@
 //TMP
 #include <iostream>
 
+Interpreter::Interpreter(Environment* env) {
+  environment = new Environment(env);
+}
+
 void Interpreter::Execute(Stmt* stmt) {
   //for block contexts
   breakCalled = false;
@@ -34,12 +38,30 @@ void Interpreter::Visit(Stmt* stmt) {
 }
 
 void Interpreter::Visit(Block* stmt) {
-  for (Stmt* ptr : stmt->stmtList) {
-    Execute(ptr);
+  environment = new Environment(environment);
 
-    //stop block execution if...
-    if (breakCalled || continueCalled || returnCalled) break;
+  try {
+    for (Stmt* ptr : stmt->stmtList) {
+      Execute(ptr);
+
+      //stop block execution if...
+      if (breakCalled || continueCalled || returnCalled) break;
+    }
   }
+  catch(RuntimeError& e) {
+    //in case of emergencies, decrease the scope
+    Environment* env = environment;
+    environment = env->GetParent();
+    delete env;
+
+    //continue up the callstack
+    throw(e);
+  }
+
+  //decrease scope
+  Environment* env = environment;
+  environment = env->GetParent();
+  delete env;
 }
 
 void Interpreter::Visit(Break* stmt) {
@@ -82,11 +104,11 @@ void Interpreter::Visit(Var* stmt) {
   //define this variable
   if (stmt->initializer != nullptr) {
     Evaluate(stmt->initializer);
-    environment.Define(stmt->name, result);
+    environment->Define(stmt->name, result);
   } 
   else {
     //undefined literal
-    environment.Define(stmt->name, Literal());
+    environment->Define(stmt->name, Literal());
   }
 }
 
@@ -133,7 +155,7 @@ void Interpreter::Visit(Expr* expr) {
 void Interpreter::Visit(Assign* expr) {
   Evaluate(expr->value);
   if (expr->name.GetType() == IDENTIFIER) {
-    environment.Assign(expr->name, result);
+    environment->Assign(expr->name, result);
   }
 
   else if (expr->name.GetType() == REFERENCE) {
@@ -142,7 +164,7 @@ void Interpreter::Visit(Assign* expr) {
     //HACK: get the number of dereference stars
     int starCount = expr->name.GetLiteral().GetNumber();
 
-    Literal literal = environment.GetVar(expr->name); //base reference before dereferencing
+    Literal literal = environment->GetVar(expr->name); //base reference before dereferencing
 
     while(starCount > 0) {
       //display
@@ -292,7 +314,7 @@ void Interpreter::Visit(Unary* expr) {
     break;
 
     case AMPERSAND:
-      result = environment.GetRef(dynamic_cast<Variable*>(expr->rhs)->name);
+      result = environment->GetRef(dynamic_cast<Variable*>(expr->rhs)->name);
     break;
 
     case STAR: {
@@ -325,7 +347,7 @@ void Interpreter::Visit(Value* expr) {
 }
 
 void Interpreter::Visit(Variable* expr) {
-  result = environment.GetVar(expr->name);
+  result = environment->GetVar(expr->name);
 }
 
 //helpers

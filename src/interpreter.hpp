@@ -8,6 +8,8 @@
 
 class Interpreter: public ExprVisitor, public StmtVisitor {
 public:
+  Interpreter(Environment* env = nullptr);
+
   void Execute(Stmt*);
   void Evaluate(Expr*);
 
@@ -38,7 +40,7 @@ private:
   Literal Dereference(Literal);
 
   //members
-  Environment environment;
+  Environment* environment = nullptr;
   Literal result;
 
   //block contexts
