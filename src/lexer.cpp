@@ -173,11 +173,15 @@ void Lexer::ScanReference() {
 }
 
 void Lexer::ScanString() {
-  int ln = line; //for error handling
+  int ln = line; //error handling
 
   //read the string
   while(!IsAtEnd() && source[current] != '"') {
-    if (source[current] == '\n') line++; //allow multiline strings
+    if (source[current] == '\n') {
+      //disallow multiline strings
+      ErrorHandler::Error(ln, std::string() + "Unterminated string (multiline strings are not allowed)");
+      break;
+    }
     Advance();
   }
 
@@ -186,11 +190,31 @@ void Lexer::ScanString() {
     ErrorHandler::Error(ln, "Unterminated string");
   }
 
-  //eat the "
+  //eat the ", or the \n
   Advance();
 
-  //finally
-  std::string s = source.substr(start+1, current-start-2); //-2 for the quotes
-  AddToken(STRING, s);
+  //get the escaped string
+  std::string str = source.substr(start+1, current-start-2); //-2 for the quotes
+
+  //unescape the string before adding the token
+  AddToken(STRING, UnescapeString(str));
 }
 
+std::string Lexer::UnescapeString(std::string str) {
+  std::string ret;
+
+  for (int i = 0; i < str.size(); i++) {
+    if (str[i] == '\\') {
+      if (str[i+1] == '\\') { ret += '\\'; i++; }
+      else if (str[i+1] == '"') { ret += '"'; i++; }
+      else if (str[i+1] == 'b') { ret += '\b'; i++; }
+      else if (str[i+1] == 'n') { ret += '\n'; i++; }
+      else if (str[i+1] == 'r') { ret += '\r'; i++; }
+      else if (str[i+1] == 't') { ret += '\t'; i++; }
+    }
+    else {
+      ret += str[i];
+    }
+  }
+  return ret;
+}

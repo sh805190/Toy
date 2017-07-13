@@ -61,4 +61,5 @@ private:
   void ScanNumber();
   void ScanReference();
   void ScanString();
+  std::string UnescapeString(std::string);
 };
