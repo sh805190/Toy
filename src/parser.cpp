@@ -152,6 +152,9 @@ Stmt* Parser::ScanFor() {
     block = new Block(stmtList);
   }
 
+  //store the body inside another block (prevent bugs with naming conflicts)
+  block = new Block({block});
+
   //piece it all together
   std::list<Stmt*> stmtList;
 
