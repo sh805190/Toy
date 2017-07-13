@@ -202,7 +202,8 @@ int main(int argc, char* argv[]) {
       {"Expression", "Expr* expr"},
       {"Block", "std::list<Stmt*> stmtList"},
       {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},
-      {"Var", "Token name, Expr* initializer"}
+      {"Var", "Token name, Expr* initializer"},
+      {"While", "Expr* condition, Stmt* branch"}
     });
   }
 

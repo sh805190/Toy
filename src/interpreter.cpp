@@ -63,6 +63,16 @@ void Interpreter::Visit(Var* stmt) {
   }
 }
 
+void Interpreter::Visit(While* stmt) {
+  for (;;) {
+    Evaluate(stmt->condition);
+    if (!IsTruthy(result)) {
+      break;
+    }
+    Execute(stmt->branch);
+  }
+}
+
 void Interpreter::Visit(Expr* expr) {
   //empty = undefined
   result = Literal();

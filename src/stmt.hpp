@@ -5,6 +5,7 @@ class Expression;
 class Block;
 class If;
 class Var;
+class While;
 
 #include "expr.hpp"
 #include "stmt.hpp"
@@ -19,6 +20,7 @@ public:
   virtual void Visit(Block*) = 0;
   virtual void Visit(If*) = 0;
   virtual void Visit(Var*) = 0;
+  virtual void Visit(While*) = 0;
 };
 
 class Stmt {
@@ -84,4 +86,19 @@ public:
 
   Token name;
   Expr* initializer;
+};
+
+class While: public Stmt {
+public:
+  While(Expr* condition, Stmt* branch) {
+    this->condition = condition;
+    this->branch = branch;
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Expr* condition;
+  Stmt* branch;
 };

@@ -41,6 +41,12 @@ void ASTDeleter::Visit(Var* stmt) {
   delete stmt;
 }
 
+void ASTDeleter::Visit(While* stmt) {
+  DeleteAST(stmt->condition);
+  DeleteAST(stmt->branch);
+  delete stmt;
+}
+
 void ASTDeleter::Visit(Expr* expr) {
   //NO OP
   delete expr;

@@ -14,6 +14,7 @@ public:
   void Visit(Expression*) override;
   void Visit(If*) override;
   void Visit(Var*) override;
+  void Visit(While*) override;
 
   void Visit(Expr*) override;
   void Visit(Assign*) override;

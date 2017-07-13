@@ -51,6 +51,14 @@ void ASTReaderPrefix::Visit(Var* stmt) {
   }
 }
 
+void ASTReaderPrefix::Visit(While* stmt) {
+  std::cout << "while ";
+  Print(stmt->condition);
+  std::cout << " do ";
+  Print(stmt->branch);
+  std::cout << " endwhile";
+}
+
 void ASTReaderPrefix::Visit(Expr* expr) {
   std::cout << "EXPR";
 }
@@ -137,6 +145,14 @@ void ASTReaderPostfix::Visit(Var* stmt) {
     Print(stmt->initializer);
     std::cout << ")";
   }
+}
+
+void ASTReaderPostfix::Visit(While* stmt) {
+  std::cout << "while ";
+  Print(stmt->condition);
+  std::cout << " do ";
+  Print(stmt->branch);
+  std::cout << " endwhile";
 }
 
 void ASTReaderPostfix::Visit(Expr* expr) {

@@ -149,8 +149,27 @@ Stmt* Parser::ScanVar() {
 }
 
 Stmt* Parser::ScanWhile() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Advance(); //skip while keyword
+
+  //conditional
+  Consume(LEFT_PAREN, "Expected '(' after while keyword");
+  Expr* condition = ScanExpression();
+  Consume(RIGHT_PAREN, "Expected ')' after while condition");
+
+  //then
+  Stmt* branch = nullptr;
+  if (tokenVector[current].GetType() == LEFT_BRACE) {
+    branch = ScanBlock();
+  }
+  else {
+    branch = ScanStatement();
+  }
+
+  //one of those
+  ignoreSemicolon = true;
+
+  //finally
+  return new While(condition, branch);
 }
 
 Stmt* Parser::ScanBreak() {
