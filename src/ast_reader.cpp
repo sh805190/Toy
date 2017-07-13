@@ -10,24 +10,44 @@ void ASTReaderPrefix::Print(Stmt* stmt) {
 }
 
 void ASTReaderPrefix::Print(Expr* expr) {
+  std::cout << "(";
   expr->Accept(this);
+  std::cout << ")";
 }
 
 void ASTReaderPrefix::Visit(Stmt* stmt) {
   std::cout << "STMT";
 }
 
+void ASTReaderPrefix::Visit(Block* stmt) {
+  std::cout << "{";
+  for (Stmt* ptr : stmt->stmtList) {
+    Print(ptr);
+  }
+  std::cout << "}";
+}
+
 void ASTReaderPrefix::Visit(Expression* stmt) {
   Print(stmt->expr);
+}
+
+void ASTReaderPrefix::Visit(If* stmt) {
+  std::cout << "if ";
+  Print(stmt->condition);
+  std::cout << " then ";
+  Print(stmt->thenBranch);
+  if (stmt->elseBranch) {
+    std::cout << " else ";
+    Print(stmt->elseBranch);
+  }
 }
 
 void ASTReaderPrefix::Visit(Var* stmt) {
   std::cout << "Declare " << stmt->name.GetLexeme();
   //TODO: check back on this
   if (stmt->initializer != nullptr) {
-    std::cout << " = (";
+    std::cout << " = ";
     Print(stmt->initializer);
-    std::cout << ")";
   }
 }
 
@@ -48,9 +68,7 @@ void ASTReaderPrefix::Visit(Binary* expr) {
 }
 
 void ASTReaderPrefix::Visit(Grouping* expr) {
-  std::cout << "(";
   Print(expr->inner);
-  std::cout << ")";
 }
 
 void ASTReaderPrefix::Visit(Logical* expr) {
@@ -76,6 +94,7 @@ void ASTReaderPrefix::Visit(Variable* expr) {
 //postfix methods
 void ASTReaderPostfix::Print(Stmt* stmt) {
   stmt->Accept(this);
+  std::cout << ";";
 }
 
 void ASTReaderPostfix::Print(Expr* expr) {
@@ -86,8 +105,28 @@ void ASTReaderPostfix::Visit(Stmt* stmt) {
   std::cout << "STMT";
 }
 
+void ASTReaderPostfix::Visit(Block* stmt) {
+  std::cout << "{";
+  for (Stmt* ptr : stmt->stmtList) {
+    Print(ptr);
+  }
+  std::cout << "}";
+}
+
 void ASTReaderPostfix::Visit(Expression* stmt) {
   Print(stmt->expr);
+}
+
+void ASTReaderPostfix::Visit(If* stmt) {
+  std::cout << "if ";
+  Print(stmt->condition);
+  std::cout << " then ";
+  Print(stmt->thenBranch);
+  if (stmt->elseBranch) {
+    std::cout << " else ";
+    Print(stmt->elseBranch);
+  }
+  std::cout << " endif";
 }
 
 void ASTReaderPostfix::Visit(Var* stmt) {

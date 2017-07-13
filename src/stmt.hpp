@@ -2,6 +2,8 @@
 
 class Stmt;
 class Expression;
+class Block;
+class If;
 class Var;
 
 #include "expr.hpp"
@@ -14,6 +16,8 @@ class StmtVisitor {
 public:
   virtual void Visit(Stmt*) = 0;
   virtual void Visit(Expression*) = 0;
+  virtual void Visit(Block*) = 0;
+  virtual void Visit(If*) = 0;
   virtual void Visit(Var*) = 0;
 };
 
@@ -35,6 +39,36 @@ public:
   }
 
   Expr* expr;
+};
+
+class Block: public Stmt {
+public:
+  Block(std::list<Stmt*> stmtList) {
+    this->stmtList = stmtList;
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  std::list<Stmt*> stmtList;
+};
+
+class If: public Stmt {
+public:
+  If(Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
+    this->condition = condition;
+    this->thenBranch = thenBranch;
+    this->elseBranch = elseBranch;
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Expr* condition;
+  Stmt* thenBranch;
+  Stmt* elseBranch;
 };
 
 class Var: public Stmt {

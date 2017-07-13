@@ -27,8 +27,28 @@ void Interpreter::Visit(Stmt* stmt) {
   throw RuntimeError(-1, "Empty statement in AST"); 
 }
 
+void Interpreter::Visit(Block* stmt) {
+  for (Stmt* ptr : stmt->stmtList) {
+    Execute(ptr);
+  }
+}
+
 void Interpreter::Visit(Expression* stmt) {
   Evaluate(stmt->expr);
+}
+
+void Interpreter::Visit(If* stmt) {
+  Evaluate(stmt->condition);
+
+  if (IsTruthy(result)) {
+    Execute(stmt->thenBranch);
+  }
+
+  else {
+    if (stmt->elseBranch) {
+      Execute(stmt->elseBranch);
+    }
+  }
 }
 
 void Interpreter::Visit(Var* stmt) {

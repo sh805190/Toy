@@ -39,7 +39,7 @@ private:
   Expr* ScanPrimary();
 
   //other types
-  Expr* ScanBlock();
+  Stmt* ScanBlock();
   Expr* ScanSpecial();
 
   //helpers
@@ -52,6 +52,7 @@ private:
   std::vector<Stmt*> statementVector;
   std::vector<Token> tokenVector;
   int current = 0;
+  bool ignoreSemicolon = false;
 
   class ParserError {
   public:

@@ -13,11 +13,10 @@ std::vector<Stmt*> Parser::GetStmtVector() {
   while(!IsAtEnd()) {
     try {
       statementVector.push_back(ScanStatement());
-      Consume(SEMICOLON, "Expected ';' at end of statement");
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
-      Advance();
+      Advance(); 
       Synchronize();
     }
   }
@@ -27,29 +26,63 @@ std::vector<Stmt*> Parser::GetStmtVector() {
 //rules
 Stmt* Parser::ScanStatement() {
   Token tok = tokenVector[current]; //work while pointing at the current token
+  Stmt* ret = nullptr;
 
   switch(tok.GetType()) {
     //all types
-    case CLASS: return ScanClass();
-    case IF: return ScanIf();
-    case RETURN: return ScanReturn();
-    case USE: return ScanUse();
-    case VAR: return ScanVar();
-    case WHILE: return ScanWhile();
-    case BREAK: return ScanBreak();
-    case CONTINUE: return ScanContinue();
-    case MODULE: return ScanModule();
+    case CLASS:
+      ret = ScanClass();
+    break;
+
+    case IF:
+      ret = ScanIf();
+    break;
+
+    case RETURN:
+      ret = ScanReturn();
+    break;
+
+    case USE:
+      ret = ScanUse();
+    break;
+
+    case VAR:
+      ret = ScanVar();
+    break;
+
+    case WHILE:
+      ret = ScanWhile();
+    break;
+
+    case BREAK:
+      ret = ScanBreak();
+    break;
+
+    case CONTINUE:
+      ret = ScanContinue();
+    break;
+
+    case MODULE:
+      ret = ScanModule();
+    break;
 
     //error
     case LEFT_BRACE:
-      Advance();
       throw ParserError(tok.GetLine(), "Block scoping is not allowed");
 
     //delegate
-    default: {
-      return new Expression(ScanExpression());
-    }
+    default:
+      ret = new Expression(ScanExpression());
   }
+
+  //finally
+  if (!ignoreSemicolon) {
+    Consume(SEMICOLON, "Expected ';' at end of statement");
+  }
+
+  ignoreSemicolon = false;
+
+  return ret;
 }
 
 //stmt types
@@ -59,8 +92,38 @@ Stmt* Parser::ScanClass() {
 }
 
 Stmt* Parser::ScanIf() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Advance(); //skip if keyword
+
+  //conditional
+  Consume(LEFT_PAREN, "Expected '(' after if keyword");
+  Expr* condition = ScanExpression();
+  Consume(RIGHT_PAREN, "Expected ')' after if condition");
+
+  //then
+  Stmt* thenBranch = nullptr;
+  if (tokenVector[current].GetType() == LEFT_BRACE) {
+    thenBranch = ScanBlock();
+  }
+  else {
+    thenBranch = ScanStatement();
+  }
+
+  //else
+  Stmt* elseBranch = nullptr;
+  if (Match(ELSE)) {
+    if (tokenVector[current].GetType() == LEFT_BRACE) {
+      elseBranch = ScanBlock();
+    }
+    else {
+      elseBranch = ScanStatement();
+    }
+  }
+
+  //one of those
+  ignoreSemicolon = true;
+
+  //finally
+  return new If(condition, thenBranch, elseBranch);
 }
 
 Stmt* Parser::ScanReturn() {
@@ -243,14 +306,31 @@ Expr* Parser::ScanPrimary() {
     return new Variable(tokenVector[current-1]);
   }
 
-  Advance(); //skip this token
+  //unknown token
   throw(ParserError(tokenVector[current-1].GetLine(), std::string() + "Unexpected symbol '" + tokenVector[current-1].GetLexeme() + "'"));
 }
 
 //other types
-Expr* Parser::ScanBlock() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+Stmt* Parser::ScanBlock() {
+  Consume(LEFT_BRACE, "Exprected '{' at beginning of a block");
+
+  std::list<Stmt*> stmtList;
+
+  while(!IsAtEnd() && tokenVector[current].GetType() != RIGHT_BRACE) {
+    //copy the main scanning loop
+    try {
+      stmtList.push_back(ScanStatement());
+      Consume(SEMICOLON, "Expected ';' at end of statement");
+    }
+    catch (ParserError pe) {
+      ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
+      Advance();
+      Synchronize();
+    }
+  }
+
+  Consume(RIGHT_BRACE, "Exprected '}' at end of a block");
+  return new Block(stmtList);
 }
 
 Expr* Parser::ScanSpecial() {
@@ -266,7 +346,7 @@ Token Parser::Advance() {
 
 void Parser::Consume(Token token, std::string errmsg) {
   if (IsAtEnd() || !Match(token)) {
-    ErrorHandler::Error(token.GetLine(), errmsg);
+    ErrorHandler::Error(tokenVector[current].GetLine(), errmsg);
     Synchronize();
   }
 }

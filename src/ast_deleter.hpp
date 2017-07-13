@@ -10,7 +10,9 @@ public:
 
   //visit methods
   void Visit(Stmt*) override;
+  void Visit(Block*) override;
   void Visit(Expression*) override;
+  void Visit(If*) override;
   void Visit(Var*) override;
 
   void Visit(Expr*) override;

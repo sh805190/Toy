@@ -200,6 +200,8 @@ int main(int argc, char* argv[]) {
   else if (!strcmp(argv[1], "stmt")) {
     defineAST(os, "Stmt", {
       {"Expression", "Expr* expr"},
+      {"Block", "std::list<Stmt*> stmtList"},
+      {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},
       {"Var", "Token name, Expr* initializer"}
     });
   }

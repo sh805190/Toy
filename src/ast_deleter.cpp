@@ -1,15 +1,26 @@
 #include "ast_deleter.hpp"
 
 void ASTDeleter::DeleteAST(Expr* expr) {
-  expr->Accept(this);
+  if (expr) {
+    expr->Accept(this);
+  }
 }
 
 void ASTDeleter::DeleteAST(Stmt* stmt) {
-  stmt->Accept(this);
+  if (stmt) {
+    stmt->Accept(this);
+  }
 }
 
 void ASTDeleter::Visit(Stmt* stmt) {
   //NO OP
+  delete stmt;
+}
+
+void ASTDeleter::Visit(Block* stmt) {
+  for(Stmt* ptr : stmt->stmtList) {
+    DeleteAST(ptr);
+  }
   delete stmt;
 }
 
@@ -18,10 +29,15 @@ void ASTDeleter::Visit(Expression* stmt) {
   delete stmt;
 }
 
+void ASTDeleter::Visit(If* stmt) {
+  DeleteAST(stmt->condition);
+  DeleteAST(stmt->thenBranch);
+  DeleteAST(stmt->elseBranch);
+  delete stmt;
+}
+
 void ASTDeleter::Visit(Var* stmt) {
-  if (stmt->initializer != nullptr) {
-    DeleteAST(stmt->initializer);
-  }
+  DeleteAST(stmt->initializer);
   delete stmt;
 }
 
