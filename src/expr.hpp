@@ -3,6 +3,7 @@
 class Expr;
 class Assign;
 class Binary;
+class Function;
 class Grouping;
 class Logical;
 class Unary;
@@ -14,12 +15,14 @@ class Variable;
 #include "token.hpp"
 
 #include <list>
+#include <string>
 
 class ExprVisitor {
 public:
   virtual void Visit(Expr*) = 0;
   virtual void Visit(Assign*) = 0;
   virtual void Visit(Binary*) = 0;
+  virtual void Visit(Function*) = 0;
   virtual void Visit(Grouping*) = 0;
   virtual void Visit(Logical*) = 0;
   virtual void Visit(Unary*) = 0;
@@ -64,6 +67,21 @@ public:
   Expr* lhs;
   Token op;
   Expr* rhs;
+};
+
+class Function: public Expr {
+public:
+  Function(std::list<std::string> varList, Block* block) {
+    this->varList = varList;
+    this->block = block;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  std::list<std::string> varList;
+  Block* block;
 };
 
 class Grouping: public Expr {

@@ -1,4 +1,5 @@
 #include "ast_deleter.hpp"
+#include "ast_duplicator.hpp"
 #include "ast_reader.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
@@ -17,8 +18,11 @@ void run(std::string source) {
   std::vector<Stmt*> statements = parser.GetStmtVector();
 
   for (Stmt* stmt : statements) {
+//    ASTDuplicator duplicator;
+
     interpreter.Execute(stmt);
-//    reader.Print(stmt);
+
+//    reader.Print(duplicator.DuplicateAST(stmt));
 //    std::cout << std::endl;
     deleter.DeleteAST(stmt);
 

@@ -76,6 +76,11 @@ void ASTDeleter::Visit(Binary* expr) {
   delete expr;
 }
 
+void ASTDeleter::Visit(Function* expr) {
+  DeleteAST(expr->block);
+  delete expr;
+}
+
 void ASTDeleter::Visit(Grouping* expr) {
   DeleteAST(expr->inner);
   delete expr;

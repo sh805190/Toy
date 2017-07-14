@@ -88,6 +88,15 @@ void ASTReaderPrefix::Visit(Binary* expr) {
   Print(expr->rhs);
 }
 
+void ASTReaderPrefix::Visit(Function* expr) {
+  std::cout << "function( ";
+  for (std::string arg : expr->varList) {
+    std::cout << arg << " ";
+  }
+  std::cout << ")";
+  Print(expr->block);
+}
+
 void ASTReaderPrefix::Visit(Grouping* expr) {
   Print(expr->inner);
 }
@@ -196,6 +205,15 @@ void ASTReaderPostfix::Visit(Binary* expr) {
   std::cout << " ";
   Print(expr->rhs);
   std::cout << " " << expr->op.GetLexeme();
+}
+
+void ASTReaderPostfix::Visit(Function* expr) {
+  std::cout << "function( ";
+  for (std::string arg : expr->varList) {
+    std::cout << arg << " ";
+  }
+  std::cout << ")";
+  Print(expr->block);
 }
 
 void ASTReaderPostfix::Visit(Grouping* expr) {

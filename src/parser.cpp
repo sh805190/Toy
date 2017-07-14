@@ -285,7 +285,7 @@ Expr* Parser::ScanAssignment() {
     expr->Accept(&tokenGetter);
 
     Token op = tokenVector[current-1];
-    Expr* rhs = ScanAssignment();
+    Expr* rhs = ScanExpression();
 
     //simple variable
     if (typeGetter.GetType() == IDENTIFIER) {
@@ -392,6 +392,10 @@ Expr* Parser::ScanPrimary() {
 
   if (Match(NUMBER) || Match(STRING)) return new Value(tokenVector[current-1].GetLiteral());
 
+  if (Match(FUNCTION)) {
+    return ScanFunction();
+  }
+
   if (Match(LEFT_PAREN)) {
     Expr* expr = ScanExpression();
     Consume(RIGHT_PAREN, "Expected ')' after expression");
@@ -433,6 +437,33 @@ Stmt* Parser::ScanBlock() {
 
   Consume(RIGHT_BRACE, "Exprected '}' at end of a block");
   return new Block(stmtList);
+}
+
+Expr* Parser::ScanFunction() {
+  std::list<std::string> formalParameters;
+
+  Consume(LEFT_PAREN, "Expected '(' after function keyword");
+
+  //parse formal parameters (overly engineered)
+  if (tokenVector[current].GetType() != RIGHT_PAREN) {
+    while(!IsAtEnd()) {
+      Token t = Advance();
+      if (t.GetType() != IDENTIFIER) {
+        throw ParserError(t.GetLine(), std::string() + "Unexpected token '" + t.GetLexeme() + "' where formal parameter expected");
+      }
+      formalParameters.push_back(t.GetLexeme());
+      if (Match(RIGHT_PAREN)) break;
+      Consume(COMMA, "Expected ',' between formal parameters");
+    }
+  }
+  else {
+    Consume(RIGHT_PAREN, "Expected ')' after formal parameters");
+  }
+
+  //get the block
+  Stmt* block = ScanBlock();
+
+  return new Function(formalParameters, dynamic_cast<Block*>(block));
 }
 
 Expr* Parser::ScanSpecial() {

@@ -5,9 +5,21 @@
 
 //TMP
 #include <iostream>
+#include <functional>
 
 Interpreter::Interpreter(Environment* env) {
   environment = new Environment(env);
+}
+
+Interpreter::~Interpreter() {
+  std::function<void(Environment*)> cleanup = [&cleanup](Environment* env) -> void {
+    if (env != nullptr && env->GetParent() != nullptr) {
+      cleanup(env->GetParent());
+    }
+    delete env;
+  };
+
+  cleanup(environment);
 }
 
 void Interpreter::Execute(Stmt* stmt) {
@@ -279,6 +291,11 @@ void Interpreter::Visit(Binary* expr) {
     default:
       throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
   }
+}
+
+void Interpreter::Visit(Function* expr) {
+  //TODO: make the function into a liteal
+  result = Literal(expr->varList, expr->block);
 }
 
 void Interpreter::Visit(Grouping* expr) {

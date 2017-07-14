@@ -117,6 +117,7 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   os << std::endl;
 
   os << "#include <list>" << std::endl;
+  os << "#include <string>" << std::endl;
   os << std::endl;
 
   //print the visitor class
@@ -188,6 +189,7 @@ int main(int argc, char* argv[]) {
     defineAST(os, "Expr", {
       {"Assign", "Token name, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
+      {"Function", "std::list<std::string> varList, Block* block"},
       {"Grouping", "Expr* inner"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},

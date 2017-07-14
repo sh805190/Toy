@@ -3,19 +3,11 @@
 #include "expr.hpp"
 #include "stmt.hpp"
 
-#include "environment.hpp"
-#include "literal.hpp"
-
-class Interpreter: public ExprVisitor, public StmtVisitor {
+//warning: one use only
+class ASTDuplicator: public ExprVisitor, public StmtVisitor {
 public:
-  Interpreter(Environment* env = nullptr);
-  ~Interpreter();
-
-  void Execute(Stmt*);
-  void Evaluate(Expr*);
-
-  bool GetReturnCalled();
-  Literal GetResult();
+  Expr* DuplicateAST(Expr*);
+  Stmt* DuplicateAST(Stmt*);
 
   //visit methods
   void Visit(Stmt*) override;
@@ -39,19 +31,6 @@ public:
   void Visit(Variable*) override;
 
 private:
-  //helpers
-  bool IsEqual(Literal, Literal);
-  void CheckOperandsAreNumbers(Token op, Literal, Literal);
-  bool IsTruthy(Literal);
-  Literal Dereference(Literal);
-
-  //members
-  Environment* environment = nullptr;
-  Literal result;
-
-  //block contexts
-  bool breakCalled = false;
-  bool continueCalled = false;
-  bool returnCalled = false;
-  int loopDepth = 0;
+  Expr* resultExpr = nullptr;
+  Stmt* resultStmt = nullptr;
 };

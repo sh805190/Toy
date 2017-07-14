@@ -17,6 +17,10 @@ public:
     type = expr->op.GetType();
   }
 
+  void Visit(Function* expr) override {
+    type = FUNCTION;
+  }
+
   void Visit(Grouping* expr) override {
     type = LEFT_PAREN;
   }
@@ -67,6 +71,10 @@ public:
 
   void Visit(Binary* expr) override {
     token = expr->op;
+  }
+
+  void Visit(Function* expr) override {
+    token = Token(END_OF_FILE, "Na", Literal(), -1);
   }
 
   void Visit(Grouping* expr) override {

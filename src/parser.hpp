@@ -41,6 +41,7 @@ private:
 
   //other types
   Stmt* ScanBlock();
+  Expr* ScanFunction();
   Expr* ScanSpecial();
 
   //helpers

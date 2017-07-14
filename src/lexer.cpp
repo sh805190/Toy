@@ -30,10 +30,11 @@ void Lexer::ScanToken() {
     case ']': AddToken(RIGHT_BRACKET); break;
     case '+': AddToken(PLUS); break;
     case '-': AddToken(MINUS); break;
-    case '.': AddToken(DOT); break;
-    case ':': AddToken(COLON); break;
-    case ';': AddToken(SEMICOLON); break;
     case '&': AddToken(AMPERSAND); break;
+    case ':': AddToken(COLON); break;
+    case ',': AddToken(COMMA); break;
+    case '.': AddToken(DOT); break;
+    case ';': AddToken(SEMICOLON); break;
 
     case '*': ScanReference(); break; //unique
     case '"': ScanString(); break; //unique

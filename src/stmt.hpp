@@ -15,6 +15,7 @@ class While;
 #include "token.hpp"
 
 #include <list>
+#include <string>
 
 class StmtVisitor {
 public:
