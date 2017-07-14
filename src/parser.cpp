@@ -214,8 +214,13 @@ Stmt* Parser::ScanModule() {
 }
 
 Stmt* Parser::ScanReturn() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Advance(); //skip return keyword
+  if (tokenVector[current].GetType() != SEMICOLON) {
+    return new Return(tokenVector[current-1].GetLine(), ScanExpression());
+  }
+  else {
+    return new Return(tokenVector[current-1].GetLine(), nullptr);
+  }
 }
 
 Stmt* Parser::ScanUse() {

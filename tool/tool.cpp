@@ -186,7 +186,6 @@ int main(int argc, char* argv[]) {
   //Expr
   if (!strcmp(argv[1], "expr")) {
     defineAST(os, "Expr", {
-//      {"Array", "Token lb, std::list<Literal> literalList, Token rb"},
       {"Assign", "Token name, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Grouping", "Expr* inner"},
@@ -204,6 +203,7 @@ int main(int argc, char* argv[]) {
       {"Continue", "int line"},
       {"Expression", "Expr* expr"},
       {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},
+      {"Return", "int line, Expr* result"},
       {"Var", "Token name, Expr* initializer"},
       {"While", "Expr* condition, Stmt* branch"}
     });

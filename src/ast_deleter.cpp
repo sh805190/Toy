@@ -44,6 +44,11 @@ void ASTDeleter::Visit(If* stmt) {
   delete stmt;
 }
 
+void ASTDeleter::Visit(Return* stmt) {
+  DeleteAST(stmt->result);
+  delete stmt;
+}
+
 void ASTDeleter::Visit(Var* stmt) {
   DeleteAST(stmt->initializer);
   delete stmt;

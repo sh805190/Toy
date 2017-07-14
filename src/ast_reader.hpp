@@ -21,6 +21,7 @@ public:
   void Visit(Continue*) override;
   void Visit(Expression*) override;
   void Visit(If*) override;
+  void Visit(Return*) override;
   void Visit(Var*) override;
   void Visit(While*) override;
 
@@ -46,6 +47,7 @@ public:
   void Visit(Continue*) override;
   void Visit(Expression*) override;
   void Visit(If*) override;
+  void Visit(Return*) override;
   void Visit(Var*) override;
   void Visit(While*) override;
 

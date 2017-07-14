@@ -1,11 +1,12 @@
 #pragma once
 
 class Stmt;
+class Block;
 class Break;
 class Continue;
 class Expression;
-class Block;
 class If;
+class Return;
 class Var;
 class While;
 
@@ -18,11 +19,12 @@ class While;
 class StmtVisitor {
 public:
   virtual void Visit(Stmt*) = 0;
+  virtual void Visit(Block*) = 0;
   virtual void Visit(Break*) = 0;
   virtual void Visit(Continue*) = 0;
   virtual void Visit(Expression*) = 0;
-  virtual void Visit(Block*) = 0;
   virtual void Visit(If*) = 0;
+  virtual void Visit(Return*) = 0;
   virtual void Visit(Var*) = 0;
   virtual void Visit(While*) = 0;
 };
@@ -32,6 +34,19 @@ public:
   virtual void Accept(StmtVisitor* visitor) {
     visitor->Visit(this);
   }
+};
+
+class Block: public Stmt {
+public:
+  Block(std::list<Stmt*> stmtList) {
+    this->stmtList = stmtList;
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  std::list<Stmt*> stmtList;
 };
 
 class Break: public Stmt {
@@ -73,19 +88,6 @@ public:
   Expr* expr;
 };
 
-class Block: public Stmt {
-public:
-  Block(std::list<Stmt*> stmtList) {
-    this->stmtList = stmtList;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
-
-  std::list<Stmt*> stmtList;
-};
-
 class If: public Stmt {
 public:
   If(Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
@@ -101,6 +103,21 @@ public:
   Expr* condition;
   Stmt* thenBranch;
   Stmt* elseBranch;
+};
+
+class Return: public Stmt {
+public:
+  Return(int line, Expr* result) {
+    this->line = line;
+    this->result = result;
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  int line;
+  Expr* result;
 };
 
 class Var: public Stmt {

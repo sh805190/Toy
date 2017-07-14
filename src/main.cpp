@@ -12,17 +12,22 @@ ASTReaderPrefix reader;
 Interpreter interpreter;
 
 void run(std::string source) {
-    Lexer lexer(source);
-    Parser parser(lexer.GetTokenVector());
-    std::vector<Stmt*> statements = parser.GetStmtVector();
+  Lexer lexer(source);
+  Parser parser(lexer.GetTokenVector());
+  std::vector<Stmt*> statements = parser.GetStmtVector();
 
-    for (Stmt* stmt : statements) {
-      interpreter.Execute(stmt);
-//      reader.Print(stmt);
-//      std::cout << std::endl;
-      deleter.DeleteAST(stmt);
+  for (Stmt* stmt : statements) {
+    interpreter.Execute(stmt);
+//    reader.Print(stmt);
+//    std::cout << std::endl;
+    deleter.DeleteAST(stmt);
+
+    //handle returns
+    if (interpreter.GetReturnCalled()) {
+      std::cout << "Final value: " << interpreter.GetResult().ToString() << std::endl;
+      break;
     }
-  
+  }
 }
 
 void runPrompt() {

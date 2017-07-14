@@ -50,6 +50,11 @@ void ASTReaderPrefix::Visit(If* stmt) {
   }
 }
 
+void ASTReaderPrefix::Visit(Return* stmt) {
+  std::cout << "return ";
+  Print(stmt->result);
+}
+
 void ASTReaderPrefix::Visit(Var* stmt) {
   std::cout << "Declare " << stmt->name.GetLexeme();
   //TODO: check back on this
@@ -151,6 +156,11 @@ void ASTReaderPostfix::Visit(If* stmt) {
     Print(stmt->elseBranch);
   }
   std::cout << " endif";
+}
+
+void ASTReaderPostfix::Visit(Return* stmt) {
+  Print(stmt->result);
+  std::cout << " return";
 }
 
 void ASTReaderPostfix::Visit(Var* stmt) {

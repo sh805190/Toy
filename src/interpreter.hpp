@@ -13,6 +13,9 @@ public:
   void Execute(Stmt*);
   void Evaluate(Expr*);
 
+  bool GetReturnCalled();
+  Literal GetResult();
+
   //visit methods
   void Visit(Stmt*) override;
   void Visit(Block*) override;
@@ -20,6 +23,7 @@ public:
   void Visit(Continue*) override;
   void Visit(Expression*) override;
   void Visit(If*) override;
+  void Visit(Return*) override;
   void Visit(Var*) override;
   void Visit(While*) override;
 

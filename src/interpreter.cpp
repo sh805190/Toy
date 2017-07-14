@@ -32,6 +32,14 @@ void Interpreter::Evaluate(Expr* expr) {
   expr->Accept(this);
 }
 
+bool Interpreter::GetReturnCalled() {
+  return returnCalled;
+}
+
+Literal Interpreter::GetResult() {
+  return result;
+}
+
 void Interpreter::Visit(Stmt* stmt) {
   //should never happen
   throw RuntimeError(-1, "Empty statement in AST"); 
@@ -98,6 +106,16 @@ void Interpreter::Visit(If* stmt) {
     }
   }
   //NOTE: block contexts continue outward
+}
+
+void Interpreter::Visit(Return* stmt) {
+  result = Literal(); //explicitly undefined
+
+  if (stmt->result) {
+    Evaluate(stmt->result);
+  }
+
+  returnCalled = true;
 }
 
 void Interpreter::Visit(Var* stmt) {
