@@ -369,7 +369,7 @@ Expr* Parser::ScanUnary() {
   //references
   if (Match(AMPERSAND) || Match(STAR)) {
     Token op = tokenVector[current-1];
-    Expr* expr = ScanPrimary();
+    Expr* expr = ScanOperator();
 
     TokenTypeGetter typeGetter;
     expr->Accept(&typeGetter);
@@ -381,7 +381,30 @@ Expr* Parser::ScanUnary() {
     return new Unary(op, expr);
   }
 
-  return ScanPrimary();
+  return ScanOperator();
+}
+
+Expr* Parser::ScanOperator() {
+  //operation = actions preformed on a primary
+  Expr* expr = ScanPrimary();
+
+  TokenTypeGetter typeGetter;
+  expr->Accept(&typeGetter);
+
+  //function call
+  if ( (typeGetter.GetType() == IDENTIFIER || typeGetter.GetType() == FUNCTION) && Match(LEFT_PAREN)) {
+    std::list<Expr*> exprList;
+    if (!Match(RIGHT_PAREN)) {
+      while(!IsAtEnd()) {
+        exprList.push_back(ScanExpression());
+        if (Match(RIGHT_PAREN)) break;
+        Consume(COMMA, "Expected ',' between arguments");
+      }
+    }
+    return new Invocation(expr, exprList);
+  }
+
+  return expr;
 }
 
 Expr* Parser::ScanPrimary() {

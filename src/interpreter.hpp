@@ -33,6 +33,7 @@ public:
   void Visit(Binary*) override;
   void Visit(Function*) override;
   void Visit(Grouping*) override;
+  void Visit(Invocation*) override;
   void Visit(Logical*) override;
   void Visit(Unary*) override;
   void Visit(Value*) override;
@@ -40,6 +41,7 @@ public:
 
 private:
   //helpers
+  void CallFunction(Literal func, std::list<Literal> literalList);
   bool IsEqual(Literal, Literal);
   void CheckOperandsAreNumbers(Token op, Literal, Literal);
   bool IsTruthy(Literal);

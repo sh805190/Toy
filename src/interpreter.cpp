@@ -1,5 +1,6 @@
 #include "interpreter.hpp"
 
+#include "ast_deleter.hpp"
 #include "error_handler.hpp"
 #include "runtime_error.hpp"
 
@@ -16,6 +17,7 @@ Interpreter::~Interpreter() {
     if (env != nullptr && env->GetParent() != nullptr) {
       cleanup(env->GetParent());
     }
+
     delete env;
   };
 
@@ -302,6 +304,22 @@ void Interpreter::Visit(Grouping* expr) {
   Evaluate(expr->inner);
 }
 
+void Interpreter::Visit(Invocation* expr) {
+  //get the call requirements
+  Evaluate(expr->expr);
+
+  Literal func = result;
+
+  std::list<Literal> literalList;
+  for (Expr* ptr : expr->exprList) {
+    Evaluate(ptr);
+    literalList.push_back(result);
+  }
+
+  //finally
+  CallFunction(func, literalList);
+}
+
 void Interpreter::Visit(Logical* expr) {
   Literal lhs;
   Literal rhs;
@@ -386,6 +404,46 @@ void Interpreter::Visit(Variable* expr) {
 }
 
 //helpers
+void Interpreter::CallFunction(Literal func, std::list<Literal> litList) {
+  //build the environment
+  std::list<std::string> varList = func.GetVarList();
+
+  if (varList.size() != litList.size()) {
+    //TODO: much better error message
+    throw RuntimeError(-1, std::string() + "Invalid number of arguments (expected " + std::to_string(varList.size()) + ", received " + std::to_string(litList.size()) + ")");
+  }
+
+  Environment* env = new Environment(nullptr);
+
+  std::list<std::string>::iterator varIter = varList.begin();
+  std::list<Literal    >::iterator litIter = litList.begin();
+
+  while(varIter != varList.end() && litIter != litList.end()) {
+  env->Define(Token(IDENTIFIER, *varIter, *litIter, -1), *litIter);
+    varIter++;
+    litIter++;
+  }
+
+  //for recursion
+  env->Define(Token(IDENTIFIER, "recurse", func, -1), func);
+
+  //create the interpreter and call each line
+  result = Literal();
+  Interpreter interpreter(env);
+
+  for (Stmt* stmt : reinterpret_cast<Block*>(func.GetBlock())->stmtList) {
+    interpreter.Execute(stmt);
+
+    //check for a call to return
+    if (interpreter.GetReturnCalled()) {
+      result = interpreter.GetResult();
+      break;
+    }
+  }
+
+  //TODO: extract from env?
+}
+
 bool Interpreter::IsEqual(Literal lhs, Literal rhs) {
   //dereference references
   lhs = Dereference(lhs);

@@ -86,6 +86,14 @@ void ASTDeleter::Visit(Grouping* expr) {
   delete expr;
 }
 
+void ASTDeleter::Visit(Invocation* expr) {
+  DeleteAST(expr->expr);
+  for (Expr* ptr : expr->exprList) {
+    DeleteAST(ptr);
+  }
+  delete expr;
+}
+
 void ASTDeleter::Visit(Logical* expr) {
   DeleteAST(expr->lhs);
   DeleteAST(expr->rhs);

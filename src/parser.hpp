@@ -37,6 +37,7 @@ private:
   Expr* ScanTerm();
   Expr* ScanFactor();
   Expr* ScanUnary();
+  Expr* ScanOperator();
   Expr* ScanPrimary();
 
   //other types

@@ -25,6 +25,10 @@ public:
     type = LEFT_PAREN;
   }
 
+  void Visit(Invocation* expr) override {
+    type = INVOCATION;
+  }
+
   void Visit(Logical* expr) override {
     type = expr->op.GetType();
   }
@@ -62,7 +66,7 @@ private:
 class TokenGetter: public ExprVisitor {
 public:
   void Visit(Expr* expr) override {
-    token = Token(END_OF_FILE, "Na", Literal(), -1);
+    token = Token(UNDEFINED, "Na", Literal(), -1);
   }
 
   void Visit(Assign* expr) override {
@@ -74,11 +78,15 @@ public:
   }
 
   void Visit(Function* expr) override {
-    token = Token(END_OF_FILE, "Na", Literal(), -1);
+    token = Token(FUNCTION, "Na", Literal(), -2);
   }
 
   void Visit(Grouping* expr) override {
-    token = Token(END_OF_FILE, "Na", Literal(), -2);
+    token = Token(LEFT_PAREN, "Na", Literal(), -3);
+  }
+
+  void Visit(Invocation* expr) override {
+    token = Token(INVOCATION, "Na", Literal(), -4);
   }
 
   void Visit(Logical* expr) override {
@@ -90,7 +98,7 @@ public:
   }
 
   void Visit(Value* expr) override {
-    token = Token(END_OF_FILE, "Na", Literal(), -3);
+    token = Token(VALUE, "Na", Literal(), -5);
   }
 
   void Visit(Variable* expr) override {

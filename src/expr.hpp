@@ -5,6 +5,7 @@ class Assign;
 class Binary;
 class Function;
 class Grouping;
+class Invocation;
 class Logical;
 class Unary;
 class Value;
@@ -24,6 +25,7 @@ public:
   virtual void Visit(Binary*) = 0;
   virtual void Visit(Function*) = 0;
   virtual void Visit(Grouping*) = 0;
+  virtual void Visit(Invocation*) = 0;
   virtual void Visit(Logical*) = 0;
   virtual void Visit(Unary*) = 0;
   virtual void Visit(Value*) = 0;
@@ -95,6 +97,21 @@ public:
   }
 
   Expr* inner;
+};
+
+class Invocation: public Expr {
+public:
+  Invocation(Expr* expr, std::list<Expr*> exprList) {
+    this->expr = expr;
+    this->exprList = exprList;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Expr* expr;
+  std::list<Expr*> exprList;
 };
 
 class Logical: public Expr {

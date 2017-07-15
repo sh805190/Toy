@@ -48,6 +48,7 @@ void ASTReaderPrefix::Visit(If* stmt) {
     std::cout << " else ";
     Print(stmt->elseBranch);
   }
+  std::cout << " endif";
 }
 
 void ASTReaderPrefix::Visit(Return* stmt) {
@@ -99,6 +100,16 @@ void ASTReaderPrefix::Visit(Function* expr) {
 
 void ASTReaderPrefix::Visit(Grouping* expr) {
   Print(expr->inner);
+}
+
+void ASTReaderPrefix::Visit(Invocation* expr) {
+  Print(expr->expr);
+  std::cout << "(";
+  for (Expr* ptr : expr->exprList) {
+    Print(ptr);
+    std::cout << ",";
+  }
+  std::cout << ")";
 }
 
 void ASTReaderPrefix::Visit(Logical* expr) {
@@ -219,6 +230,16 @@ void ASTReaderPostfix::Visit(Function* expr) {
 void ASTReaderPostfix::Visit(Grouping* expr) {
   std::cout << "(";
   Print(expr->inner);
+  std::cout << ")";
+}
+
+void ASTReaderPostfix::Visit(Invocation* expr) {
+  Print(expr->expr);
+  std::cout << "(";
+  for (Expr* ptr : expr->exprList) {
+    Print(ptr);
+    std::cout << ",";
+  }
   std::cout << ")";
 }
 

@@ -1,3 +1,20 @@
+var fib = function(i) {
+  i;
+  if (i <= 0) return 0;
+  if (i == 1) return 1;
+  return recurse(i-1) + recurse(i-2);
+};
 
+var square = function(i) {
+  return i*i;
+};
 
-var fib = function(fib, i) { };
+var answer = 2;
+
+for (var i = 0; i < 4; i = i + 1) {
+  answer = square(answer);
+}
+
+"result";
+answer;
+

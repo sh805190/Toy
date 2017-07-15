@@ -191,6 +191,7 @@ int main(int argc, char* argv[]) {
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Function", "std::list<std::string> varList, Block* block"},
       {"Grouping", "Expr* inner"},
+      {"Invocation", "Expr* expr, std::list<Expr*> exprList"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},
       {"Value", "Literal value"},

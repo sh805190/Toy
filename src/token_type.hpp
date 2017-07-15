@@ -20,6 +20,9 @@ enum TokenType {
   //literal types
   IDENTIFIER, BOOLEAN, NUMBER, REFERENCE, STRING,
 
+  //other temporary types
+  INVOCATION, VALUE,
+
   //program terminator
   END_OF_FILE
 };

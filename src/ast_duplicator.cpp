@@ -2,11 +2,9 @@
 
 #include "runtime_error.hpp"
 
-#include <iostream>
-
 Expr* ASTDuplicator::DuplicateAST(Expr* expr) {
   if (expr == nullptr) {
-    return nullptr;
+    return resultExpr = nullptr;
   }
 
   expr->Accept(this);
@@ -15,7 +13,7 @@ Expr* ASTDuplicator::DuplicateAST(Expr* expr) {
 
 Stmt* ASTDuplicator::DuplicateAST(Stmt* stmt) {
   if (stmt == nullptr) {
-    return nullptr;
+    return resultStmt = nullptr;
   }
 
   stmt->Accept(this);
@@ -34,7 +32,6 @@ void ASTDuplicator::Visit(Block* stmt) {
     stmtList.push_back(resultStmt);
   }
   resultStmt = new Block(stmtList);
-std::cout << "\tBLOCK DUPLICATED" << std::endl;
 }
 
 void ASTDuplicator::Visit(Break* stmt) {
@@ -107,6 +104,20 @@ void ASTDuplicator::Visit(Function* expr) {
 void ASTDuplicator::Visit(Grouping* expr) {
   DuplicateAST(expr->inner);
   resultExpr = new Grouping(resultExpr);
+}
+
+void ASTDuplicator::Visit(Invocation* expr) {
+  //function
+  DuplicateAST(expr->expr);
+  Expr* func = resultExpr;
+
+  std::list<Expr*> exprList;
+  for (Expr* ptr : expr->exprList) {
+    DuplicateAST(ptr);
+    exprList.push_back(resultExpr);
+  }
+
+  resultExpr = new Invocation(func, exprList);
 }
 
 void ASTDuplicator::Visit(Logical* expr) {
