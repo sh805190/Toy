@@ -139,7 +139,7 @@ Stmt* Parser::ScanFor() {
     increment = ScanExpression();
   }
 
-  Consume(RIGHT_PAREN, "Expected ';' after for increment");
+  Consume(RIGHT_PAREN, "Expected ')' after for increment");
 
   //get the block (ensures that the body of the for statement is a block object
   Stmt* block = nullptr;
@@ -388,20 +388,25 @@ Expr* Parser::ScanOperator() {
   //operation = actions preformed on a primary
   Expr* expr = ScanPrimary();
 
-  TokenTypeGetter typeGetter;
-  expr->Accept(&typeGetter);
+  for (;;) {
+    TokenTypeGetter typeGetter;
+    expr->Accept(&typeGetter);
 
-  //function call
-  if ( (typeGetter.GetType() == IDENTIFIER || typeGetter.GetType() == FUNCTION) && Match(LEFT_PAREN)) {
-    std::list<Expr*> exprList;
-    if (!Match(RIGHT_PAREN)) {
-      while(!IsAtEnd()) {
-        exprList.push_back(ScanExpression());
-        if (Match(RIGHT_PAREN)) break;
-        Consume(COMMA, "Expected ',' between arguments");
+    //function call
+    if (Match(LEFT_PAREN)) {
+      std::list<Expr*> exprList;
+      if (!Match(RIGHT_PAREN)) {
+        while(!IsAtEnd()) {
+          exprList.push_back(ScanExpression());
+          if (Match(RIGHT_PAREN)) break;
+          Consume(COMMA, "Expected ',' between arguments");
+        }
       }
+      expr = new Invocation(expr, exprList);
     }
-    return new Invocation(expr, exprList);
+    else {
+      break;
+    }
   }
 
   return expr;

@@ -308,6 +308,10 @@ void Interpreter::Visit(Invocation* expr) {
   //get the call requirements
   Evaluate(expr->expr);
 
+  if (result.GetType() != Literal::Type::FUNCTION) {
+    throw RuntimeError(-1, std::string() + "'" + result.ToString() + "' is not a function");
+  }
+
   Literal func = result;
 
   std::list<Literal> literalList;

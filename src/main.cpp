@@ -22,7 +22,7 @@ void run(std::string source) {
 
     interpreter.Execute(stmt);
 
-//    reader.Print(duplicator.DuplicateAST(stmt));
+//    reader.Print(stmt);
 //    std::cout << std::endl;
     deleter.DeleteAST(stmt);
 

@@ -11,9 +11,17 @@ var square = function(i) {
 
 var answer = 2;
 
-for (var i = 0; i < 4; i = i + 1) {
+/*for (var i = 0; i < 4; i = i + 1) {
   answer = square(answer);
-}
+}*/
+
+var generator = function() {
+  return function(a) {
+    return a + 1337;
+  };
+};
+
+answer = generator()(answer);
 
 "result";
 answer;
