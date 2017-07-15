@@ -389,9 +389,6 @@ Expr* Parser::ScanOperator() {
   Expr* expr = ScanPrimary();
 
   for (;;) {
-    TokenTypeGetter typeGetter;
-    expr->Accept(&typeGetter);
-
     //function call
     if (Match(LEFT_PAREN)) {
       std::list<Expr*> exprList;
@@ -404,6 +401,8 @@ Expr* Parser::ScanOperator() {
       }
       expr = new Invocation(expr, exprList);
     }
+
+    //done
     else {
       break;
     }
