@@ -156,9 +156,7 @@ Stmt* Parser::ScanFor() {
     block = ScanBlock();
   }
   else {
-    std::vector<Stmt*> stmtVector;
-    stmtVector.push_back(ScanStatement());
-    block = new Block(stmtVector);
+    block = new Block({ScanStatement()});
   }
 
   //store the body inside another block (prevent bugs with naming conflicts)
@@ -196,7 +194,7 @@ Stmt* Parser::ScanIf() {
     thenBranch = ScanBlock();
   }
   else {
-    thenBranch = ScanStatement();
+    thenBranch = new Block({ScanStatement()});
   }
 
   //else
@@ -206,7 +204,7 @@ Stmt* Parser::ScanIf() {
       elseBranch = ScanBlock();
     }
     else {
-      elseBranch = ScanStatement();
+      elseBranch = new Block({ScanStatement()});
     }
   }
 
@@ -263,7 +261,7 @@ Stmt* Parser::ScanWhile() {
     branch = ScanBlock();
   }
   else {
-    branch = ScanStatement();
+    branch = new Block({ScanStatement()});
   }
 
   //one of those

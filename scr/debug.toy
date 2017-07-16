@@ -1,0 +1,9 @@
+if (true) var a;
+
+var a;
+
+var n = 0;
+while (n < 10) {
+  var b;
+  n = n + 1;
+}
