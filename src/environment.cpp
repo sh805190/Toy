@@ -19,7 +19,7 @@ Literal Environment::Assign(Token name, Literal value) {
     if (parent) {
       return parent->Assign(name, value);
     }
-    throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "'");
+    throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "' in assignment");
   }
 
   return literalMap[name.GetLexeme()] = value;
@@ -30,7 +30,7 @@ Literal Environment::GetVar(Token name) {
     if (parent) {
       return parent->GetVar(name);
     }
-    throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "'");
+    throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "' found");
   }
 
   return literalMap[name.GetLexeme()];
@@ -41,7 +41,7 @@ Literal* Environment::GetRef(Token name) {
     if (parent) {
       return parent->GetRef(name);
     }
-    throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "'");
+    throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "' found when retreiving reference");
   }
 
   return &literalMap[name.GetLexeme()];

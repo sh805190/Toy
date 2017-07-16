@@ -82,9 +82,21 @@ void ASTDuplicator::Visit(Expr* expr) {
   resultExpr = new Expr();
 }
 
-void ASTDuplicator::Visit(Assign* expr) {
+void ASTDuplicator::Visit(Array* expr) {
+  std::vector<Expr*> exprVector;
+  for (Expr* ptr : expr->exprVector) {
+    DuplicateAST(ptr);
+    exprVector.push_back(resultExpr);
+  }
+  resultExpr = new Array(exprVector);
+}
+
+void ASTDuplicator::Visit(Assign* expr) { 
+  DuplicateAST(expr->target);
+  Expr* target = resultExpr;
   DuplicateAST(expr->value);
-  resultExpr = new Assign(expr->name, resultExpr);
+  Expr* value = resultExpr;
+  resultExpr = new Assign(expr->op, target, value);
 }
 
 void ASTDuplicator::Visit(Binary* expr) {
@@ -104,6 +116,14 @@ void ASTDuplicator::Visit(Function* expr) {
 void ASTDuplicator::Visit(Grouping* expr) {
   DuplicateAST(expr->inner);
   resultExpr = new Grouping(resultExpr);
+}
+
+void ASTDuplicator::Visit(Index* expr) {
+  DuplicateAST(expr->array);
+  Expr* array = resultExpr;
+  DuplicateAST(expr->index);
+  Expr* index = resultExpr;
+  resultExpr = new Index(array, index);
 }
 
 void ASTDuplicator::Visit(Invocation* expr) {

@@ -187,10 +187,12 @@ int main(int argc, char* argv[]) {
   //Expr
   if (!strcmp(argv[1], "expr")) {
     defineAST(os, "Expr", {
-      {"Assign", "Token name, Expr* value"}, 
+      {"Array", "std::vector<Expr*> exprVector"},
+      {"Assign", "Token op, Expr* target, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Function", "std::vector<std::string> parameterVector, Block* block"},
       {"Grouping", "Expr* inner"},
+      {"Index", "Expr* array, Expr* index"},
       {"Invocation", "Expr* expr, std::vector<Expr*> exprVector"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},

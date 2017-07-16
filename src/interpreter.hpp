@@ -29,10 +29,12 @@ public:
   void Visit(While*) override;
 
   void Visit(Expr*) override;
+  void Visit(Array*) override;
   void Visit(Assign*) override;
   void Visit(Binary*) override;
   void Visit(Function*) override;
   void Visit(Grouping*) override;
+  void Visit(Index*) override;
   void Visit(Invocation*) override;
   void Visit(Logical*) override;
   void Visit(Unary*) override;

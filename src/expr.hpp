@@ -1,10 +1,12 @@
 #pragma once
 
 class Expr;
+class Array;
 class Assign;
 class Binary;
 class Function;
 class Grouping;
+class Index;
 class Invocation;
 class Logical;
 class Unary;
@@ -21,10 +23,12 @@ class Variable;
 class ExprVisitor {
 public:
   virtual void Visit(Expr*) = 0;
+  virtual void Visit(Array*) = 0;
   virtual void Visit(Assign*) = 0;
   virtual void Visit(Binary*) = 0;
   virtual void Visit(Function*) = 0;
   virtual void Visit(Grouping*) = 0;
+  virtual void Visit(Index*) = 0;
   virtual void Visit(Invocation*) = 0;
   virtual void Visit(Logical*) = 0;
   virtual void Visit(Unary*) = 0;
@@ -39,10 +43,24 @@ public:
   }
 };
 
+class Array: public Expr {
+public:
+  Array(std::vector<Expr*> exprVector) {
+    this->exprVector = exprVector;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  std::vector<Expr*> exprVector;
+};
+
 class Assign: public Expr {
 public:
-  Assign(Token name, Expr* value) {
-    this->name = name;
+  Assign(Token op, Expr* target, Expr* value) {
+    this->op = op;
+    this->target = target;
     this->value = value;
   }
 
@@ -50,7 +68,8 @@ public:
     visitor->Visit(this);
   }
 
-  Token name;
+  Token op;
+  Expr* target;
   Expr* value;
 };
 
@@ -97,6 +116,21 @@ public:
   }
 
   Expr* inner;
+};
+
+class Index: public Expr {
+public:
+  Index(Expr* array, Expr* index) {
+    this->array = array;
+    this->index = index;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Expr* array;
+  Expr* index;
 };
 
 class Invocation: public Expr {

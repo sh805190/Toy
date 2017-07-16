@@ -1,28 +1,24 @@
-var fib = function(i) {
-  i;
-  if (i <= 0) return 0;
-  if (i == 1) return 1;
-  return recurse(i-1) + recurse(i-2);
-};
+var func = function() {
+  var func2 = function() {
+    var array2 = [1, 2, 42];
+    return array2;
+  }
 
-var square = function(i) {
-  return i*i;
-};
+  var array = [1, func2, 3];
 
-var answer = 2;
-
-for (var i = 0; i < 4; i = i + 1) {
-  answer = square(answer);
+  return array;
 }
 
-var generator = function() {
-  return function(a) {
-    return a + 1337;
-  };
-};
+//chaining arrays and functions
+var answer = func()[1]()[2];
 
-answer = generator()(answer);
+var matrix = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+];
 
 "result";
-answer;
+answer == 42;
+matrix;
 

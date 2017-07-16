@@ -77,8 +77,19 @@ void ASTReaderPrefix::Visit(Expr* expr) {
   std::cout << "EXPR";
 }
 
+void ASTReaderPrefix::Visit(Array* expr) {
+  std::cout << "[";
+  for (Expr* ptr : expr->exprVector) {
+    Print(ptr);
+    std::cout << ",";
+  }
+  std::cout << "]";
+}
+
 void ASTReaderPrefix::Visit(Assign* expr) {
-  std::cout << "= " << expr->name.GetLexeme() << " ";
+  std::cout << "= ";
+  Print(expr->target);
+  std::cout << " ";
   Print(expr->value);
 }
 
@@ -100,6 +111,14 @@ void ASTReaderPrefix::Visit(Function* expr) {
 
 void ASTReaderPrefix::Visit(Grouping* expr) {
   Print(expr->inner);
+}
+
+
+void ASTReaderPrefix::Visit(Index* expr) {
+  Print(expr->array);
+  std::cout << "[";
+  Print(expr->index);
+  std::cout << "]";
 }
 
 void ASTReaderPrefix::Visit(Invocation* expr) {
@@ -205,8 +224,18 @@ void ASTReaderPostfix::Visit(Expr* expr) {
   std::cout << "EXPR";
 }
 
+void ASTReaderPostfix::Visit(Array* expr) {
+  std::cout << "[";
+  for (Expr* ptr : expr->exprVector) {
+    Print(ptr);
+    std::cout << ",";
+  }
+  std::cout << "]";
+}
+
 void ASTReaderPostfix::Visit(Assign* expr) {
-  std::cout << expr->name.GetLexeme() << " ";
+  Print(expr->target);
+  std::cout << " ";
   Print(expr->value);
   std::cout << " =";
 }
@@ -231,6 +260,13 @@ void ASTReaderPostfix::Visit(Grouping* expr) {
   std::cout << "(";
   Print(expr->inner);
   std::cout << ")";
+}
+
+void ASTReaderPostfix::Visit(Index* expr) {
+  Print(expr->array);
+  std::cout << "[";
+  Print(expr->index);
+  std::cout << "]";
 }
 
 void ASTReaderPostfix::Visit(Invocation* expr) {

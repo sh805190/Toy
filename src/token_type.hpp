@@ -18,10 +18,10 @@ enum TokenType {
   WHILE,
 
   //literal types
-  IDENTIFIER, BOOLEAN, NUMBER, REFERENCE, STRING,
+  IDENTIFIER, ARRAY, BOOLEAN, NUMBER, REFERENCE, STRING,
 
   //other temporary types
-  INVOCATION, VALUE,
+  INDEX, INVOCATION, VALUE,
 
   //program terminator
   END_OF_FILE

@@ -65,7 +65,15 @@ void ASTDeleter::Visit(Expr* expr) {
   delete expr;
 }
 
+void ASTDeleter::Visit(Array* expr) {
+  for (Expr* ptr : expr->exprVector) {
+    DeleteAST(ptr);
+  }
+  delete expr;
+}
+
 void ASTDeleter::Visit(Assign* expr) {
+  DeleteAST(expr->target);
   DeleteAST(expr->value);
   delete expr;
 }
@@ -83,6 +91,12 @@ void ASTDeleter::Visit(Function* expr) {
 
 void ASTDeleter::Visit(Grouping* expr) {
   DeleteAST(expr->inner);
+  delete expr;
+}
+
+void ASTDeleter::Visit(Index* expr) {
+  DeleteAST(expr->array);
+  DeleteAST(expr->index);
   delete expr;
 }
 

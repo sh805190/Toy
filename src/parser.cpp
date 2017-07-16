@@ -276,29 +276,17 @@ Expr* Parser::ScanAssignment() {
     //check the lhs expression type
     TokenTypeGetter typeGetter;
     expr->Accept(&typeGetter);
-    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != STAR) {
+
+    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR) {
       throw ParserError(tokenVector[current-1].GetLine(), "Invalid assignment target");
     }
 
     //get the variable token
-    TokenGetter tokenGetter;
-    expr->Accept(&tokenGetter);
-
     Token op = tokenVector[current-1];
     Expr* rhs = ScanExpression();
 
-    //simple variable
-    if (typeGetter.GetType() == IDENTIFIER) {
-      expr = new Assign(tokenGetter.GetToken(), rhs);
-    }
-    //altering a dereferenced variable
-    else if (typeGetter.GetType() == STAR) {
-      Unary* unary = dynamic_cast<Unary*>(expr); //unary object passed up
-      Variable* variable = dynamic_cast<Variable*>(unary->rhs); //variable object it's pointing too
-
-      //HACK: using tokenGetter here to keep track of how deep to dereference
-      expr = new Assign(Token(REFERENCE, variable->name.GetLexeme(), tokenGetter.GetToken().GetLiteral(), variable->name.GetLine()), rhs);
-    }
+    //simple
+    expr = new Assign(op, expr, rhs);
   }
 
   return expr;
@@ -388,9 +376,18 @@ Expr* Parser::ScanOperator() {
   //operation = actions preformed on a primary
   Expr* expr = ScanPrimary();
 
+  //chained arrays/functions need a loop
   for (;;) {
+    //array access
+    if (Match(LEFT_BRACKET)) {
+      Expr* index = ScanExpression();
+      Consume(RIGHT_BRACKET, "Expected ']' after array index");
+
+      expr = new Index(expr, index);
+    }
+
     //function call
-    if (Match(LEFT_PAREN)) {
+    else if (Match(LEFT_PAREN)) {
       std::vector<Expr*> exprVector;
       if (!Match(RIGHT_PAREN)) {
         while(!IsAtEnd()) {
@@ -421,6 +418,17 @@ Expr* Parser::ScanPrimary() {
 
   if (Match(FUNCTION)) {
     return ScanFunction();
+  }
+
+  //array creation
+  if (Match(LEFT_BRACKET)) {
+    std::vector<Expr*> exprVector;
+    while(!IsAtEnd()) {
+      exprVector.push_back(ScanExpression());
+      if (Match(RIGHT_BRACKET)) break;
+      Consume(COMMA, "Expected ',' between array elements");
+    }
+    return new Array(exprVector);
   }
 
   if (Match(LEFT_PAREN)) {

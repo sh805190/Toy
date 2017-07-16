@@ -1,7 +1,9 @@
 #include "interpreter.hpp"
 
 #include "ast_deleter.hpp"
+#include "ast_reader.hpp"
 #include "error_handler.hpp"
+#include "expr_visitors.hpp"
 #include "runtime_error.hpp"
 
 //TMP
@@ -25,12 +27,18 @@ Interpreter::~Interpreter() {
 }
 
 void Interpreter::Execute(Stmt* stmt) {
+  ASTReaderPrefix reader; //debugging
+
   //for block contexts
   breakCalled = false;
   continueCalled = false;
   returnCalled = false;
 
   try {
+//std::cout << "READER:";
+//reader.Print(stmt);
+//std::cout << std::endl;
+
     result = Literal();
     stmt->Accept(this);
 
@@ -184,19 +192,93 @@ void Interpreter::Visit(Expr* expr) {
   result = Literal();
 }
 
+void Interpreter::Visit(Array* expr) {
+  std::vector<Literal> literalVector;
+  for (Expr* ptr : expr->exprVector) {
+    Evaluate(ptr);
+    literalVector.push_back(result);
+  }
+  result = Literal(literalVector);
+}
+
 void Interpreter::Visit(Assign* expr) {
-  Evaluate(expr->value);
-  if (expr->name.GetType() == IDENTIFIER) {
-    environment->Assign(expr->name, result);
+  //get the assignment target type
+  TokenTypeGetter typeGetter;
+  expr->target->Accept(&typeGetter);
+
+  if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR) {
+    throw RuntimeError(expr->op.GetLine(), "Unexpected type on left hand side of assignment");
   }
 
-  else if (expr->name.GetType() == REFERENCE) {
+  //assign to a variable
+  if (typeGetter.GetType() == IDENTIFIER) {
+    Evaluate(expr->value);
+    environment->Assign(dynamic_cast<Variable*>(expr->target)->name, result);
+  }
+
+  //assign to an index
+  else if (typeGetter.GetType() == INDEX) {
+    Index* index = dynamic_cast<Index*>(expr->target);
+
+    //get info about the lhs
+    TokenTypeGetter typeGetter;
+    index->array->Accept(&typeGetter);
+
+    //ugly lambda
+    auto setter = [&](Literal array, Literal index, Literal value, int line) -> Literal {
+      if (array.GetType() != Literal::Type::ARRAY) {
+        throw RuntimeError(line, "Value left of '[' is not an array"); 
+      }
+
+      if (index.GetType() != Literal::Type::NUMBER) {
+        throw RuntimeError(line, "Expected a number between '[' and ']'");
+      }
+
+      std::vector<Literal> literalVector = array.GetLiteralVector();
+
+      //bounds check
+      if (index.GetNumber() < 0 || index.GetNumber() >= literalVector.size()) {
+        throw RuntimeError(line, "Array index out of bounds");
+      }
+
+      literalVector[(int)(index.GetNumber())] = value;
+      array.SetLiteralVector(literalVector);
+
+      return array;
+    };
+
+    //raw array
+    if (typeGetter.GetType() == ARRAY) {
+      //use "setter()" lambda
+      Evaluate(index->array);
+      Literal array = result;
+      Evaluate(index->index);
+      Literal index = result;
+      Evaluate(expr->value);
+
+      result = setter(array, index, result, expr->op.GetLine());
+    }
+
+    //extract and re-store the variable
+    else if (typeGetter.GetType() == IDENTIFIER) {
+      Literal array = environment->GetVar(dynamic_cast<Variable*>(index->array)->name);
+      Evaluate(index->index);
+      Literal indexNumber = result;
+      Evaluate(expr->value);
+
+      result = setter(array, indexNumber, result, expr->op.GetLine());
+
+      environment->Assign(dynamic_cast<Variable*>(index->array)->name, result);
+    }
+  }
+
+  //assign to a dereferenced variable
+  else if (typeGetter.GetType() == STAR) {
     std::string starLexeme;
 
     //HACK: get the number of dereference stars
-    int starCount = expr->name.GetLiteral().GetNumber();
-
-    Literal literal = environment->GetVar(expr->name); //base reference before dereferencing
+    int starCount = dynamic_cast<Unary*>(expr->target)->op.GetLiteral().GetNumber();
+    Literal literal = environment->GetVar(dynamic_cast<Variable*>(dynamic_cast<Unary*>(expr->target)->rhs)->name); //base reference before dereferencing
 
     while(starCount > 0) {
       //display
@@ -204,11 +286,12 @@ void Interpreter::Visit(Assign* expr) {
 
       //check that the literal type is a reference
       if (literal.GetType() != Literal::Type::REFERENCE) {
-        throw RuntimeError(expr->name.GetLine(), std::string() + "Expression '" + starLexeme + expr->name.GetLexeme() + "' is not a variable");
+        throw RuntimeError(expr->op.GetLine(), std::string() + "Expression '" + starLexeme + dynamic_cast<Variable*>(dynamic_cast<Unary*>(expr->target)->rhs)->name.GetLexeme() + "' is not a variable");
       }
 
       //set the concrete reference via one level of dereference
       if (starCount == 1) {
+        Evaluate(expr->value);
         *(literal.GetReference()) = result;
         break;
       }
@@ -302,6 +385,26 @@ void Interpreter::Visit(Function* expr) {
 
 void Interpreter::Visit(Grouping* expr) {
   Evaluate(expr->inner);
+}
+
+void Interpreter::Visit(Index* expr) {
+  Evaluate(expr->array);
+
+  if (result.GetType() != Literal::Type::ARRAY) {
+    throw RuntimeError(-1, std::string() + "'" + result.ToString() + "' is not an array");
+  }
+
+  Literal array = result;
+
+  Evaluate(expr->index);
+
+  if (result.GetType() != Literal::Type::NUMBER) {
+    throw RuntimeError(-1, std::string() + "Unexpected value type as index of array (expected number, got '" + result.ToString() + "'");
+  }
+
+  Literal index = result;
+
+  result = array.GetLiteralVector()[(int)(index.GetNumber())];
 }
 
 void Interpreter::Visit(Invocation* expr) {

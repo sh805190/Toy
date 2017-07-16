@@ -9,6 +9,10 @@ public:
     type = UNDEFINED;
   }
 
+  void Visit(Array* expr) override {
+    type = ARRAY;
+  }
+
   void Visit(Assign* expr) override {
     type = EQUAL;
   }
@@ -23,6 +27,10 @@ public:
 
   void Visit(Grouping* expr) override {
     type = LEFT_PAREN;
+  }
+
+  void Visit(Index* expr) override {
+    type = INDEX;
   }
 
   void Visit(Invocation* expr) override {
@@ -69,8 +77,12 @@ public:
     token = Token(UNDEFINED, "Na", Literal(), -1);
   }
 
+  void Visit(Array* expr) override {
+    token = Token(ARRAY, "Na", Literal(), -2);
+  }
+
   void Visit(Assign* expr) override {
-    token = expr->name;
+    token = Token(EQUAL, "Na", Literal(), -3);
   }
 
   void Visit(Binary* expr) override {
@@ -78,15 +90,19 @@ public:
   }
 
   void Visit(Function* expr) override {
-    token = Token(FUNCTION, "Na", Literal(), -2);
+    token = Token(FUNCTION, "Na", Literal(), -4);
   }
 
   void Visit(Grouping* expr) override {
-    token = Token(LEFT_PAREN, "Na", Literal(), -3);
+    token = Token(LEFT_PAREN, "Na", Literal(), -5);
+  }
+
+  void Visit(Index* expr) override {
+    token = Token(INDEX, "Na", Literal(), -6);
   }
 
   void Visit(Invocation* expr) override {
-    token = Token(INVOCATION, "Na", Literal(), -4);
+    token = Token(INVOCATION, "Na", Literal(), -7);
   }
 
   void Visit(Logical* expr) override {
@@ -98,7 +114,7 @@ public:
   }
 
   void Visit(Value* expr) override {
-    token = Token(VALUE, "Na", Literal(), -5);
+    token = Token(VALUE, "Na", Literal(), -8);
   }
 
   void Visit(Variable* expr) override {

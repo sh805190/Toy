@@ -210,7 +210,7 @@ std::string Literal::ToString() {
     }
 
     case Type::REFERENCE:
-      return reference->ToString();
+      return std::string() + "&" + reference->ToString();
 
     case Type::STRING:
       return str;
