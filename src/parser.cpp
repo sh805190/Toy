@@ -12,7 +12,10 @@ std::vector<Stmt*> Parser::GetStmtVector() {
 
   while(!IsAtEnd()) {
     try {
-      statementVector.push_back(ScanStatement());
+      Stmt* stmt = ScanStatement();
+      if (stmt) {
+        statementVector.push_back(stmt);
+      }
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
@@ -29,6 +32,11 @@ Stmt* Parser::ScanStatement() {
   Stmt* ret = nullptr;
 
   switch(tok.GetType()) {
+    //allow empty statements
+    case SEMICOLON:
+      //EMPTY
+    break;
+
     //all types
     case BREAK:
       ret = ScanBreak();
@@ -70,9 +78,10 @@ Stmt* Parser::ScanStatement() {
       ret = ScanWhile();
     break;
 
-    //error
     case LEFT_BRACE:
-      throw ParserError(tok.GetLine(), "Block scoping is not allowed");
+      ret = ScanBlock();
+      skipSemicolon = true;
+    break;
 
     //delegate
     default:

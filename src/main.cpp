@@ -1,6 +1,7 @@
 #include "ast_deleter.hpp"
 #include "ast_duplicator.hpp"
 #include "ast_reader.hpp"
+#include "error_handler.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "interpreter.hpp"
@@ -31,6 +32,11 @@ void run(std::string source) {
       std::cout << "Final value: " << interpreter.GetResult().ToString() << std::endl;
       break;
     }
+  }
+
+  if (ErrorHandler::GetErrorCount()) {
+    std::cout << "Total errors found: " << ErrorHandler::GetErrorCount() << std::endl;
+    ErrorHandler::SetErrorCount(0);
   }
 }
 

@@ -21,4 +21,13 @@ var matrix = [
 "result";
 answer == 42;
 matrix;
+break;
+;
 
+
+{
+  var answer = 5;
+  answer;
+}
+
+answer;
