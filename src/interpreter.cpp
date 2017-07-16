@@ -63,7 +63,7 @@ void Interpreter::Visit(Block* stmt) {
   environment = new Environment(environment);
 
   try {
-    for (Stmt* ptr : stmt->stmtList) {
+    for (Stmt* ptr : stmt->stmtVector) {
       Execute(ptr);
 
       //stop block execution if...
@@ -297,7 +297,7 @@ void Interpreter::Visit(Binary* expr) {
 
 void Interpreter::Visit(Function* expr) {
   //TODO: make the function into a liteal
-  result = Literal(expr->varList, expr->block);
+  result = Literal(expr->parameterVector, expr->block);
 }
 
 void Interpreter::Visit(Grouping* expr) {
@@ -314,14 +314,14 @@ void Interpreter::Visit(Invocation* expr) {
 
   Literal func = result;
 
-  std::list<Literal> literalList;
-  for (Expr* ptr : expr->exprList) {
+  std::vector<Literal> literalVector;
+  for (Expr* ptr : expr->exprVector) {
     Evaluate(ptr);
-    literalList.push_back(result);
+    literalVector.push_back(result);
   }
 
   //finally
-  CallFunction(func, literalList);
+  CallFunction(func, literalVector);
 }
 
 void Interpreter::Visit(Logical* expr) {
@@ -408,24 +408,24 @@ void Interpreter::Visit(Variable* expr) {
 }
 
 //helpers
-void Interpreter::CallFunction(Literal func, std::list<Literal> litList) {
+void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector) {
   //build the environment
-  std::list<std::string> varList = func.GetVarList();
+  std::vector<std::string> parameterVector = func.GetParameterVector();
 
-  if (varList.size() != litList.size()) {
+  if (parameterVector.size() != literalVector.size()) {
     //TODO: much better error message
-    throw RuntimeError(-1, std::string() + "Invalid number of arguments (expected " + std::to_string(varList.size()) + ", received " + std::to_string(litList.size()) + ")");
+    throw RuntimeError(-1, std::string() + "Invalid number of arguments (expected " + std::to_string(parameterVector.size()) + ", received " + std::to_string(literalVector.size()) + ")");
   }
 
   Environment* env = new Environment(nullptr);
 
-  std::list<std::string>::iterator varIter = varList.begin();
-  std::list<Literal    >::iterator litIter = litList.begin();
+  std::vector<std::string>::iterator paramIter = parameterVector.begin();
+  std::vector<Literal>::iterator literalIter = literalVector.begin();
 
-  while(varIter != varList.end() && litIter != litList.end()) {
-  env->Define(Token(IDENTIFIER, *varIter, *litIter, -1), *litIter);
-    varIter++;
-    litIter++;
+  while(paramIter != parameterVector.end() && literalIter != literalVector.end()) {
+  env->Define(Token(IDENTIFIER, *paramIter, *literalIter, -1), *literalIter);
+    paramIter++;
+    literalIter++;
   }
 
   //for recursion
@@ -435,7 +435,7 @@ void Interpreter::CallFunction(Literal func, std::list<Literal> litList) {
   result = Literal();
   Interpreter interpreter(env);
 
-  for (Stmt* stmt : reinterpret_cast<Block*>(func.GetBlock())->stmtList) {
+  for (Stmt* stmt : reinterpret_cast<Block*>(func.GetBlock())->stmtVector) {
     interpreter.Execute(stmt);
 
     //check for a call to return

@@ -15,8 +15,8 @@ class Variable;
 #include "stmt.hpp"
 #include "token.hpp"
 
-#include <list>
 #include <string>
+#include <vector>
 
 class ExprVisitor {
 public:
@@ -73,8 +73,8 @@ public:
 
 class Function: public Expr {
 public:
-  Function(std::list<std::string> varList, Block* block) {
-    this->varList = varList;
+  Function(std::vector<std::string> parameterVector, Block* block) {
+    this->parameterVector = parameterVector;
     this->block = block;
   }
 
@@ -82,7 +82,7 @@ public:
     visitor->Visit(this);
   }
 
-  std::list<std::string> varList;
+  std::vector<std::string> parameterVector;
   Block* block;
 };
 
@@ -101,9 +101,9 @@ public:
 
 class Invocation: public Expr {
 public:
-  Invocation(Expr* expr, std::list<Expr*> exprList) {
+  Invocation(Expr* expr, std::vector<Expr*> exprVector) {
     this->expr = expr;
-    this->exprList = exprList;
+    this->exprVector = exprVector;
   }
 
   void Accept(ExprVisitor* visitor) override {
@@ -111,7 +111,7 @@ public:
   }
 
   Expr* expr;
-  std::list<Expr*> exprList;
+  std::vector<Expr*> exprVector;
 };
 
 class Logical: public Expr {

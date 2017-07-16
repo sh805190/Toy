@@ -116,8 +116,8 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   os << "#include \"token.hpp\"" << std::endl;
   os << std::endl;
 
-  os << "#include <list>" << std::endl;
   os << "#include <string>" << std::endl;
+  os << "#include <vector>" << std::endl;
   os << std::endl;
 
   //print the visitor class
@@ -189,9 +189,9 @@ int main(int argc, char* argv[]) {
     defineAST(os, "Expr", {
       {"Assign", "Token name, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
-      {"Function", "std::list<std::string> varList, Block* block"},
+      {"Function", "std::vector<std::string> parameterVector, Block* block"},
       {"Grouping", "Expr* inner"},
-      {"Invocation", "Expr* expr, std::list<Expr*> exprList"},
+      {"Invocation", "Expr* expr, std::vector<Expr*> exprVector"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},
       {"Value", "Literal value"},
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
   //Stmt
   else if (!strcmp(argv[1], "stmt")) {
     defineAST(os, "Stmt", {
-      {"Block", "std::list<Stmt*> stmtList"},
+      {"Block", "std::vector<Stmt*> stmtVector"},
       {"Break", "int line"},
       {"Continue", "int line"},
       {"Expression", "Expr* expr"},

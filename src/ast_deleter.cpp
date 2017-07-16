@@ -18,7 +18,7 @@ void ASTDeleter::Visit(Stmt* stmt) {
 }
 
 void ASTDeleter::Visit(Block* stmt) {
-  for(Stmt* ptr : stmt->stmtList) {
+  for(Stmt* ptr : stmt->stmtVector) {
     DeleteAST(ptr);
   }
   delete stmt;
@@ -88,7 +88,7 @@ void ASTDeleter::Visit(Grouping* expr) {
 
 void ASTDeleter::Visit(Invocation* expr) {
   DeleteAST(expr->expr);
-  for (Expr* ptr : expr->exprList) {
+  for (Expr* ptr : expr->exprVector) {
     DeleteAST(ptr);
   }
   delete expr;

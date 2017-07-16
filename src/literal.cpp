@@ -18,14 +18,18 @@ Literal::Literal(Type t): type(t) {
   assert(type != Type::UNDEFINED);
 }
 
+Literal::Literal(std::vector<Literal>& lv): type(Type::ARRAY) {
+  literalVector = lv;
+}
+
 Literal::Literal(bool b): type(Type::BOOLEAN) {
   boolean = b;
 }
 
-Literal::Literal(std::list<std::string>& sl, void* b): type(Type::FUNCTION) {
+Literal::Literal(std::vector<std::string>& sv, void* b): type(Type::FUNCTION) {
   ASTDuplicator duplicator;
 
-  varList = sl;
+  parameterVector = sv;
   block = reinterpret_cast<void*>(duplicator.DuplicateAST(reinterpret_cast<Block*>(b)));
 }
 
@@ -53,18 +57,34 @@ Literal& Literal::operator=(const Literal& rhs) {
   ASTDuplicator duplicator;
 
   this->type = rhs.type;
+  this->literalVector = rhs.literalVector;
   this->boolean = rhs.boolean;
-  this->varList = rhs.varList;
+  this->parameterVector = rhs.parameterVector;
   deleter.DeleteAST(reinterpret_cast<Block*>(this->block));
   this->block = reinterpret_cast<void*>(duplicator.DuplicateAST(reinterpret_cast<Block*>(rhs.block)));
   this->number = rhs.number;
   this->reference = rhs.reference;
   this->str = rhs.str;
+
   return *this;
 }
 
 Literal::Type Literal::GetType() {
   return type;
+}
+
+std::vector<Literal> Literal::SetLiteralVector(std::vector<Literal>& lv) {
+  type = Type::ARRAY;
+  return literalVector = lv;
+}
+
+std::vector<Literal> Literal::GetLiteralVector() {
+  if (type == Type::REFERENCE) {
+    return reference->GetLiteralVector();
+  }
+
+  assert(type == Type::ARRAY);
+  return literalVector;
 }
 
 bool Literal::SetBoolean(bool b) {
@@ -81,17 +101,18 @@ bool Literal::GetBoolean() {
   return boolean;
 }
 
-std::list<std::string> Literal::SetVarList(std::list<std::string> sl) {
+std::vector<std::string> Literal::SetParameterVector(std::vector<std::string>& pv) {
   type = Type::FUNCTION;
-  return varList = sl;
+  return parameterVector = pv;
 }
 
-std::list<std::string> Literal::GetVarList() {
+std::vector<std::string> Literal::GetParameterVector() {
   if (type == Type::REFERENCE) {
-    return reference->GetVarList();
+    return reference->GetParameterVector();
   }
 
-  return varList;
+  assert(type == Type::FUNCTION);
+  return parameterVector;
 }
 
 void* Literal::SetBlock(void* b) {
@@ -109,6 +130,7 @@ void* Literal::GetBlock() {
     return reference->GetBlock();
   }
 
+  assert(type == Type::FUNCTION);
   return block;
 }
 
@@ -152,19 +174,28 @@ std::string Literal::GetString() {
 
 std::string Literal::ToString() {
   switch(type) {
+    case Type::ARRAY: {
+      std::string output = "[";
+      for (auto& it : literalVector) {
+        output += it.ToString();
+        output += ",";
+      }
+      if (literalVector.size()) output.erase(output.end()-1);
+      output += "]";
+      return output;
+    }
+
     case Type::BOOLEAN:
       return boolean ? "true" : "false";
 
     case Type::FUNCTION: {
-      bool prune = false;
       std::string output = "function(";
-      for (std::string arg : varList) {
-        output += arg;
+      for (auto& it : parameterVector) {
+        output += it;
         output += ",";
-        prune = true;
       }
       //prune the last comma
-      if (prune) output.erase(output.end()-1);
+      if (parameterVector.size()) output.erase(output.end()-1);
       output += ") {...}";
       return output;
     }

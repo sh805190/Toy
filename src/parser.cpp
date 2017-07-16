@@ -147,30 +147,30 @@ Stmt* Parser::ScanFor() {
     block = ScanBlock();
   }
   else {
-    std::list<Stmt*> stmtList;
-    stmtList.push_back(ScanStatement());
-    block = new Block(stmtList);
+    std::vector<Stmt*> stmtVector;
+    stmtVector.push_back(ScanStatement());
+    block = new Block(stmtVector);
   }
 
   //store the body inside another block (prevent bugs with naming conflicts)
   block = new Block({block});
 
   //piece it all together
-  std::list<Stmt*> stmtList;
+  std::vector<Stmt*> stmtVector;
 
   if (initializer) {
-    stmtList.push_back(initializer);
+    stmtVector.push_back(initializer);
   }
   if (increment) {
-    dynamic_cast<Block*>(block)->stmtList.push_back(new Expression(increment));
+    dynamic_cast<Block*>(block)->stmtVector.push_back(new Expression(increment));
   }
-  stmtList.push_back(new While(condition, block));
+  stmtVector.push_back(new While(condition, block));
 
   //one of those
   skipSemicolon = true;
 
   //finally, return the full, new block object
-  return new Block(stmtList);
+  return new Block(stmtVector);
 }
 
 Stmt* Parser::ScanIf() {
@@ -391,15 +391,15 @@ Expr* Parser::ScanOperator() {
   for (;;) {
     //function call
     if (Match(LEFT_PAREN)) {
-      std::list<Expr*> exprList;
+      std::vector<Expr*> exprVector;
       if (!Match(RIGHT_PAREN)) {
         while(!IsAtEnd()) {
-          exprList.push_back(ScanExpression());
+          exprVector.push_back(ScanExpression());
           if (Match(RIGHT_PAREN)) break;
           Consume(COMMA, "Expected ',' between arguments");
         }
       }
-      expr = new Invocation(expr, exprList);
+      expr = new Invocation(expr, exprVector);
     }
 
     //done
@@ -444,12 +444,12 @@ Stmt* Parser::ScanBlock() {
   //error handling
   int ln = tokenVector[current-1].GetLine();
 
-  std::list<Stmt*> stmtList;
+  std::vector<Stmt*> stmtVector;
 
   while(!IsAtEnd() && tokenVector[current].GetType() != RIGHT_BRACE) {
     //copy the main scanning loop
     try {
-      stmtList.push_back(ScanStatement());
+      stmtVector.push_back(ScanStatement());
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());
@@ -463,11 +463,11 @@ Stmt* Parser::ScanBlock() {
   }
 
   Consume(RIGHT_BRACE, "Exprected '}' at end of a block");
-  return new Block(stmtList);
+  return new Block(stmtVector);
 }
 
 Expr* Parser::ScanFunction() {
-  std::list<std::string> formalParameters;
+  std::vector<std::string> formalParameters;
 
   Consume(LEFT_PAREN, "Expected '(' after function keyword");
 

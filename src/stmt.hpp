@@ -14,8 +14,8 @@ class While;
 #include "stmt.hpp"
 #include "token.hpp"
 
-#include <list>
 #include <string>
+#include <vector>
 
 class StmtVisitor {
 public:
@@ -39,15 +39,15 @@ public:
 
 class Block: public Stmt {
 public:
-  Block(std::list<Stmt*> stmtList) {
-    this->stmtList = stmtList;
+  Block(std::vector<Stmt*> stmtVector) {
+    this->stmtVector = stmtVector;
   }
 
   void Accept(StmtVisitor* visitor) override {
     visitor->Visit(this);
   }
 
-  std::list<Stmt*> stmtList;
+  std::vector<Stmt*> stmtVector;
 };
 
 class Break: public Stmt {

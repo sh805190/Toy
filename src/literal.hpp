@@ -1,19 +1,20 @@
 #pragma once
 
-#include <list>
 #include <string>
+#include <vector>
 
 class Literal {
 public:
   enum class Type {
-    BOOLEAN, FUNCTION, NUMBER, REFERENCE, STRING, UNDEFINED
+    ARRAY, BOOLEAN, FUNCTION, NUMBER, REFERENCE, STRING, UNDEFINED
   };
 
   Literal();
   Literal(const Literal&);
   Literal(Type);
+  Literal(std::vector<Literal>& literalVector);
   Literal(bool);
-  Literal(std::list<std::string>& varList, void* block);
+  Literal(std::vector<std::string>& parameterVector, void* block);
   Literal(double);
   Literal(Literal*);
   Literal(std::string);
@@ -24,11 +25,14 @@ public:
 
   Type GetType();
 
+  std::vector<Literal> SetLiteralVector(std::vector<Literal>& literalVector);
+  std::vector<Literal> GetLiteralVector();
+
   bool SetBoolean(bool);
   bool GetBoolean();
 
-  std::list<std::string> SetVarList(std::list<std::string> sl);
-  std::list<std::string> GetVarList();
+  std::vector<std::string> SetParameterVector(std::vector<std::string>& parameterVector);
+  std::vector<std::string> GetParameterVector();
 
   void* SetBlock(void*);
   void* GetBlock();
@@ -42,13 +46,13 @@ public:
   std::string SetString(std::string);
   std::string GetString();
 
-  //debugging
   std::string ToString();
 
 private:
   Type type;
+  std::vector<Literal> literalVector;
   bool boolean = false;
-  std::list<std::string> varList;
+  std::vector<std::string> parameterVector;
   void* block = nullptr; //using Block type caused issues
   double number = 0;
   Literal* reference = nullptr;

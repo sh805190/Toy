@@ -26,12 +26,12 @@ void ASTDuplicator::Visit(Stmt* stmt) {
 }
 
 void ASTDuplicator::Visit(Block* stmt) {
-  std::list<Stmt*> stmtList;
-  for (Stmt* it : stmt->stmtList) {
+  std::vector<Stmt*> stmtVector;
+  for (Stmt* it : stmt->stmtVector) {
     DuplicateAST(it);
-    stmtList.push_back(resultStmt);
+    stmtVector.push_back(resultStmt);
   }
-  resultStmt = new Block(stmtList);
+  resultStmt = new Block(stmtVector);
 }
 
 void ASTDuplicator::Visit(Break* stmt) {
@@ -98,7 +98,7 @@ void ASTDuplicator::Visit(Binary* expr) {
 
 void ASTDuplicator::Visit(Function* expr) {
   DuplicateAST(expr->block);
-  resultExpr = new Function(expr->varList, dynamic_cast<Block*>(resultStmt));
+  resultExpr = new Function(expr->parameterVector, dynamic_cast<Block*>(resultStmt));
 }
 
 void ASTDuplicator::Visit(Grouping* expr) {
@@ -111,13 +111,13 @@ void ASTDuplicator::Visit(Invocation* expr) {
   DuplicateAST(expr->expr);
   Expr* func = resultExpr;
 
-  std::list<Expr*> exprList;
-  for (Expr* ptr : expr->exprList) {
+  std::vector<Expr*> exprVector;
+  for (Expr* ptr : expr->exprVector) {
     DuplicateAST(ptr);
-    exprList.push_back(resultExpr);
+    exprVector.push_back(resultExpr);
   }
 
-  resultExpr = new Invocation(func, exprList);
+  resultExpr = new Invocation(func, exprVector);
 }
 
 void ASTDuplicator::Visit(Logical* expr) {

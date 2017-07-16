@@ -21,7 +21,7 @@ void ASTReaderPrefix::Visit(Stmt* stmt) {
 
 void ASTReaderPrefix::Visit(Block* stmt) {
   std::cout << "{";
-  for (Stmt* ptr : stmt->stmtList) {
+  for (Stmt* ptr : stmt->stmtVector) {
     Print(ptr);
   }
   std::cout << "}";
@@ -91,7 +91,7 @@ void ASTReaderPrefix::Visit(Binary* expr) {
 
 void ASTReaderPrefix::Visit(Function* expr) {
   std::cout << "function( ";
-  for (std::string arg : expr->varList) {
+  for (std::string arg : expr->parameterVector) {
     std::cout << arg << " ";
   }
   std::cout << ")";
@@ -105,7 +105,7 @@ void ASTReaderPrefix::Visit(Grouping* expr) {
 void ASTReaderPrefix::Visit(Invocation* expr) {
   Print(expr->expr);
   std::cout << "(";
-  for (Expr* ptr : expr->exprList) {
+  for (Expr* ptr : expr->exprVector) {
     Print(ptr);
     std::cout << ",";
   }
@@ -148,7 +148,7 @@ void ASTReaderPostfix::Visit(Stmt* stmt) {
 
 void ASTReaderPostfix::Visit(Block* stmt) {
   std::cout << "{";
-  for (Stmt* ptr : stmt->stmtList) {
+  for (Stmt* ptr : stmt->stmtVector) {
     Print(ptr);
   }
   std::cout << "}";
@@ -220,7 +220,7 @@ void ASTReaderPostfix::Visit(Binary* expr) {
 
 void ASTReaderPostfix::Visit(Function* expr) {
   std::cout << "function( ";
-  for (std::string arg : expr->varList) {
+  for (std::string arg : expr->parameterVector) {
     std::cout << arg << " ";
   }
   std::cout << ")";
@@ -236,7 +236,7 @@ void ASTReaderPostfix::Visit(Grouping* expr) {
 void ASTReaderPostfix::Visit(Invocation* expr) {
   Print(expr->expr);
   std::cout << "(";
-  for (Expr* ptr : expr->exprList) {
+  for (Expr* ptr : expr->exprVector) {
     Print(ptr);
     std::cout << ",";
   }
