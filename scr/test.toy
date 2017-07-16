@@ -2,12 +2,12 @@ var func = function() {
   var func2 = function() {
     var array2 = [1, 2, 42];
     return array2;
-  }
+  };
 
   var array = [1, func2, 3];
 
   return array;
-}
+};
 
 //chaining arrays and functions
 var answer = func()[1]()[2];
