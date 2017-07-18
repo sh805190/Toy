@@ -276,8 +276,8 @@ Expr* Parser::ScanAssignment() {
     TokenTypeGetter typeGetter;
     expr->Accept(&typeGetter);
 
-    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR) {
-      throw ParserError(tokenVector[current-1].GetLine(), "Invalid assignment target");
+    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR && typeGetter.GetType() != DOT) {
+      throw ParserError(tokenVector[current-1].GetLine(), std::string() + "Invalid assignment target");
     }
 
     //get the variable token
@@ -396,6 +396,22 @@ Expr* Parser::ScanOperator() {
         }
       }
       expr = new Invocation(expr, exprVector);
+    }
+
+    //accessing a member of an object
+    else if (Match(DOT)) {
+      Token op = tokenVector[current-1];
+      Expr* rhs = ScanOperator();
+      return new Binary(expr, op, rhs);
+    }
+
+    //accessing a member of a reference
+    else if (Match(MEMBER_DEREFERENCE)) {
+      //syntactic sugar
+      Token op = tokenVector[current-1];
+      expr = new Unary(Token(STAR, "*", Literal(1,0), op.GetLine()), expr);
+      Expr* rhs = ScanOperator();
+      return new Binary(expr, DOT, rhs);
     }
 
     //done

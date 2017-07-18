@@ -10,9 +10,9 @@ void ASTReaderPrefix::Print(Stmt* stmt) {
 }
 
 void ASTReaderPrefix::Print(Expr* expr) {
-//  std::cout << "(";
+  std::cout << "(";
   expr->Accept(this);
-//  std::cout << ")";
+  std::cout << ")";
 }
 
 void ASTReaderPrefix::Visit(Stmt* stmt) {
@@ -115,7 +115,9 @@ void ASTReaderPrefix::Visit(Function* expr) {
 }
 
 void ASTReaderPrefix::Visit(Grouping* expr) {
+  std::cout << "(";
   Print(expr->inner);
+  std::cout << ")";
 }
 
 

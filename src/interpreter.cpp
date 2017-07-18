@@ -10,8 +10,13 @@
 #include <iostream>
 #include <functional>
 
-Interpreter::Interpreter(Environment* env) {
-  environment = new Environment(env);
+Interpreter::Interpreter(Environment* parent, Environment* forced) {
+  if (forced) {
+    environment = forced;
+  }
+  else {
+    environment = new Environment(parent);
+  }
 }
 
 Interpreter::~Interpreter() {
@@ -35,9 +40,9 @@ void Interpreter::Execute(Stmt* stmt) {
   returnCalled = false;
 
   try {
-//std::cout << "READER:";
-//reader.Print(stmt);
-//std::cout << std::endl;
+std::cout << "READER:";
+reader.Print(stmt);
+std::cout << std::endl;
 
     result = Literal();
     stmt->Accept(this);
@@ -280,7 +285,7 @@ void Interpreter::Visit(Assign* expr) {
     int starCount = dynamic_cast<Unary*>(expr->target)->op.GetLiteral().GetNumber();
     Literal literal = environment->GetVar(dynamic_cast<Variable*>(dynamic_cast<Unary*>(expr->target)->rhs)->name); //base reference before dereferencing
 
-    while(starCount > 0) {
+    while(starCount > 0 || starCount < 0) { //second clause is syntactic sugar
       //display
       starLexeme += "*";
 
@@ -300,11 +305,21 @@ void Interpreter::Visit(Assign* expr) {
       literal = *(literal.GetReference());
 
       starCount--;
+
+      if (starCount < 0 && literal.GetType() != Literal::Type::REFERENCE) {
+        break;
+      }
     }
   }
 }
 
 void Interpreter::Visit(Binary* expr) {
+  //access a member
+  if (expr->op.GetType() == DOT) {
+      AccessMember(expr->lhs, expr->rhs);
+      return;
+  }
+
   //evaluate each side
   Evaluate(expr->lhs);
   Literal lhs = result;
@@ -373,6 +388,7 @@ void Interpreter::Visit(Binary* expr) {
       result = lhs.GetNumber() * rhs.GetNumber();
     break;
 
+    //error
     default:
       throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
   }
@@ -382,7 +398,7 @@ void Interpreter::Visit(Class* expr) {
   //create the environment and interpreter
   result = Literal();
   Environment* env = new Environment(nullptr);
-  Interpreter interpreter(env);
+  Interpreter interpreter(nullptr, env);
 
   //call the class definition as a pseudo-function
   for (Stmt* stmt : expr->block->stmtVector) {
@@ -509,7 +525,7 @@ void Interpreter::Visit(Unary* expr) {
       std::string starLexeme;
       int starCount = expr->op.GetLiteral().GetNumber();
       Literal literal = result;
-      while(starCount > 0) {
+      while(starCount > 0 || starCount < 0) { //second clause is syntactic sugar
         //display
         starLexeme += "*";
 
@@ -523,6 +539,10 @@ void Interpreter::Visit(Unary* expr) {
         literal = *(literal.GetReference());
 
         starCount--;
+
+        if (starCount < 0 && literal.GetType() != Literal::Type::REFERENCE) {
+          break;
+        }
       }
       result = literal;
     }
@@ -539,6 +559,27 @@ void Interpreter::Visit(Variable* expr) {
 }
 
 //helpers
+void Interpreter::AccessMember(Expr* lhs, Expr* rhs) {
+  TokenTypeGetter typeGetter;
+  lhs->Accept(&typeGetter);
+
+  if(typeGetter.GetType() == GROUPING) {
+    AccessMember(dynamic_cast<Grouping*>(lhs)->inner, rhs);
+    return;
+  }
+
+  if(typeGetter.GetType() == STAR) {
+    TokenGetter tokGetter;
+    lhs->Accept(&tokGetter);
+    if (tokGetter.GetToken().GetLiteral().GetNumber() > 1) {
+      AccessMember(dynamic_cast<Unary*>(lhs)->rhs, rhs);
+    }
+  }
+
+  std::string name = dynamic_cast<Variable*>(dynamic_cast<Unary*>(lhs)->rhs)->name;
+  result = environment->GetVar(name).GetMember(rhs.GetLexeme());
+}
+
 void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector, Literal* self) {
   //build the environment
   std::vector<std::string> parameterVector = func.GetParameterVector();

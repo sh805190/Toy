@@ -2,6 +2,7 @@
 
 #include "ast_deleter.hpp"
 #include "ast_duplicator.hpp"
+#include "runtime_error.hpp"
 #include "stmt.hpp"
 
 #include <assert.h>
@@ -66,6 +67,7 @@ Literal& Literal::operator=(const Literal& rhs) {
   this->parameterVector = rhs.parameterVector;
   deleter.DeleteAST(reinterpret_cast<Block*>(this->block));
   this->block = reinterpret_cast<void*>(duplicator.DuplicateAST(reinterpret_cast<Block*>(rhs.block)));
+  this->literalMap = rhs.literalMap;
   this->number = rhs.number;
   this->reference = rhs.reference;
   this->str = rhs.str;
@@ -166,6 +168,9 @@ Literal Literal::SetMember(std::string key, Literal val) {
 
 Literal Literal::GetMember(std::string key) {
   assert(type == Type::OBJECT);
+  if (literalMap.find(key) == literalMap.end()) {
+    throw RuntimeError(-1, std::string() + "Can't find the member '" + key + "' in object");
+  }
   return literalMap[key];
 }
 

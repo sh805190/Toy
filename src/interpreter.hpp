@@ -8,7 +8,7 @@
 
 class Interpreter: public ExprVisitor, public StmtVisitor {
 public:
-  Interpreter(Environment* env = nullptr);
+  Interpreter(Environment* parent = nullptr, Environment* forced = nullptr);
   ~Interpreter();
 
   void Execute(Stmt*);
@@ -44,6 +44,7 @@ public:
 
 private:
   //helpers
+  void AccessMember(Expr* lhs, Expr* rhs);
   void CallFunction(Literal func, std::vector<Literal> literalVector, Literal* = nullptr);
   void CreateObject(Literal, std::vector<Literal> literalVector);
   bool IsEqual(Literal, Literal);

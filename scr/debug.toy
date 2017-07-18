@@ -10,11 +10,15 @@ class
     "destroy";
   };
 
+  var faster = function() {
+    this->speed = this->speed + 1;
+  };
+
   var speed = 0;
 };
 
 var c = car();
 
 "result";
-c;
-//c.speed;
+c.faster();
+c.speed;

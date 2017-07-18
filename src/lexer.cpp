@@ -29,7 +29,6 @@ void Lexer::ScanToken() {
     case '[': AddToken(LEFT_BRACKET); break;
     case ']': AddToken(RIGHT_BRACKET); break;
     case '+': AddToken(PLUS); break;
-    case '-': AddToken(MINUS); break;
     case '&': AddToken(AMPERSAND); break;
     case ':': AddToken(COLON); break;
     case ',': AddToken(COMMA); break;
@@ -44,6 +43,7 @@ void Lexer::ScanToken() {
     case '=': AddToken(Match('=') ? EQUAL_EQUAL : EQUAL); break;
     case '<': AddToken(Match('=') ? LESS_EQUAL : LESS); break;
     case '>': AddToken(Match('=') ? GREATER_EQUAL : GREATER); break;
+    case '-': AddToken(Match('>') ? MEMBER_DEREFERENCE : MINUS); break;
 
     //eat comments
     case '/':
