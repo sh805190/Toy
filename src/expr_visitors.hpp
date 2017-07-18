@@ -21,6 +21,10 @@ public:
     type = expr->op.GetType();
   }
 
+  void Visit(Class* expr) override {
+    type = CLASS;
+  }
+
   void Visit(Function* expr) override {
     type = FUNCTION;
   }
@@ -89,20 +93,24 @@ public:
     token = expr->op;
   }
 
+  void Visit(Class* expr) override {
+    token = Token(CLASS, "Na", Literal(), -4);
+  }
+
   void Visit(Function* expr) override {
-    token = Token(FUNCTION, "Na", Literal(), -4);
+    token = Token(FUNCTION, "Na", Literal(), -6);
   }
 
   void Visit(Grouping* expr) override {
-    token = Token(LEFT_PAREN, "Na", Literal(), -5);
+    token = Token(LEFT_PAREN, "Na", Literal(), -7);
   }
 
   void Visit(Index* expr) override {
-    token = Token(INDEX, "Na", Literal(), -6);
+    token = Token(INDEX, "Na", Literal(), -8);
   }
 
   void Visit(Invocation* expr) override {
-    token = Token(INVOCATION, "Na", Literal(), -7);
+    token = Token(INVOCATION, "Na", Literal(), -9);
   }
 
   void Visit(Logical* expr) override {
@@ -114,7 +122,7 @@ public:
   }
 
   void Visit(Value* expr) override {
-    token = Token(VALUE, "Na", Literal(), -8);
+    token = Token(VALUE, "Na", Literal(), -10);
   }
 
   void Visit(Variable* expr) override {

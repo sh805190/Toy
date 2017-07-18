@@ -1,0 +1,11 @@
+Declare car = class {Declare create = function( ){created}Declare destroy = function( ){destroy}Declare speed = 0}
+READER:Declare car = class {Declare create = function( ){created}Declare destroy = function( ){destroy}Declare speed = 0}
+INTERPRETER:class {...}
+Declare c = car{VARIABLE}()
+READER:Declare c = car{VARIABLE}()
+READER:Declare create = function( ){created}
+INTERPRETER:function() {...}
+READER:Declare destroy = function( ){destroy}
+INTERPRETER:function() {...}
+READER:Declare speed = 0
+INTERPRETER:0

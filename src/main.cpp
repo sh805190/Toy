@@ -21,10 +21,10 @@ void run(std::string source) {
   for (Stmt* stmt : statements) {
 //    ASTDuplicator duplicator;
 
-    interpreter.Execute(stmt);
+//reader.Print(stmt);
+//std::cout << std::endl;
 
-//    reader.Print(stmt);
-//    std::cout << std::endl;
+    interpreter.Execute(stmt);
     deleter.DeleteAST(stmt);
 
     //handle returns

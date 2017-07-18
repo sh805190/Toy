@@ -18,7 +18,6 @@ private:
 
   //stmt types
   Stmt* ScanBreak();
-  Stmt* ScanClass();
   Stmt* ScanContinue();
   Stmt* ScanFor();
   Stmt* ScanIf();
@@ -42,6 +41,7 @@ private:
 
   //other types
   Stmt* ScanBlock();
+  Expr* ScanClass();
   Expr* ScanFunction();
   Expr* ScanSpecial();
 

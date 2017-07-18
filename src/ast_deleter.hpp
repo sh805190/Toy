@@ -23,6 +23,7 @@ public:
   void Visit(Array*) override;
   void Visit(Assign*) override;
   void Visit(Binary*) override;
+  void Visit(Class*) override;
   void Visit(Function*) override;
   void Visit(Grouping*) override;
   void Visit(Index*) override;

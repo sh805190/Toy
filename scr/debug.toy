@@ -1,9 +1,20 @@
-if (true) var a;
+var
+car
+=
+class
+{
+  var create = function() {
+    "created";
+  };
+  var destroy = function() {
+    "destroy";
+  };
 
-var a;
+  var speed = 0;
+};
 
-var n = 0;
-while (n < 10) {
-  var b;
-  n = n + 1;
-}
+var c = car();
+
+"result";
+c;
+//c.speed;

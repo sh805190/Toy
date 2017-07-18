@@ -2,6 +2,7 @@
 
 #include "error_handler.hpp"
 #include "expr_visitors.hpp"
+#include "stmt_visitors.hpp"
 
 Parser::Parser(std::vector<Token> t): tokenVector(t) {
   //EMPTY
@@ -40,10 +41,6 @@ Stmt* Parser::ScanStatement() {
     //all types
     case BREAK:
       ret = ScanBreak();
-    break;
-
-    case CLASS:
-      ret = ScanClass();
     break;
 
     case CONTINUE:
@@ -102,11 +99,6 @@ Stmt* Parser::ScanStatement() {
 Stmt* Parser::ScanBreak() {
   Advance(); //skip break keyword
   return new Break(tokenVector[current-1].GetLine());
-}
-
-Stmt* Parser::ScanClass() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 Stmt* Parser::ScanContinue() {
@@ -393,7 +385,7 @@ Expr* Parser::ScanOperator() {
       expr = new Index(expr, index);
     }
 
-    //function call
+    //function/class call
     else if (Match(LEFT_PAREN)) {
       std::vector<Expr*> exprVector;
       if (!Match(RIGHT_PAREN)) {
@@ -423,10 +415,6 @@ Expr* Parser::ScanPrimary() {
 
   if (Match(NUMBER) || Match(STRING)) return new Value(tokenVector[current-1].GetLiteral());
 
-  if (Match(FUNCTION)) {
-    return ScanFunction();
-  }
-
   //array creation
   if (Match(LEFT_BRACKET)) {
     std::vector<Expr*> exprVector;
@@ -438,6 +426,15 @@ Expr* Parser::ScanPrimary() {
     return new Array(exprVector);
   }
 
+  if (Match(FUNCTION)) {
+    return ScanFunction();
+  }
+
+  if (Match(CLASS)) {
+    return ScanClass();
+  }
+
+  //grouping
   if (Match(LEFT_PAREN)) {
     Expr* expr = ScanExpression();
     Consume(RIGHT_PAREN, "Expected ')' after expression");
@@ -479,6 +476,23 @@ Stmt* Parser::ScanBlock() {
 
   Consume(RIGHT_BRACE, "Exprected '}' at end of a block");
   return new Block(stmtVector);
+}
+
+Expr* Parser::ScanClass() {
+  StmtTypeGetter typeGetter;
+
+  //Get the block
+  Block* block = dynamic_cast<Block*>(ScanBlock());
+
+  //ensure all statements are var declarations
+  for (Stmt* ptr : block->stmtVector) {
+    ptr->Accept(&typeGetter);
+    if (typeGetter.GetType() != VAR) {
+      throw ParserError(-1, "Only variable declarations and definitions are allowed inside class definitions");
+    }
+  }
+
+  return new Class(block);
 }
 
 Expr* Parser::ScanFunction() {

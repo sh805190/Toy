@@ -50,3 +50,7 @@ Literal* Environment::GetRef(Token name) {
 Environment* Environment::GetParent() {
   return parent;
 }
+
+std::map<std::string, Literal>* Environment::GetLiteralMapRef() {
+  return &literalMap;
+}

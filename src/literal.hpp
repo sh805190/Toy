@@ -1,12 +1,15 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
+
+class Environment;
 
 class Literal {
 public:
   enum class Type {
-    ARRAY, BOOLEAN, FUNCTION, NUMBER, REFERENCE, STRING, UNDEFINED
+    ARRAY, BOOLEAN, CLASS, FUNCTION, NUMBER, OBJECT, REFERENCE, STRING, UNDEFINED
   };
 
   Literal();
@@ -16,6 +19,7 @@ public:
   Literal(bool);
   Literal(std::vector<std::string>& parameterVector, void* block);
   Literal(double);
+  Literal(Environment*);
   Literal(Literal*);
   Literal(std::string);
 
@@ -23,6 +27,7 @@ public:
 
   Literal& operator=(const Literal&);
 
+  Type SetType(Type);
   Type GetType();
 
   std::vector<Literal> SetLiteralVector(std::vector<Literal>& literalVector);
@@ -40,6 +45,9 @@ public:
   double SetNumber(double);
   double GetNumber();
 
+  Literal SetMember(std::string, Literal);
+  Literal GetMember(std::string);
+
   Literal* SetReference(Literal*);
   Literal* GetReference();
 
@@ -55,6 +63,9 @@ private:
   std::vector<std::string> parameterVector;
   void* block = nullptr; //using Block type caused issues
   double number = 0;
+  std::map<std::string, Literal> literalMap;
   Literal* reference = nullptr;
   std::string str;
 };
+
+#include "environment.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "literal.hpp"
 #include "token.hpp"
+#include "literal.hpp"
 
 #include <map>
 #include <string>
@@ -17,6 +17,8 @@ public:
   Literal* GetRef(Token name);
 
   Environment* GetParent();
+
+  std::map<std::string, Literal>* GetLiteralMapRef();
 
 private:
   std::map<std::string, Literal> literalMap;

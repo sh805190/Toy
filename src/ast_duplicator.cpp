@@ -108,6 +108,11 @@ void ASTDuplicator::Visit(Binary* expr) {
   resultExpr = new Binary(lhs, expr->op, resultExpr);
 }
 
+void ASTDuplicator::Visit(Class* expr) {
+  DuplicateAST(expr->block);
+  resultExpr = new Class(dynamic_cast<Block*>(resultStmt));
+}
+
 void ASTDuplicator::Visit(Function* expr) {
   DuplicateAST(expr->block);
   resultExpr = new Function(expr->parameterVector, dynamic_cast<Block*>(resultStmt));

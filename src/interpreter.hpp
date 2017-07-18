@@ -32,6 +32,7 @@ public:
   void Visit(Array*) override;
   void Visit(Assign*) override;
   void Visit(Binary*) override;
+  void Visit(Class*) override;
   void Visit(Function*) override;
   void Visit(Grouping*) override;
   void Visit(Index*) override;
@@ -43,7 +44,8 @@ public:
 
 private:
   //helpers
-  void CallFunction(Literal func, std::vector<Literal> literalVector);
+  void CallFunction(Literal func, std::vector<Literal> literalVector, Literal* = nullptr);
+  void CreateObject(Literal, std::vector<Literal> literalVector);
   bool IsEqual(Literal, Literal);
   void CheckOperandsAreNumbers(Token op, Literal, Literal);
   bool IsTruthy(Literal);

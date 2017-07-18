@@ -1,0 +1,149 @@
+//One line comments begin with '//' and end on a new line
+
+/* multiline comments begin with a '/' and a '*' and end with a '*' followed by
+a '/'. They can also be /* nested */ inside each other. And of course, they can
+take up multiple lines */
+
+//modules must begin with the keyword 'module', followed by a semicolon. More
+//on modules later.
+module;
+
+//a single statement consists of an expression, ending in a ';'
+true;
+
+//statements can be empty
+;
+
+//multiple statements can be written on one line
+true; false;
+
+//the 'use' keyword sets up the interpreter with various settings, and must be
+//terminated with a ';'
+
+//'panic' will tell the program not to continue if any errors are found
+//the default is to continue to try and find as many errors as possible
+use panic;
+
+//'strict' restricts the language to using only features specified in the
+//official documentation
+use strict;
+
+//'version' specifies what version of the toy language should be used. the
+//program reserves the right to reject any version specification it doesn't like
+use version 0;
+
+//the 'use' keyword can enable built in modules, such as "standard"
+use "standard";
+
+//'use' can also load external files as modules, by specifying their file name
+use "external.toy";
+
+//please note that module names are surrounded by double quote marks, making
+//them strings
+
+//variables can be declared with the 'var' keyword
+var a;
+
+//variables can be assigned a value using an equals sign
+a = 42;
+
+//they can also be assigned during declaration
+var b = 56;
+
+//variables are typeless, and are only a name. The value defines the type
+a = "hello world";
+
+//the types are: array, boolean, function, number, reference, string and
+//undefined. Once implemented, classes and objects will also be types
+
+//an array is defined by surrounding a number of values (or variables) with
+//brackets
+
+var array = [1, 2, 3];
+
+//arrays have a number of built in-member functions
+
+array.size(); //get the size of the array
+array.insert(0, 4); //insert at position 0 the value 4, pushing back the rest
+array.erase(0); //erase the value at position 0
+
+//booleans have one of two values
+var boolean = true;
+boolean = false;
+
+//all values besides false and undefined are true
+
+//functions are pieces of code that can be reused.
+//to create a function, use the keyword 'function' followed by a '()' enclosed
+//list of parameters. Finally, write the function code inside a pair of '{}'.
+//You can store a function in a variable, or call it immediately. To call a
+function, place a pair of '()' after the variable or function.
+
+var f = function(x, y) {
+  return x+y;
+};
+
+f(5, 6);
+
+function(x, y) { return x-y; }(1, 2);
+
+//you can call a function from within a function using the built-in variable 'recurse'
+
+var r = function(i) {
+  if (i <= 0) return i;
+  return recurse(i-1);
+}
+
+r(10);
+
+//numbers are decimal values, but they can be treated as integers.
+
+var number = 42;
+var pi = 3.141592;
+
+//numbers have a built in function that convers them to a string
+
+pi = pi.to_string();
+var e = 2.7.to_string();
+
+//a reference shares the value of another variable
+
+b = &a; a is equal to b
+
+//you can reassign the base variable, and the reference will change too
+
+a = 144; //b = 144 too
+
+//you can access the base variable by dereferencingthe reference
+
+*b = 169; // a = 169 too
+
+//you can create references only one pevel at a time, but you can dereference
+//as much as possible
+
+var concrete = 42;
+var ref1 = &concrete;
+var ref2 = &ref1;
+
+**ref2 = 56; //concrete = 56
+
+//string is a series of characters surrounded by double quotes
+
+var str = "hello world";
+
+//strings can contain escaped characters, and can be concatenated
+
+var hello = "hello";
+var world = hello + " world\n";
+
+//strings containing only decimal numbers can be converted to a number
+
+str = "12.34";
+number = str.to_number();
+
+//every variable without a value is equal to 'undefined', and only 'undefined'
+
+var z;
+z == undefined;
+
+//TODO: more to come

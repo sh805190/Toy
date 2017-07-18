@@ -33,6 +33,10 @@ Literal::Literal(std::vector<std::string>& sv, void* b): type(Type::FUNCTION) {
   block = reinterpret_cast<void*>(duplicator.DuplicateAST(reinterpret_cast<Block*>(b)));
 }
 
+Literal::Literal(Environment* env): type(Type::CLASS) {
+  literalMap = *(env->GetLiteralMapRef());
+}
+
 Literal::Literal(double d): type(Type::NUMBER) {
   number = d;
 }
@@ -46,7 +50,7 @@ Literal::Literal(std::string s): type(Type::STRING) {
 }
 
 Literal::~Literal() {
-  if (type == Type::FUNCTION) {
+  if (type == Type::CLASS || type == Type::FUNCTION) {
     ASTDeleter deleter;
     deleter.DeleteAST(reinterpret_cast<Block*>(block));
   }
@@ -67,6 +71,10 @@ Literal& Literal::operator=(const Literal& rhs) {
   this->str = rhs.str;
 
   return *this;
+}
+
+Literal::Type Literal::SetType(Type t) {
+  return type = t;
 }
 
 Literal::Type Literal::GetType() {
@@ -130,7 +138,7 @@ void* Literal::GetBlock() {
     return reference->GetBlock();
   }
 
-  assert(type == Type::FUNCTION);
+  assert(type == Type::CLASS || type == Type::FUNCTION);
   return block;
 }
 
@@ -146,6 +154,19 @@ double Literal::GetNumber() {
 
   assert(type == Type::NUMBER);
   return number;
+}
+
+Literal Literal::SetMember(std::string key, Literal val) {
+  if (type == Type::REFERENCE) {
+    return reference->SetMember(key, val);
+  }
+  type = Type::OBJECT;
+  return literalMap[key] = val;
+}
+
+Literal Literal::GetMember(std::string key) {
+  assert(type == Type::OBJECT);
+  return literalMap[key];
 }
 
 Literal* Literal::SetReference(Literal* rhs) {
@@ -173,6 +194,7 @@ std::string Literal::GetString() {
 }
 
 std::string Literal::ToString() {
+  //ARRAY, BOOLEAN, CLASS, FUNCTION, NUMBER, OBJECT, REFERENCE, STRING, UNDEFINED
   switch(type) {
     case Type::ARRAY: {
       std::string output = "[";
@@ -187,6 +209,9 @@ std::string Literal::ToString() {
 
     case Type::BOOLEAN:
       return boolean ? "true" : "false";
+
+    case Type::CLASS:
+      return "class {...}";
 
     case Type::FUNCTION: {
       std::string output = "function(";
@@ -207,6 +232,18 @@ std::string Literal::ToString() {
         s = s.substr(0, s.size() - 1);
       }
       return s;
+    }
+
+    case Type::OBJECT: {
+      std::string output = "object {";
+      for (auto& it : literalMap) {
+        output += it.first;
+        output += ",";
+      }
+      //prune the last comma
+      if (literalMap.size()) output.erase(output.end()-1);
+      output += "};";
+      return output;
     }
 
     case Type::REFERENCE:

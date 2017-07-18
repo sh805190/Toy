@@ -190,6 +190,7 @@ int main(int argc, char* argv[]) {
       {"Array", "std::vector<Expr*> exprVector"},
       {"Assign", "Token op, Expr* target, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
+      {"Class", "Block* block"},
       {"Function", "std::vector<std::string> parameterVector, Block* block"},
       {"Grouping", "Expr* inner"},
       {"Index", "Expr* array, Expr* index"},

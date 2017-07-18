@@ -4,6 +4,7 @@ class Expr;
 class Array;
 class Assign;
 class Binary;
+class Class;
 class Function;
 class Grouping;
 class Index;
@@ -26,6 +27,7 @@ public:
   virtual void Visit(Array*) = 0;
   virtual void Visit(Assign*) = 0;
   virtual void Visit(Binary*) = 0;
+  virtual void Visit(Class*) = 0;
   virtual void Visit(Function*) = 0;
   virtual void Visit(Grouping*) = 0;
   virtual void Visit(Index*) = 0;
@@ -88,6 +90,19 @@ public:
   Expr* lhs;
   Token op;
   Expr* rhs;
+};
+
+class Class: public Expr {
+public:
+  Class(Block* block) {
+    this->block = block;
+  }
+
+  void Accept(ExprVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Block* block;
 };
 
 class Function: public Expr {

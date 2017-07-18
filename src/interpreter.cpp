@@ -378,8 +378,23 @@ void Interpreter::Visit(Binary* expr) {
   }
 }
 
+void Interpreter::Visit(Class* expr) {
+  //create the environment and interpreter
+  result = Literal();
+  Environment* env = new Environment(nullptr);
+  Interpreter interpreter(env);
+
+  //call the class definition as a pseudo-function
+  for (Stmt* stmt : expr->block->stmtVector) {
+    interpreter.Execute(stmt);
+  }
+
+  //create the new object from the environment
+  result = Literal(env);
+}
+
 void Interpreter::Visit(Function* expr) {
-  //TODO: make the function into a liteal
+  //make the function into a liteal
   result = Literal(expr->parameterVector, expr->block);
 }
 
@@ -411,20 +426,33 @@ void Interpreter::Visit(Invocation* expr) {
   //get the call requirements
   Evaluate(expr->expr);
 
-  if (result.GetType() != Literal::Type::FUNCTION) {
-    throw RuntimeError(-1, std::string() + "'" + result.ToString() + "' is not a function");
+  if (result.GetType() == Literal::Type::FUNCTION) {
+    Literal func = result;
+
+    std::vector<Literal> literalVector;
+    for (Expr* ptr : expr->exprVector) {
+      Evaluate(ptr);
+      literalVector.push_back(result);
+    }
+
+    //finally
+    CallFunction(func, literalVector);
   }
+  else if (result.GetType() == Literal::Type::CLASS) {
+    Literal prototype = result;
 
-  Literal func = result;
+    std::vector<Literal> literalVector;
+    for (Expr* ptr : expr->exprVector) {
+      Evaluate(ptr);
+      literalVector.push_back(result);
+    }
 
-  std::vector<Literal> literalVector;
-  for (Expr* ptr : expr->exprVector) {
-    Evaluate(ptr);
-    literalVector.push_back(result);
+    //finally
+    CreateObject(prototype, literalVector);
   }
-
-  //finally
-  CallFunction(func, literalVector);
+  else {
+    throw RuntimeError(-1, std::string() + "'" + result.ToString() + "' is not a function or a class");
+  }
 }
 
 void Interpreter::Visit(Logical* expr) {
@@ -511,7 +539,7 @@ void Interpreter::Visit(Variable* expr) {
 }
 
 //helpers
-void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector) {
+void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector, Literal* self) {
   //build the environment
   std::vector<std::string> parameterVector = func.GetParameterVector();
 
@@ -520,6 +548,7 @@ void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector)
     throw RuntimeError(-1, std::string() + "Invalid number of arguments (expected " + std::to_string(parameterVector.size()) + ", received " + std::to_string(literalVector.size()) + ")");
   }
 
+  //create the environment object
   Environment* env = new Environment(nullptr);
 
   std::vector<std::string>::iterator paramIter = parameterVector.begin();
@@ -529,6 +558,11 @@ void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector)
   env->Define(Token(IDENTIFIER, *paramIter, *literalIter, -1), *literalIter);
     paramIter++;
     literalIter++;
+  }
+
+  //if calling on a method
+  if (self != nullptr) {
+    env->Define(Token(IDENTIFIER, "self", self, -1), self);
   }
 
   //for recursion
@@ -549,6 +583,24 @@ void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector)
   }
 
   //TODO: extract from env?
+}
+
+void Interpreter::CreateObject(Literal prototype, std::vector<Literal> literalVector) {
+  //create the new object based on the prototype
+  result = Literal();
+  Literal object = prototype;
+  object.SetType(Literal::Type::OBJECT);
+
+  //call the constructor
+  if (object.GetMember("create").GetType() == Literal::Type::FUNCTION) {
+    CallFunction(object.GetMember("create"), literalVector, &object);
+  }
+
+  if (result.GetType() != Literal::Type::UNDEFINED) {
+    throw RuntimeError(-1, "Unexpected value returned from a constructor");
+  }
+
+  result = object;
 }
 
 bool Interpreter::IsEqual(Literal lhs, Literal rhs) {

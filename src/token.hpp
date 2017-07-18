@@ -1,5 +1,7 @@
 #pragma once
 
+class Token;
+
 #include "token_type.hpp"
 
 #include "literal.hpp"

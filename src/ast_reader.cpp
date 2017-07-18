@@ -4,15 +4,15 @@
 
 //prefix methods
 void ASTReaderPrefix::Print(Stmt* stmt) {
-  std::cout << "(";
+//  std::cout << "(";
   stmt->Accept(this);
-  std::cout << ")";
+//  std::cout << ")";
 }
 
 void ASTReaderPrefix::Print(Expr* expr) {
-  std::cout << "(";
+//  std::cout << "(";
   expr->Accept(this);
-  std::cout << ")";
+//  std::cout << ")";
 }
 
 void ASTReaderPrefix::Visit(Stmt* stmt) {
@@ -98,6 +98,11 @@ void ASTReaderPrefix::Visit(Binary* expr) {
   Print(expr->lhs);
   std::cout << " ";
   Print(expr->rhs);
+}
+
+void ASTReaderPrefix::Visit(Class* expr) {
+  std::cout << "class ";
+  Print(expr->block);
 }
 
 void ASTReaderPrefix::Visit(Function* expr) {
@@ -245,6 +250,11 @@ void ASTReaderPostfix::Visit(Binary* expr) {
   std::cout << " ";
   Print(expr->rhs);
   std::cout << " " << expr->op.GetLexeme();
+}
+
+void ASTReaderPostfix::Visit(Class* expr) {
+  std::cout << "class ";
+  Print(expr->block);
 }
 
 void ASTReaderPostfix::Visit(Function* expr) {
