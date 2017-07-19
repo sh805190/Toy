@@ -44,7 +44,6 @@ public:
 
 private:
   //helpers
-  void AccessMember(Expr* lhs, Expr* rhs);
   void CallFunction(Literal func, std::vector<Literal> literalVector, Literal* = nullptr);
   void CreateObject(Literal, std::vector<Literal> literalVector);
   bool IsEqual(Literal, Literal);

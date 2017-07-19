@@ -56,7 +56,7 @@ public:
 
   std::string ToString();
 
-private:
+public:
   Type type;
   std::vector<Literal> literalVector;
   bool boolean = false;

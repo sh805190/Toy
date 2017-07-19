@@ -5,6 +5,9 @@ class
 {
   var create = function() {
     "created";
+    this;
+    *this;
+    (*this).speed;
   };
   var destroy = function() {
     "destroy";
@@ -20,5 +23,6 @@ class
 var c = car();
 
 "result";
+c.faster;
 c.faster();
 c.speed;

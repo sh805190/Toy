@@ -43,7 +43,7 @@ void Lexer::ScanToken() {
     case '=': AddToken(Match('=') ? EQUAL_EQUAL : EQUAL); break;
     case '<': AddToken(Match('=') ? LESS_EQUAL : LESS); break;
     case '>': AddToken(Match('=') ? GREATER_EQUAL : GREATER); break;
-    case '-': AddToken(Match('>') ? MEMBER_DEREFERENCE : MINUS); break;
+    case '-': AddToken(Match('>') ? MINUS_GREATER : MINUS); break;
 
     //eat comments
     case '/':

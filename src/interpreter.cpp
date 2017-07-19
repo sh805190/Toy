@@ -11,12 +11,7 @@
 #include <functional>
 
 Interpreter::Interpreter(Environment* parent, Environment* forced) {
-  if (forced) {
-    environment = forced;
-  }
-  else {
-    environment = new Environment(parent);
-  }
+  environment = forced ? forced : new Environment(parent);
 }
 
 Interpreter::~Interpreter() {
@@ -285,7 +280,7 @@ void Interpreter::Visit(Assign* expr) {
     int starCount = dynamic_cast<Unary*>(expr->target)->op.GetLiteral().GetNumber();
     Literal literal = environment->GetVar(dynamic_cast<Variable*>(dynamic_cast<Unary*>(expr->target)->rhs)->name); //base reference before dereferencing
 
-    while(starCount > 0 || starCount < 0) { //second clause is syntactic sugar
+    while(starCount > 0) {
       //display
       starLexeme += "*";
 
@@ -305,24 +300,29 @@ void Interpreter::Visit(Assign* expr) {
       literal = *(literal.GetReference());
 
       starCount--;
-
-      if (starCount < 0 && literal.GetType() != Literal::Type::REFERENCE) {
-        break;
-      }
     }
   }
 }
 
 void Interpreter::Visit(Binary* expr) {
-  //access a member
-  if (expr->op.GetType() == DOT) {
-      AccessMember(expr->lhs, expr->rhs);
-      return;
-  }
-
   //evaluate each side
   Evaluate(expr->lhs);
   Literal lhs = result;
+
+  //access operator
+  if (expr->op.GetType() == DOT) {
+    TokenTypeGetter typeGetter;
+    expr->rhs->Accept(&typeGetter);
+
+    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != INVOCATION) {
+      throw RuntimeError(expr->op.GetLine(), std::string() + "Can't access a member of '" + lhs.ToString() + "' (type " + std::to_string(typeGetter.GetType()) + ")");
+    }
+
+    Evaluate(expr->rhs);
+
+    return;
+  }
+
   Evaluate(expr->rhs);
   Literal rhs = result;
 
@@ -405,7 +405,7 @@ void Interpreter::Visit(Class* expr) {
     interpreter.Execute(stmt);
   }
 
-  //create the new object from the environment
+  //create the new class literal from the environment
   result = Literal(env);
 }
 
@@ -442,6 +442,7 @@ void Interpreter::Visit(Invocation* expr) {
   //get the call requirements
   Evaluate(expr->expr);
 
+  //invoke a function
   if (result.GetType() == Literal::Type::FUNCTION) {
     Literal func = result;
 
@@ -454,6 +455,8 @@ void Interpreter::Visit(Invocation* expr) {
     //finally
     CallFunction(func, literalVector);
   }
+
+  //invoke a class
   else if (result.GetType() == Literal::Type::CLASS) {
     Literal prototype = result;
 
@@ -466,6 +469,8 @@ void Interpreter::Visit(Invocation* expr) {
     //finally
     CreateObject(prototype, literalVector);
   }
+
+  //others
   else {
     throw RuntimeError(-1, std::string() + "'" + result.ToString() + "' is not a function or a class");
   }
@@ -525,7 +530,7 @@ void Interpreter::Visit(Unary* expr) {
       std::string starLexeme;
       int starCount = expr->op.GetLiteral().GetNumber();
       Literal literal = result;
-      while(starCount > 0 || starCount < 0) { //second clause is syntactic sugar
+      while(starCount > 0) {
         //display
         starLexeme += "*";
 
@@ -539,10 +544,6 @@ void Interpreter::Visit(Unary* expr) {
         literal = *(literal.GetReference());
 
         starCount--;
-
-        if (starCount < 0 && literal.GetType() != Literal::Type::REFERENCE) {
-          break;
-        }
       }
       result = literal;
     }
@@ -559,27 +560,6 @@ void Interpreter::Visit(Variable* expr) {
 }
 
 //helpers
-void Interpreter::AccessMember(Expr* lhs, Expr* rhs) {
-  TokenTypeGetter typeGetter;
-  lhs->Accept(&typeGetter);
-
-  if(typeGetter.GetType() == GROUPING) {
-    AccessMember(dynamic_cast<Grouping*>(lhs)->inner, rhs);
-    return;
-  }
-
-  if(typeGetter.GetType() == STAR) {
-    TokenGetter tokGetter;
-    lhs->Accept(&tokGetter);
-    if (tokGetter.GetToken().GetLiteral().GetNumber() > 1) {
-      AccessMember(dynamic_cast<Unary*>(lhs)->rhs, rhs);
-    }
-  }
-
-  std::string name = dynamic_cast<Variable*>(dynamic_cast<Unary*>(lhs)->rhs)->name;
-  result = environment->GetVar(name).GetMember(rhs.GetLexeme());
-}
-
 void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector, Literal* self) {
   //build the environment
   std::vector<std::string> parameterVector = func.GetParameterVector();
@@ -603,7 +583,7 @@ void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector,
 
   //if calling on a method
   if (self != nullptr) {
-    env->Define(Token(IDENTIFIER, "self", self, -1), self);
+    env->Define(Token(REFERENCE, "this", self, -1), self);
   }
 
   //for recursion
@@ -624,6 +604,9 @@ void Interpreter::CallFunction(Literal func, std::vector<Literal> literalVector,
   }
 
   //TODO: extract from env?
+  if (self != nullptr) {
+    result = *self;
+  }
 }
 
 void Interpreter::CreateObject(Literal prototype, std::vector<Literal> literalVector) {
@@ -635,10 +618,6 @@ void Interpreter::CreateObject(Literal prototype, std::vector<Literal> literalVe
   //call the constructor
   if (object.GetMember("create").GetType() == Literal::Type::FUNCTION) {
     CallFunction(object.GetMember("create"), literalVector, &object);
-  }
-
-  if (result.GetType() != Literal::Type::UNDEFINED) {
-    throw RuntimeError(-1, "Unexpected value returned from a constructor");
   }
 
   result = object;

@@ -402,16 +402,16 @@ Expr* Parser::ScanOperator() {
     else if (Match(DOT)) {
       Token op = tokenVector[current-1];
       Expr* rhs = ScanOperator();
-      return new Binary(expr, op, rhs);
+      expr = new Binary(expr, op, rhs);
     }
 
     //accessing a member of a reference
-    else if (Match(MEMBER_DEREFERENCE)) {
+    else if (Match(MINUS_GREATER)) {
       //syntactic sugar
       Token op = tokenVector[current-1];
-      expr = new Unary(Token(STAR, "*", Literal(1,0), op.GetLine()), expr);
+      expr = new Unary(Token(STAR, "*", Literal(1.0), op.GetLine()), expr);
       Expr* rhs = ScanOperator();
-      return new Binary(expr, DOT, rhs);
+      expr = new Binary(expr, Token(DOT, ".", Literal(), op.GetLine()), rhs);
     }
 
     //done

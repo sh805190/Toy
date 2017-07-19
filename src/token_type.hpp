@@ -10,7 +10,7 @@ enum TokenType {
   //two character operators
   BANG_EQUAL, EQUAL_EQUAL,
   LESS_EQUAL, GREATER_EQUAL,
-  MEMBER_DEREFERENCE,
+  MINUS_GREATER,
 
   //keywords
   AND, BREAK, CASE, CLASS, CONTINUE, DEFAULT,

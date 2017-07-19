@@ -1,17 +1,13 @@
-READER:Declare car = (class {Declare create = (function( ){(created}Declare destroy = (function( ){(destroy}Declare faster = (function( ){(. (((*(this{VARIABLE}) (= (speed{VARIABLE} (. (((*(this{VARIABLE}) (+ (speed{VARIABLE} (1}Declare speed = (0}
-READER:Declare create = (function( ){(created}
-INTERPRETER:function() {...}
-READER:Declare destroy = (function( ){(destroy}
-INTERPRETER:function() {...}
-READER:Declare faster = (function( ){(. (((*(this{VARIABLE}) (= (speed{VARIABLE} (. (((*(this{VARIABLE}) (+ (speed{VARIABLE} (1}
-INTERPRETER:function() {...}
-READER:Declare speed = (0
-INTERPRETER:0
-INTERPRETER:class {...}
-READER:Declare c = ((car{VARIABLE}()
-READER:(created
-INTERPRETER:created
-INTERPRETER:object {create,destroy,faster,speed};
-READER:(result
-INTERPRETER:result
-READER:(. (c{VARIABLE} ((faster{VARIABLE}()
+Declare car = (class {Declare create = (function( ){(created)})Declare destroy = (function( ){(destroy)})
+
+
+
+Declare faster = (function( ){(= (. (*(this{VARIABLE})) (speed{VARIABLE})) (+ (. (*(this{VARIABLE})) (speed{VARIABLE})) (1)))})
+
+
+Declare speed = (0)})
+Declare c = ((car{VARIABLE})())
+(result)
+(. (c{VARIABLE}) (faster{VARIABLE}))
+(. (c{VARIABLE}) ((faster{VARIABLE})()))
+(. (c{VARIABLE}) (speed{VARIABLE}))
