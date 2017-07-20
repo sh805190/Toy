@@ -51,6 +51,7 @@ int main() {
 */
 
 #include <algorithm>
+#include <cctype>
 #include <cstdarg>
 #include <cstring>
 #include <fstream>
@@ -99,6 +100,18 @@ std::vector<std::string> splitString(std::string s, std::string delim) {
   return strings;
 }
 
+std::string toUpper(std::string s) {
+  std::string output;
+  for (char c : s) output += toupper(c);
+  return output;
+
+}
+std::string toLower(std::string s) {
+  std::string output;
+  for (char c : s) output += tolower(c);
+  return output;
+}
+
 void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<std::string, std::string>> data) {
   //print the basics
   os << "#pragma once" << std::endl;
@@ -127,6 +140,7 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   for (auto& p : data) {
     os << "  virtual void Visit(" << p.first << "*) = 0;" << std::endl;
   }
+  os << "  int line = -1" << std::endl;
   os << "};" << std::endl << std::endl;
 
   //print the base class
@@ -167,6 +181,101 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
 
     //close the class
     os << "};" << std::endl;
+  }
+}
+
+void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pair<std::string, std::string>> data) {
+  //print the basics
+  os << "#pragma once" << std::endl;
+  os << std::endl;
+
+  //forward declare the literal classes
+  os << "class " << baseName << ";" << std::endl;
+  for (auto& p : data) {
+    os << "class " << p.first << ";" << std::endl;
+  }
+  os << std::endl;
+
+  //declare the includes
+  os << "#include <map>" << std::endl;
+  os << "#include <string>" << std::endl;
+  os << "#include <vector>" << std::endl;
+  os << std::endl;
+
+  //delcare the base class
+  os << "class " << baseName << " {" << std::endl;
+  os << "public:" << std::endl;
+  os << "  enum class Type {" << std:: endl;
+  os << "    ";
+  for (auto& p : data) {
+    os << toUpper(p.first) << ", ";
+  }
+  os << std::endl;
+  os << "  };" << std::endl;
+  os << std::endl;
+
+  os << "  " << baseName << "() = default;" << std::endl;
+  os << "  virtual ~" << baseName << "() = default;" << std::endl << std::endl;
+  os << "  virtual Literal* Copy() { return new Literal(); }" << std::endl;
+  os << "  virtual std::string ToString() { return \"LITERAL\"; }" << std::endl;
+
+  os << "  Type type;" << std::endl;
+  os << "};" << std::endl << std::endl;
+
+  //declare each child class
+  for (auto& p : data) {
+    //parsing
+    std::vector<std::string> memberDeclarations = splitString(p.second, "/");
+    std::vector<std::string> memberNames = splitString(p.second, " /");
+
+    os << "class " << p.first << ": public " << baseName << " {" << std::endl;
+    os << "public:" << std::endl;
+
+    //defaults
+    os << "  " << p.first << "() = default;" << std::endl;
+    os << "  ~" << p.first << "() = default;" << std::endl;
+    os << std::endl;
+
+    if (memberDeclarations.size()) {
+      //parameter constructor
+      os << "  " << p.first << "(";
+      for (int i = 0; i < memberDeclarations.size(); ) {
+        os << memberDeclarations[i];
+        i++;
+        if (i < memberDeclarations.size()) {
+          os << ",";
+        }
+      }
+      os << ") {" << std::endl;
+      for (int i = 0; i < memberNames.size(); i += 2) {
+        os << "    this->" << memberNames[i+1] << " = std::move(" << memberNames[i+1] << ");" << std::endl;
+      }
+      os << "  }" << std::endl << std::endl;
+    }
+
+    //define the methods
+    os << "  Literal* Copy() override {" << std::endl;
+    os << "    return new " << p.first << "(";
+    for (int i = 0; i < memberNames.size(); ) {
+      os << memberNames[i+1];
+      i += 2;
+      if (i < memberNames.size()) os << ",";
+    }
+    os << ");" << std::endl;
+    os << "  }" << std::endl;
+    os << std::endl;
+
+    os << "  std::string ToString() override {" << std::endl;
+    os << "    return \""  << toLower(p.first) << "\";" << std::endl;
+    os << "  }" << std::endl;
+
+    //define the members
+    for (std::string m : memberDeclarations) {
+      os << "  " << m << ";" << std::endl;
+    }
+
+    //finish
+    os << "};" << std::endl << std::endl;
   }
 }
 
@@ -212,6 +321,20 @@ int main(int argc, char* argv[]) {
       {"Return", "int line, Expr* result"},
       {"Var", "Token name, Expr* initializer"},
       {"While", "Expr* condition, Stmt* branch"}
+    });
+  }
+  //Literal
+  else if (!strcmp(argv[1], "literal")) {
+    defineLiteral(os, "Literal", {
+      {"Array", "std::vector<Literal*> array"},
+      {"Boolean", "bool boolean"},
+      {"Class", "std::map<std::string,Literal*> members"},
+      {"Function", "std::vector<std::string> parameters/ void* block"},
+      {"Number", "double number"},
+      {"Object", "std::map<std::string,Literal*> members"},
+      {"Reference", "Literal* reference"},
+      {"String", "std::string str"},
+      {"Undefined", ""},
     });
   }
 

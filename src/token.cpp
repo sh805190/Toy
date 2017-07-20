@@ -1,28 +1,53 @@
 #include "token.hpp"
 
-Token::Token():
-  type(UNDEFINED), lexeme(""), literal(""), line(-1)
-{
-  //EMPTY
+Token::Token() {
+  type = UNDEFINED;
+  lexeme = "";
+  literal = nullptr;
+  line = -1;
 }
 
-Token::Token(TokenType argType):
-  type(argType), lexeme(""), literal(""), line(-1)
-{
-  //EMPTY
+Token::Token(const Token& rhs) {
+  *this = rhs;
 }
 
-Token::Token(TokenType argType, std::string argLexeme, Literal argLiteral, int argLine):
-  type(argType), lexeme(argLexeme), literal(argLiteral), line(argLine)
-{
-  //EMPTY
+Token::Token(Token&& rhs) {
+  *this = std::move(rhs);
+}
+
+Token::Token(TokenType argType) {
+  type = argType;
+  lexeme = "";
+  literal = nullptr;
+  line = -1;
+}
+
+Token::Token(TokenType argType, std::string argLexeme, Literal* argLiteral, int argLine) {
+  type = argType;
+  lexeme = argLexeme;
+  literal = argLiteral;
+  line = argLine;
 }
 
 Token& Token::operator=(const Token& rhs) {
   this->type = rhs.type;
   this->lexeme = rhs.lexeme;
+  this->literal = rhs.literal->Copy();
+  this->line = rhs.line;
+  return *this;
+}
+
+Token& Token::operator=(Token&& rhs) {
+  this->type = rhs.type;
+  this->lexeme = rhs.lexeme;
   this->literal = rhs.literal;
   this->line = rhs.line;
+
+  rhs.type = UNDEFINED;
+  rhs.lexeme = "";
+  rhs.literal = nullptr;
+  rhs.line = -1;
+
   return *this;
 }
 
@@ -34,7 +59,7 @@ std::string Token::GetLexeme() {
   return lexeme;
 }
 
-Literal Token::GetLiteral() {
+Literal* Token::GetLiteral() {
   return literal;
 }
 
@@ -43,7 +68,14 @@ int Token::GetLine() {
 }
 
 std::string Token::ToString() {
-  std::string ret;
-  ret += "Token " + std::to_string(int(type)) + " '" + lexeme + "' " + literal.ToString() + " line " + std::to_string(line) + ";";
-  return ret;
+  std::string output = std::string() + "Token " + std::to_string(int(type)) + " '" + lexeme + "' ";
+  if (literal) {
+    output += literal->ToString();
+    output += " ";
+  }
+  else {
+    output +=  "nullptr ";
+  }
+  output += std::string() + "line " + std::to_string(line) + ";";
+  return output;
 }

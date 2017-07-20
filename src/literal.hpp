@@ -1,71 +1,199 @@
 #pragma once
 
+class Literal;
+class Array;
+class Boolean;
+class Class;
+class Function;
+class Number;
+class Object;
+class Reference;
+class String;
+class Undefined;
+
 #include <map>
 #include <string>
 #include <vector>
 
-class Environment;
-
 class Literal {
 public:
   enum class Type {
-    ARRAY, BOOLEAN, CLASS, FUNCTION, NUMBER, OBJECT, REFERENCE, STRING, UNDEFINED
+    ARRAY, BOOLEAN, CLASS, FUNCTION, NUMBER, OBJECT, REFERENCE, STRING, UNDEFINED, 
   };
 
-  Literal();
-  Literal(const Literal&);
-  Literal(Type);
-  Literal(std::vector<Literal>& literalVector);
-  Literal(bool);
-  Literal(std::vector<std::string>& parameterVector, void* block);
-  Literal(double);
-  Literal(Environment*);
-  Literal(Literal*);
-  Literal(std::string);
+  Literal() = default;
+  virtual ~Literal() = default;
 
-  ~Literal();
-
-  Literal& operator=(const Literal&);
-
-  Type SetType(Type);
-  Type GetType();
-
-  std::vector<Literal> SetLiteralVector(std::vector<Literal>& literalVector);
-  std::vector<Literal> GetLiteralVector();
-
-  bool SetBoolean(bool);
-  bool GetBoolean();
-
-  std::vector<std::string> SetParameterVector(std::vector<std::string>& parameterVector);
-  std::vector<std::string> GetParameterVector();
-
-  void* SetBlock(void*);
-  void* GetBlock();
-
-  double SetNumber(double);
-  double GetNumber();
-
-  Literal SetMember(std::string, Literal);
-  Literal GetMember(std::string);
-
-  Literal* SetReference(Literal*);
-  Literal* GetReference();
-
-  std::string SetString(std::string);
-  std::string GetString();
-
-  std::string ToString();
-
-public:
+  virtual Literal* Copy() { return new Literal(); }
+  virtual std::string ToString() { return "LITERAL"; }
   Type type;
-  std::vector<Literal> literalVector;
-  bool boolean = false;
-  std::vector<std::string> parameterVector;
-  void* block = nullptr; //using Block type caused issues
-  double number = 0;
-  std::map<std::string, Literal> literalMap;
-  Literal* reference = nullptr;
+};
+
+class Array: public Literal {
+public:
+  Array() = default;
+  ~Array() = default;
+
+  Array(std::vector<Literal*> array) {
+    this->array = std::move(array);
+  }
+
+  Literal* Copy() override {
+    return new Array(array);
+  }
+
+  std::string ToString() override {
+    return "array";
+  }
+  std::vector<Literal*> array;
+};
+
+class Boolean: public Literal {
+public:
+  Boolean() = default;
+  ~Boolean() = default;
+
+  Boolean(bool boolean) {
+    this->boolean = std::move(boolean);
+  }
+
+  Literal* Copy() override {
+    return new Boolean(boolean);
+  }
+
+  std::string ToString() override {
+    return "boolean";
+  }
+  bool boolean;
+};
+
+class Class: public Literal {
+public:
+  Class() = default;
+  ~Class() = default;
+
+  Class(std::map<std::string,Literal*> members) {
+    this->members = std::move(members);
+  }
+
+  Literal* Copy() override {
+    return new Class(members);
+  }
+
+  std::string ToString() override {
+    return "class";
+  }
+  std::map<std::string,Literal*> members;
+};
+
+class Function: public Literal {
+public:
+  Function() = default;
+  ~Function() = default;
+
+  Function(std::vector<std::string> parameters, void* block) {
+    this->parameters = std::move(parameters);
+    this->block = std::move(block);
+  }
+
+  Literal* Copy() override {
+    return new Function(parameters,block);
+  }
+
+  std::string ToString() override {
+    return "function";
+  }
+  std::vector<std::string> parameters;
+   void* block;
+};
+
+class Number: public Literal {
+public:
+  Number() = default;
+  ~Number() = default;
+
+  Number(double number) {
+    this->number = std::move(number);
+  }
+
+  Literal* Copy() override {
+    return new Number(number);
+  }
+
+  std::string ToString() override {
+    return "number";
+  }
+  double number;
+};
+
+class Object: public Literal {
+public:
+  Object() = default;
+  ~Object() = default;
+
+  Object(std::map<std::string,Literal*> members) {
+    this->members = std::move(members);
+  }
+
+  Literal* Copy() override {
+    return new Object(members);
+  }
+
+  std::string ToString() override {
+    return "object";
+  }
+  std::map<std::string,Literal*> members;
+};
+
+class Reference: public Literal {
+public:
+  Reference() = default;
+  ~Reference() = default;
+
+  Reference(Literal* reference) {
+    this->reference = std::move(reference);
+  }
+
+  Literal* Copy() override {
+    return new Reference(reference);
+  }
+
+  std::string ToString() override {
+    return "reference";
+  }
+  Literal* reference;
+};
+
+class String: public Literal {
+public:
+  String() = default;
+  ~String() = default;
+
+  String(std::string str) {
+    this->str = std::move(str);
+  }
+
+  Literal* Copy() override {
+    return new String(str);
+  }
+
+  std::string ToString() override {
+    return "string";
+  }
   std::string str;
 };
 
-#include "environment.hpp"
+class Undefined: public Literal {
+public:
+  Undefined() = default;
+  ~Undefined() = default;
+
+  Literal* Copy() override {
+    return new Undefined();
+  }
+
+  std::string ToString() override {
+    return "undefined";
+  }
+};
+

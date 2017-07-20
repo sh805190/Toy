@@ -28,6 +28,7 @@ public:
   virtual void Visit(Return*) = 0;
   virtual void Visit(Var*) = 0;
   virtual void Visit(While*) = 0;
+  int line = -1
 };
 
 class Stmt {

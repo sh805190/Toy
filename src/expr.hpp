@@ -36,6 +36,7 @@ public:
   virtual void Visit(Unary*) = 0;
   virtual void Visit(Value*) = 0;
   virtual void Visit(Variable*) = 0;
+  int line = -1
 };
 
 class Expr {

@@ -1,7 +1,5 @@
 #pragma once
 
-class Token;
-
 #include "token_type.hpp"
 
 #include "literal.hpp"
@@ -12,14 +10,18 @@ class Token;
 class Token {
 public:
   Token();
+  Token(const Token&);
+  Token(Token&&);
+
   Token(TokenType type);
-  Token(TokenType type, std::string lexeme, Literal literal, int line);
+  Token(TokenType type, std::string lexeme, Literal* literal, int line);
 
   Token& operator=(const Token&);
+  Token& operator=(Token&&);
 
   TokenType GetType();
   std::string GetLexeme();
-  Literal GetLiteral();
+  Literal* GetLiteral();
   int GetLine();
 
   //debugging
@@ -28,6 +30,6 @@ public:
 private:
   TokenType type;
   std::string lexeme;
-  Literal literal;
+  Literal* literal;
   int line;
 };
