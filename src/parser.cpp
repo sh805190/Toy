@@ -372,8 +372,8 @@ Expr* Parser::ScanUnary() {
 }
 
 Expr* Parser::ScanOperator() {
-  //operation = actions preformed on a primary
-  Expr* expr = ScanPrimary();
+  //operation = actions preformed on a primary/binding
+  Expr* expr = ScanBinding();
 
   //chained arrays/functions need a loop
   for (;;) {
@@ -398,14 +398,26 @@ Expr* Parser::ScanOperator() {
       expr = new Invocation(expr, exprVector);
     }
 
-    //accessing a member of an object
-    else if (Match(DOT)) {
-      Token op = tokenVector[current-1];
-      Expr* rhs = ScanOperator();
-      expr = new Binary(expr, op, rhs);
+    //done
+    else {
+      break;
     }
+  }
 
-    //accessing a member of a reference
+  return expr;
+}
+
+Expr* Parser::ScanBinding() {
+  Expr* expr = ScanPrimary();
+
+  //accessing a member of an object
+  if (Match(DOT)) {
+    Token op = tokenVector[current-1];
+    Expr* rhs = ScanBinding();
+    expr = new Binary(expr, op, rhs);
+  }
+
+/*    //accessing a member of a reference
     else if (Match(MINUS_GREATER)) {
       //syntactic sugar
       Token op = tokenVector[current-1];
@@ -413,12 +425,7 @@ Expr* Parser::ScanOperator() {
       Expr* rhs = ScanOperator();
       expr = new Binary(expr, Token(DOT, ".", Literal(), op.GetLine()), rhs);
     }
-
-    //done
-    else {
-      break;
-    }
-  }
+*/
 
   return expr;
 }

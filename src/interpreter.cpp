@@ -35,9 +35,9 @@ void Interpreter::Execute(Stmt* stmt) {
   returnCalled = false;
 
   try {
-std::cout << "READER:";
-reader.Print(stmt);
-std::cout << std::endl;
+//std::cout << "READER:";
+//reader.Print(stmt);
+//std::cout << std::endl;
 
     result = Literal();
     stmt->Accept(this);
@@ -206,7 +206,7 @@ void Interpreter::Visit(Assign* expr) {
   TokenTypeGetter typeGetter;
   expr->target->Accept(&typeGetter);
 
-  if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR) {
+  if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR && typeGetter.GetType() != DOT) {
     throw RuntimeError(expr->op.GetLine(), "Unexpected type on left hand side of assignment");
   }
 
@@ -302,27 +302,39 @@ void Interpreter::Visit(Assign* expr) {
       starCount--;
     }
   }
+
+  else if (typeGetter.GetType() == DOT) {
+    std::cout << "DEBUG: ASSIGNING TO A MEMBER" << std::endl;
+    throw RuntimeError(expr->op.GetLine(), "Assigning to a member not implemented yet");
+  }
+
+  //something isn't working
+  else {
+    throw RuntimeError(expr->op.GetLine(), "Assignment failed for an unknown reason");
+  }
 }
 
 void Interpreter::Visit(Binary* expr) {
-  //evaluate each side
+  //evaluate lhs
   Evaluate(expr->lhs);
   Literal lhs = result;
 
-  //access operator
+  //access member
   if (expr->op.GetType() == DOT) {
+    //check the rhs type
     TokenTypeGetter typeGetter;
     expr->rhs->Accept(&typeGetter);
-
-    if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != INVOCATION) {
-      throw RuntimeError(expr->op.GetLine(), std::string() + "Can't access a member of '" + lhs.ToString() + "' (type " + std::to_string(typeGetter.GetType()) + ")");
+    if (typeGetter.GetType() == IDENTIFIER) {
+      Token name = dynamic_cast<Variable*>(expr->rhs)->name;
+      result = lhs.GetMember(name.GetLexeme());
+      return;
     }
 
-    Evaluate(expr->rhs);
-
-    return;
+    //error
+    throw RuntimeError(expr->op.GetLine(), std::string() + "Can't access member of an object (type " + std::to_string(typeGetter.GetType()) + ")");
   }
 
+  //get the rhs for all other operations
   Evaluate(expr->rhs);
   Literal rhs = result;
 

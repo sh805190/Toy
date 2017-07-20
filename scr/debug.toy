@@ -14,7 +14,7 @@ class
   };
 
   var faster = function() {
-    this->speed = this->speed + 1;
+    (*this).speed = (*this).speed + 1;
   };
 
   var speed = 0;
@@ -23,6 +23,7 @@ class
 var c = car();
 
 "result";
+c;
 c.faster;
 c.faster();
 c.speed;
