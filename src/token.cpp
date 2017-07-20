@@ -29,6 +29,12 @@ Token::Token(TokenType argType, std::string argLexeme, Literal* argLiteral, int 
   line = argLine;
 }
 
+Token::~Token() {
+  if (literal) {
+    delete literal;
+  }
+}
+
 Token& Token::operator=(const Token& rhs) {
   this->type = rhs.type;
   this->lexeme = rhs.lexeme;

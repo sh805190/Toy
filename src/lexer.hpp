@@ -50,7 +50,7 @@ private:
 
   //helpers
   void AddToken(TokenType type);
-  void AddToken(TokenType type, Literal literal);
+  void AddToken(TokenType type, Literal* literal);
   char Advance();
   void EatComments();
   bool IsAlpha(char c);

@@ -21,12 +21,13 @@ public:
     ARRAY, BOOLEAN, CLASS, FUNCTION, NUMBER, OBJECT, REFERENCE, STRING, UNDEFINED, 
   };
 
-  Literal() = default;
-  virtual ~Literal() = default;
+  Literal() { count++; }
+  virtual ~Literal() { count--; }
 
   virtual Literal* Copy() { return new Literal(); }
   virtual std::string ToString() { return "LITERAL"; }
   Type type;
+static int count;
 };
 
 class Array: public Literal {
