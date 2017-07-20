@@ -9,6 +9,7 @@ class Parser {
 public:
   Parser() = delete;
   Parser(std::vector<Token> tokens);
+  ~Parser();
 
   std::vector<Stmt*> GetStmtVector();
 
@@ -47,7 +48,7 @@ private:
   Expr* ScanSpecial();
 
   //helpers
-  Token Advance();
+  Token& Advance();
   void Consume(Token token, std::string errmsg);
   bool IsAtEnd();
   bool Match(Token);

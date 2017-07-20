@@ -32,6 +32,6 @@ public:
 private:
   TokenType type;
   std::string lexeme;
-  Literal* literal;
+  Literal* literal = nullptr;
   int line;
 };

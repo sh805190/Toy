@@ -50,16 +50,17 @@ public:
   }
 
   void Visit(Value* expr) override {
-    switch(expr->value.GetType()) {
-      case Literal::Type::BOOLEAN:
+    switch(expr->value->type) {
+      case Literal::Type::LBOOLEAN:
         type = BOOLEAN;
       break;
-      case Literal::Type::NUMBER:
+      case Literal::Type::LNUMBER:
         type = NUMBER;
       break;
-      case Literal::Type::STRING:
+      case Literal::Type::LSTRING:
         type = STRING;
       break;
+      //TODO: more?
     }
   }
 
@@ -78,15 +79,15 @@ private:
 class TokenGetter: public ExprVisitor {
 public:
   void Visit(Expr* expr) override {
-    token = Token(UNDEFINED, "Na", Literal(), -1);
+    token = Token(UNDEFINED, "Na", nullptr, -1);
   }
 
   void Visit(Array* expr) override {
-    token = Token(ARRAY, "Na", Literal(), -2);
+    token = Token(ARRAY, "Na", nullptr, -1);
   }
 
   void Visit(Assign* expr) override {
-    token = Token(EQUAL, "Na", Literal(), -3);
+    token = Token(EQUAL, "Na", nullptr, -1);
   }
 
   void Visit(Binary* expr) override {
@@ -94,23 +95,23 @@ public:
   }
 
   void Visit(Class* expr) override {
-    token = Token(CLASS, "Na", Literal(), -4);
+    token = Token(CLASS, "Na", nullptr, -1);
   }
 
   void Visit(Function* expr) override {
-    token = Token(FUNCTION, "Na", Literal(), -6);
+    token = Token(FUNCTION, "Na", nullptr, -1);
   }
 
   void Visit(Grouping* expr) override {
-    token = Token(LEFT_PAREN, "Na", Literal(), -7);
+    token = Token(LEFT_PAREN, "Na", nullptr, -1);
   }
 
   void Visit(Index* expr) override {
-    token = Token(INDEX, "Na", Literal(), -8);
+    token = Token(INDEX, "Na", nullptr, -1);
   }
 
   void Visit(Invocation* expr) override {
-    token = Token(INVOCATION, "Na", Literal(), -9);
+    token = Token(INVOCATION, "Na", nullptr, -1);
   }
 
   void Visit(Logical* expr) override {
@@ -122,7 +123,7 @@ public:
   }
 
   void Visit(Value* expr) override {
-    token = Token(VALUE, "Na", Literal(), -10);
+    token = Token(VALUE, "Na", nullptr, -1);
   }
 
   void Visit(Variable* expr) override {

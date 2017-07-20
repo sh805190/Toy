@@ -28,19 +28,22 @@ public:
   virtual void Visit(Return*) = 0;
   virtual void Visit(Var*) = 0;
   virtual void Visit(While*) = 0;
-  int line = -1
 };
 
 class Stmt {
 public:
+  Stmt() = default;
+  Stmt(int ln) { line = ln; }
   virtual void Accept(StmtVisitor* visitor) {
     visitor->Visit(this);
   }
+  int line = -1;
 };
 
 class Block: public Stmt {
 public:
-  Block(std::vector<Stmt*> stmtVector) {
+  Block(int ln, std::vector<Stmt*> stmtVector) {
+this->line = ln;
     this->stmtVector = stmtVector;
   }
 
@@ -53,33 +56,32 @@ public:
 
 class Break: public Stmt {
 public:
-  Break(int line) {
-    this->line = line;
+  Break(int ln) {
+this->line = ln;
   }
 
   void Accept(StmtVisitor* visitor) override {
     visitor->Visit(this);
   }
 
-  int line;
-};
+ };
 
 class Continue: public Stmt {
 public:
-  Continue(int line) {
-    this->line = line;
+  Continue(int ln) {
+this->line = ln;
   }
 
   void Accept(StmtVisitor* visitor) override {
     visitor->Visit(this);
   }
 
-  int line;
-};
+ };
 
 class Expression: public Stmt {
 public:
-  Expression(Expr* expr) {
+  Expression(int ln, Expr* expr) {
+this->line = ln;
     this->expr = expr;
   }
 
@@ -92,7 +94,8 @@ public:
 
 class If: public Stmt {
 public:
-  If(Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
+  If(int ln, Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
+this->line = ln;
     this->condition = condition;
     this->thenBranch = thenBranch;
     this->elseBranch = elseBranch;
@@ -109,8 +112,8 @@ public:
 
 class Return: public Stmt {
 public:
-  Return(int line, Expr* result) {
-    this->line = line;
+  Return(int ln, Expr* result) {
+this->line = ln;
     this->result = result;
   }
 
@@ -118,13 +121,13 @@ public:
     visitor->Visit(this);
   }
 
-  int line;
   Expr* result;
 };
 
 class Var: public Stmt {
 public:
-  Var(Token name, Expr* initializer) {
+  Var(int ln, Token name, Expr* initializer) {
+this->line = ln;
     this->name = name;
     this->initializer = initializer;
   }
@@ -139,7 +142,8 @@ public:
 
 class While: public Stmt {
 public:
-  While(Expr* condition, Stmt* branch) {
+  While(int ln, Expr* condition, Stmt* branch) {
+this->line = ln;
     this->condition = condition;
     this->branch = branch;
   }

@@ -1,5 +1,9 @@
 #include "error_handler.hpp"
+#include "ast_deleter.hpp"
+#include "ast_reader.hpp"
 #include "lexer.hpp"
+#include "parser.hpp"
+#include "stmt.hpp"
 #include "token.hpp"
 
 #include <fstream>
@@ -9,12 +13,17 @@
 
 void run(std::string source) {
 {
+  ASTDeleter deleter;
+  ASTReaderPrefix reader;
+
   Lexer lexer(source);
+  Parser parser(lexer.GetTokenVector());
+  std::vector<Stmt*> stmtVector = parser.GetStmtVector();
 
-  std::vector<Token> tokenVector = lexer.GetTokenVector();
-
-  for (Token& tok : tokenVector) {
-    std::cout << tok.ToString() << std::endl;
+  for (Stmt* stmt : stmtVector) {
+    reader.Print(stmt);
+    std::cout << std::endl;
+    deleter.DeleteAST(stmt);
   }
 
   if (ErrorHandler::GetErrorCount()) {

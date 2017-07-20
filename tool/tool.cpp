@@ -140,15 +140,17 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   for (auto& p : data) {
     os << "  virtual void Visit(" << p.first << "*) = 0;" << std::endl;
   }
-  os << "  int line = -1" << std::endl;
   os << "};" << std::endl << std::endl;
 
   //print the base class
   os << "class " << baseName << " {" << std::endl;
   os << "public:" << std::endl;
+  os << "  " << baseName << "() = default;" << std::endl;
+  os << "  " << baseName << "(int ln) { line = ln; }" << std::endl;
   os << "  virtual void Accept(" << baseName << "Visitor* visitor) {" << std::endl;
   os << "    visitor->Visit(this);" << std::endl;
   os << "  }" << std::endl;
+  os << "  int line = -1;" << std::endl;
   os << "};" << std::endl;
 
   //define each AST class
@@ -157,10 +159,13 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
     os << std::endl;
     os << "class " << p.first << ": public " << baseName << " {" << std::endl;
     os << "public:" << std::endl;
-    os << "  " << p.first << "(" << p.second << ") {" << std::endl;
+    os << "  " << p.first << "(int ln";
+    if (p.second.size()) os << ", ";
+    os << p.second << ") {" << std::endl;
 
     //set the member values
     std::vector<std::string> members = splitString(p.second, " ,");
+    os << "this->line = ln;" << std::endl;
     for (int i = 0; i < members.size(); i += 2) { //+2, since the type declaration is mixed in
       os << "    this->" << members[i+1] << " = " << members[i+1] << ";" << std::endl;
     }
@@ -214,12 +219,14 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
   os << "  };" << std::endl;
   os << std::endl;
 
-  os << "  " << baseName << "() = default;" << std::endl;
-  os << "  virtual ~" << baseName << "() = default;" << std::endl << std::endl;
+  os << "  " << baseName << "() { count++; }" << std::endl;
+  os << "  virtual ~" << baseName << "() { count--; }" << std::endl << std::endl;
   os << "  virtual Literal* Copy() { return new Literal(); }" << std::endl;
   os << "  virtual std::string ToString() { return \"LITERAL\"; }" << std::endl;
 
   os << "  Type type;" << std::endl;
+  os << "  //debugging" << std::endl;
+  os << "  static int count;" << std::endl;
   os << "};" << std::endl << std::endl;
 
   //declare each child class
@@ -233,7 +240,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
 
     //defaults
     os << "  " << p.first << "() = default;" << std::endl;
-    os << "  ~" << p.first << "() = default;" << std::endl;
+    os << "  virtual ~" << p.first << "() = default;" << std::endl;
     os << std::endl;
 
     if (memberDeclarations.size()) {
@@ -279,7 +286,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
   }
 }
 
-int main(int argc, char* argv[]) {
+int run(int argc, std::vector<std::string> argv) {
   //ensure the correct usage
   if (argc != 3) {
     std::cout << "Usage: " << argv[0] << " OP fname" << std::endl;
@@ -294,10 +301,10 @@ int main(int argc, char* argv[]) {
   }
 
   //Expr
-  if (!strcmp(argv[1], "expr")) {
+  if (!strcmp(argv[1].c_str(), "expr")) {
     defineAST(os, "Expr", {
       {"Array", "std::vector<Expr*> exprVector"},
-      {"Assign", "Token op, Expr* target, Expr* value"}, 
+      {"Assign", "Expr* target, Expr* value"}, 
       {"Binary", "Expr* lhs, Token op, Expr* rhs"},
       {"Class", "Block* block"},
       {"Function", "std::vector<std::string> parameterVector, Block* block"},
@@ -306,35 +313,35 @@ int main(int argc, char* argv[]) {
       {"Invocation", "Expr* expr, std::vector<Expr*> exprVector"},
       {"Logical", "Expr* lhs, Token op, Expr* rhs"},
       {"Unary", "Token op, Expr* rhs"},
-      {"Value", "Literal value"},
+      {"Value", "Literal* value"},
       {"Variable", "Token name"}
     });
   }
   //Stmt
-  else if (!strcmp(argv[1], "stmt")) {
+  else if (!strcmp(argv[1].c_str(), "stmt")) {
     defineAST(os, "Stmt", {
       {"Block", "std::vector<Stmt*> stmtVector"},
-      {"Break", "int line"},
-      {"Continue", "int line"},
+      {"Break", ""},
+      {"Continue", ""},
       {"Expression", "Expr* expr"},
       {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},
-      {"Return", "int line, Expr* result"},
+      {"Return", "Expr* result"},
       {"Var", "Token name, Expr* initializer"},
       {"While", "Expr* condition, Stmt* branch"}
     });
   }
   //Literal
-  else if (!strcmp(argv[1], "literal")) {
+  else if (!strcmp(argv[1].c_str(), "literal")) {
     defineLiteral(os, "Literal", {
-      {"Array", "std::vector<Literal*> array"},
-      {"Boolean", "bool boolean"},
-      {"Class", "std::map<std::string,Literal*> members"},
-      {"Function", "std::vector<std::string> parameters/ void* block"},
-      {"Number", "double number"},
-      {"Object", "std::map<std::string,Literal*> members"},
-      {"Reference", "Literal* reference"},
-      {"String", "std::string str"},
-      {"Undefined", ""},
+      {"lArray", "std::vector<Literal*> array"},
+      {"lBoolean", "bool boolean"},
+      {"lClass", "std::map<std::string,Literal*> members"},
+      {"lFunction", "std::vector<std::string> parameters/ void* block"},
+      {"lNumber", "double number"},
+      {"lObject", "std::map<std::string,Literal*> members"},
+      {"lReference", "Literal* reference"},
+      {"lString", "std::string str"},
+      {"lUndefined", ""},
     });
   }
 
@@ -350,3 +357,14 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
+//lazy
+int main(int argc, char* argv[]) {
+  if (argc == 3) {
+    return run(argc, {argv[0], argv[1], argv[2]});
+  }
+  run(3,{argv[0], "expr", "src/expr.hpp"});
+  run(3,{argv[0], "stmt", "src/stmt.hpp"});
+  run(3,{argv[0], "literal", "src/literal.hpp"});
+
+  return 0;
+}

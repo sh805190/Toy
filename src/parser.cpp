@@ -8,6 +8,10 @@ Parser::Parser(std::vector<Token> t): tokenVector(t) {
   //EMPTY
 }
 
+Parser::~Parser() {
+  tokenVector.clear();
+}
+
 std::vector<Stmt*> Parser::GetStmtVector() {
   statementVector.clear();
 
@@ -29,7 +33,7 @@ std::vector<Stmt*> Parser::GetStmtVector() {
 
 //rules
 Stmt* Parser::ScanStatement() {
-  Token tok = tokenVector[current]; //work while pointing at the current token
+  Token &tok = tokenVector[current]; //work while pointing at the current token
   Stmt* ret = nullptr;
 
   switch(tok.GetType()) {
@@ -82,7 +86,7 @@ Stmt* Parser::ScanStatement() {
 
     //delegate
     default:
-      ret = new Expression(ScanExpression());
+      ret = new Expression(tok.GetLine(), ScanExpression());
   }
 
   //finally
@@ -97,17 +101,17 @@ Stmt* Parser::ScanStatement() {
 
 //stmt types
 Stmt* Parser::ScanBreak() {
-  Advance(); //skip break keyword
-  return new Break(tokenVector[current-1].GetLine());
+  Token &tok = Advance(); //skip break keyword
+  return new Break(tok.GetLine());
 }
 
 Stmt* Parser::ScanContinue() {
-  Advance(); //skip continue keyword
-  return new Continue(tokenVector[current-1].GetLine());
+  Token &tok = Advance(); //skip continue keyword
+  return new Continue(tok.GetLine());
 }
 
 Stmt* Parser::ScanFor() {
-  Advance(); //skip for keyword
+  Token& tok = Advance(); //skip for keyword
  
   //heading
   Consume(LEFT_PAREN, "Expected '(' after for keyword");
@@ -118,7 +122,7 @@ Stmt* Parser::ScanFor() {
     initializer = ScanVar();
   }
   else if (tokenVector[current].GetType() != SEMICOLON) {
-    initializer = new Expression(ScanExpression());
+    initializer = new Expression(tokenVector[current].GetLine(), ScanExpression());
   }
 
   Consume(SEMICOLON, "Expected ';' after for initializer");
@@ -129,7 +133,7 @@ Stmt* Parser::ScanFor() {
     condition = ScanExpression();
   }
   else {
-    condition = new Value(true); //empty condition means forever
+    condition = new Value(tokenVector[current].GetLine(), new lBoolean(true)); //empty condition means forever
   }
 
   Consume(SEMICOLON, "Expected ';' after for condition");
@@ -148,11 +152,11 @@ Stmt* Parser::ScanFor() {
     block = ScanBlock();
   }
   else {
-    block = new Block({ScanStatement()});
+    block = new Block(tokenVector[current].GetLine(), {ScanStatement()});
   }
 
   //store the body inside another block (prevent bugs with naming conflicts)
-  block = new Block({block});
+  block = new Block(block->line, {block});
 
   //piece it all together
   std::vector<Stmt*> stmtVector;
@@ -160,20 +164,20 @@ Stmt* Parser::ScanFor() {
   if (initializer) {
     stmtVector.push_back(initializer);
   }
-  if (increment) {
-    dynamic_cast<Block*>(block)->stmtVector.push_back(new Expression(increment));
+  if (increment) { //append to the block before inserting into the While
+    dynamic_cast<Block*>(block)->stmtVector.push_back(new Expression(increment->line, increment));
   }
-  stmtVector.push_back(new While(condition, block));
+  stmtVector.push_back(new While(tok.GetLine(), condition, block));
 
   //one of those
   skipSemicolon = true;
 
   //finally, return the full, new block object
-  return new Block(stmtVector);
+  return new Block(tok.GetLine(), stmtVector);
 }
 
 Stmt* Parser::ScanIf() {
-  Advance(); //skip if keyword
+  Token& tok = Advance(); //skip if keyword
 
   //conditional
   Consume(LEFT_PAREN, "Expected '(' after if keyword");
@@ -186,7 +190,7 @@ Stmt* Parser::ScanIf() {
     thenBranch = ScanBlock();
   }
   else {
-    thenBranch = new Block({ScanStatement()});
+    thenBranch = new Block(tokenVector[current].GetLine(), {ScanStatement()});
   }
 
   //else
@@ -196,7 +200,7 @@ Stmt* Parser::ScanIf() {
       elseBranch = ScanBlock();
     }
     else {
-      elseBranch = new Block({ScanStatement()});
+      elseBranch = new Block(tokenVector[current].GetLine(), {ScanStatement()});
     }
   }
 
@@ -204,7 +208,7 @@ Stmt* Parser::ScanIf() {
   skipSemicolon = true;
 
   //finally
-  return new If(condition, thenBranch, elseBranch);
+  return new If(tok.GetLine(), condition, thenBranch, elseBranch);
 }
 
 Stmt* Parser::ScanModule() {
@@ -213,12 +217,12 @@ Stmt* Parser::ScanModule() {
 }
 
 Stmt* Parser::ScanReturn() {
-  Advance(); //skip return keyword
+  Token& tok = Advance(); //skip return keyword
   if (tokenVector[current].GetType() != SEMICOLON) {
-    return new Return(tokenVector[current-1].GetLine(), ScanExpression());
+    return new Return(tok.GetLine(), ScanExpression());
   }
   else {
-    return new Return(tokenVector[current-1].GetLine(), nullptr);
+    return new Return(tok.GetLine(), nullptr);
   }
 }
 
@@ -228,7 +232,7 @@ Stmt* Parser::ScanUse() {
 }
 
 Stmt* Parser::ScanVar() {
-  Advance(); //skip var keyword
+  Token& tok = Advance(); //skip var keyword
   Token name = Advance();
   Expr* initializer = nullptr;
 
@@ -236,11 +240,11 @@ Stmt* Parser::ScanVar() {
     initializer = ScanExpression();
   }
 
-  return new Var(name, initializer);
+  return new Var(tok.GetLine(), name, initializer);
 }
 
 Stmt* Parser::ScanWhile() {
-  Advance(); //skip while keyword
+  Token& tok = Advance(); //skip while keyword
 
   //conditional
   Consume(LEFT_PAREN, "Expected '(' after while keyword");
@@ -253,14 +257,14 @@ Stmt* Parser::ScanWhile() {
     branch = ScanBlock();
   }
   else {
-    branch = new Block({ScanStatement()});
+    branch = new Block(tokenVector[current].GetLine(), {ScanStatement()});
   }
 
   //one of those
   skipSemicolon = true;
 
   //finally
-  return new While(condition, branch);
+  return new While(tok.GetLine(), condition, branch);
 }
 
 Expr* Parser::ScanExpression() {
@@ -277,7 +281,7 @@ Expr* Parser::ScanAssignment() {
     expr->Accept(&typeGetter);
 
     if (typeGetter.GetType() != IDENTIFIER && typeGetter.GetType() != INDEX && typeGetter.GetType() != STAR && typeGetter.GetType() != DOT) {
-      throw ParserError(tokenVector[current-1].GetLine(), std::string() + "Invalid assignment target");
+      throw ParserError(expr->line, std::string() + "Invalid assignment target");
     }
 
     //get the variable token
@@ -285,7 +289,7 @@ Expr* Parser::ScanAssignment() {
     Expr* rhs = ScanExpression();
 
     //simple
-    expr = new Assign(op, expr, rhs);
+    expr = new Assign(op.GetLine(), expr, rhs);
   }
 
   return expr;
@@ -297,7 +301,7 @@ Expr* Parser::ScanLogical() {
   if (Match(AND) || Match(OR)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanComparison();
-    expr = new Logical(expr, op, rhs);
+    expr = new Logical(op.GetLine(), expr, op, rhs);
   }
 
   return expr;
@@ -309,7 +313,7 @@ Expr* Parser::ScanComparison() {
   if (Match(EQUAL_EQUAL) || Match(BANG_EQUAL) || Match(LESS) || Match(LESS_EQUAL) || Match(GREATER) || Match(GREATER_EQUAL)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanTerm();
-    expr = new Binary(expr, op, rhs);
+    expr = new Binary(op.GetLine(), expr, op, rhs);
   }
 
   return expr;
@@ -321,7 +325,7 @@ Expr* Parser::ScanTerm() {
   if (Match(PLUS) || Match(MINUS)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanFactor();
-    expr = new Binary(expr, op, rhs);
+    expr = new Binary(op.GetLine(), expr, op, rhs);
   }
 
   return expr;
@@ -334,12 +338,12 @@ Expr* Parser::ScanFactor() {
     Token op = tokenVector[current-1];
 
     //account for reference notation screwing with arithmetic
-    if (op.GetType() == STAR && op.GetLiteral().GetNumber() != 1) {
+    if (op.GetType() == STAR && dynamic_cast<lNumber*>(op.GetLiteral())->number != 1) {
       throw ParserError(op.GetLine(), "Too many characters in '" + op.GetLexeme() + "' (did you mean to use a reference?)");
     }
 
     Expr* rhs = ScanUnary();
-    expr = new Binary(expr, op, rhs);
+    expr = new Binary(op.GetLine(), expr, op, rhs);
   }
 
   return expr;
@@ -350,7 +354,7 @@ Expr* Parser::ScanUnary() {
   if (Match(MINUS) || Match(BANG)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanUnary();
-    return new Unary(op, rhs);
+    return new Unary(op.GetLine(), op, rhs);
   }
 
   //references
@@ -365,7 +369,7 @@ Expr* Parser::ScanUnary() {
       throw ParserError(op.GetLine(), std::string() + "Operand of '" + op.GetLexeme() + "' must be a variable");
     }
 
-    return new Unary(op, expr);
+    return new Unary(op.GetLine(), op, expr);
   }
 
   return ScanOperator();
@@ -379,14 +383,16 @@ Expr* Parser::ScanOperator() {
   for (;;) {
     //array access
     if (Match(LEFT_BRACKET)) {
+      Token op = tokenVector[current-1];
       Expr* index = ScanExpression();
       Consume(RIGHT_BRACKET, "Expected ']' after array index");
 
-      expr = new Index(expr, index);
+      expr = new Index(op.GetLine(), expr, index);
     }
 
     //function/class call
     else if (Match(LEFT_PAREN)) {
+      Token op = tokenVector[current-1];
       std::vector<Expr*> exprVector;
       if (!Match(RIGHT_PAREN)) {
         while(!IsAtEnd()) {
@@ -395,7 +401,7 @@ Expr* Parser::ScanOperator() {
           Consume(COMMA, "Expected ',' between arguments");
         }
       }
-      expr = new Invocation(expr, exprVector);
+      expr = new Invocation(op.GetLine(), expr, exprVector);
     }
 
     //done
@@ -414,7 +420,7 @@ Expr* Parser::ScanBinding() {
   if (Match(DOT)) {
     Token op = tokenVector[current-1];
     Expr* rhs = ScanBinding();
-    expr = new Binary(expr, op, rhs);
+    expr = new Binary(op.GetLine(), expr, op, rhs);
   }
 
 /*    //accessing a member of a reference
@@ -431,12 +437,14 @@ Expr* Parser::ScanBinding() {
 }
 
 Expr* Parser::ScanPrimary() {
-  if (Match(FALSE)) return new Value(false);
-  if (Match(TRUE)) return new Value(true);
+  int line = tokenVector[current].GetLine();
 
-  if (Match(UNDEFINED)) return new Expr();
+  if (Match(FALSE)) return new Value(line, new lBoolean(false));
+  if (Match(TRUE)) return new Value(line, new lBoolean(true));
 
-  if (Match(NUMBER) || Match(STRING)) return new Value(tokenVector[current-1].GetLiteral());
+  if (Match(UNDEFINED)) return new Expr(line);
+
+  if (Match(NUMBER) || Match(STRING)) return new Value(line, tokenVector[current-1].GetLiteral()->Copy());
 
   //array creation
   if (Match(LEFT_BRACKET)) {
@@ -446,7 +454,7 @@ Expr* Parser::ScanPrimary() {
       if (Match(RIGHT_BRACKET)) break;
       Consume(COMMA, "Expected ',' between array elements");
     }
-    return new Array(exprVector);
+    return new Array(line, exprVector);
   }
 
   if (Match(FUNCTION)) {
@@ -461,15 +469,15 @@ Expr* Parser::ScanPrimary() {
   if (Match(LEFT_PAREN)) {
     Expr* expr = ScanExpression();
     Consume(RIGHT_PAREN, "Expected ')' after expression");
-    return new Grouping(expr);
+    return new Grouping(line, expr);
   }
 
   if (Match(IDENTIFIER)) {
-    return new Variable(tokenVector[current-1]);
+    return new Variable(line, tokenVector[current-1]);
   }
 
   //unknown token
-  throw(ParserError(tokenVector[current-1].GetLine(), std::string() + "Unexpected symbol '" + tokenVector[current-1].GetLexeme() + "'"));
+  throw(ParserError(line, std::string() + "Unexpected symbol '" + tokenVector[current-1].GetLexeme() + "'"));
 }
 
 //other types
@@ -498,11 +506,12 @@ Stmt* Parser::ScanBlock() {
   }
 
   Consume(RIGHT_BRACE, "Exprected '}' at end of a block");
-  return new Block(stmtVector);
+  return new Block(ln, stmtVector);
 }
 
 Expr* Parser::ScanClass() {
   StmtTypeGetter typeGetter;
+  int ln = tokenVector[current-1].GetLine(); //from the class keyword
 
   //Get the block
   Block* block = dynamic_cast<Block*>(ScanBlock());
@@ -515,10 +524,12 @@ Expr* Parser::ScanClass() {
     }
   }
 
-  return new Class(block);
+  return new Class(ln, block);
 }
 
 Expr* Parser::ScanFunction() {
+  int ln = tokenVector[current-1].GetLine(); //from the function keyword
+
   std::vector<std::string> formalParameters;
 
   Consume(LEFT_PAREN, "Expected '(' after function keyword");
@@ -542,7 +553,7 @@ Expr* Parser::ScanFunction() {
   //get the block
   Stmt* block = ScanBlock();
 
-  return new Function(formalParameters, dynamic_cast<Block*>(block));
+  return new Function(ln, formalParameters, dynamic_cast<Block*>(block));
 }
 
 Expr* Parser::ScanSpecial() {
@@ -551,7 +562,7 @@ Expr* Parser::ScanSpecial() {
 }
 
 //helpers
-Token Parser::Advance() {
+Token& Parser::Advance() {
   current++;
   return tokenVector[current - 1];
 }

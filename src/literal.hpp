@@ -1,15 +1,15 @@
 #pragma once
 
 class Literal;
-class Array;
-class Boolean;
-class Class;
-class Function;
-class Number;
-class Object;
-class Reference;
-class String;
-class Undefined;
+class lArray;
+class lBoolean;
+class lClass;
+class lFunction;
+class lNumber;
+class lObject;
+class lReference;
+class lString;
+class lUndefined;
 
 #include <map>
 #include <string>
@@ -18,7 +18,7 @@ class Undefined;
 class Literal {
 public:
   enum class Type {
-    ARRAY, BOOLEAN, CLASS, FUNCTION, NUMBER, OBJECT, REFERENCE, STRING, UNDEFINED, 
+    LARRAY, LBOOLEAN, LCLASS, LFUNCTION, LNUMBER, LOBJECT, LREFERENCE, LSTRING, LUNDEFINED, 
   };
 
   Literal() { count++; }
@@ -27,174 +27,175 @@ public:
   virtual Literal* Copy() { return new Literal(); }
   virtual std::string ToString() { return "LITERAL"; }
   Type type;
-static int count;
+  //debugging
+  static int count;
 };
 
-class Array: public Literal {
+class lArray: public Literal {
 public:
-  Array() = default;
-  ~Array() = default;
+  lArray() = default;
+  virtual ~lArray() = default;
 
-  Array(std::vector<Literal*> array) {
+  lArray(std::vector<Literal*> array) {
     this->array = std::move(array);
   }
 
   Literal* Copy() override {
-    return new Array(array);
+    return new lArray(array);
   }
 
   std::string ToString() override {
-    return "array";
+    return "larray";
   }
   std::vector<Literal*> array;
 };
 
-class Boolean: public Literal {
+class lBoolean: public Literal {
 public:
-  Boolean() = default;
-  ~Boolean() = default;
+  lBoolean() = default;
+  virtual ~lBoolean() = default;
 
-  Boolean(bool boolean) {
+  lBoolean(bool boolean) {
     this->boolean = std::move(boolean);
   }
 
   Literal* Copy() override {
-    return new Boolean(boolean);
+    return new lBoolean(boolean);
   }
 
   std::string ToString() override {
-    return "boolean";
+    return "lboolean";
   }
   bool boolean;
 };
 
-class Class: public Literal {
+class lClass: public Literal {
 public:
-  Class() = default;
-  ~Class() = default;
+  lClass() = default;
+  virtual ~lClass() = default;
 
-  Class(std::map<std::string,Literal*> members) {
+  lClass(std::map<std::string,Literal*> members) {
     this->members = std::move(members);
   }
 
   Literal* Copy() override {
-    return new Class(members);
+    return new lClass(members);
   }
 
   std::string ToString() override {
-    return "class";
+    return "lclass";
   }
   std::map<std::string,Literal*> members;
 };
 
-class Function: public Literal {
+class lFunction: public Literal {
 public:
-  Function() = default;
-  ~Function() = default;
+  lFunction() = default;
+  virtual ~lFunction() = default;
 
-  Function(std::vector<std::string> parameters, void* block) {
+  lFunction(std::vector<std::string> parameters, void* block) {
     this->parameters = std::move(parameters);
     this->block = std::move(block);
   }
 
   Literal* Copy() override {
-    return new Function(parameters,block);
+    return new lFunction(parameters,block);
   }
 
   std::string ToString() override {
-    return "function";
+    return "lfunction";
   }
   std::vector<std::string> parameters;
    void* block;
 };
 
-class Number: public Literal {
+class lNumber: public Literal {
 public:
-  Number() = default;
-  ~Number() = default;
+  lNumber() = default;
+  virtual ~lNumber() = default;
 
-  Number(double number) {
+  lNumber(double number) {
     this->number = std::move(number);
   }
 
   Literal* Copy() override {
-    return new Number(number);
+    return new lNumber(number);
   }
 
   std::string ToString() override {
-    return "number";
+    return "lnumber";
   }
   double number;
 };
 
-class Object: public Literal {
+class lObject: public Literal {
 public:
-  Object() = default;
-  ~Object() = default;
+  lObject() = default;
+  virtual ~lObject() = default;
 
-  Object(std::map<std::string,Literal*> members) {
+  lObject(std::map<std::string,Literal*> members) {
     this->members = std::move(members);
   }
 
   Literal* Copy() override {
-    return new Object(members);
+    return new lObject(members);
   }
 
   std::string ToString() override {
-    return "object";
+    return "lobject";
   }
   std::map<std::string,Literal*> members;
 };
 
-class Reference: public Literal {
+class lReference: public Literal {
 public:
-  Reference() = default;
-  ~Reference() = default;
+  lReference() = default;
+  virtual ~lReference() = default;
 
-  Reference(Literal* reference) {
+  lReference(Literal* reference) {
     this->reference = std::move(reference);
   }
 
   Literal* Copy() override {
-    return new Reference(reference);
+    return new lReference(reference);
   }
 
   std::string ToString() override {
-    return "reference";
+    return "lreference";
   }
   Literal* reference;
 };
 
-class String: public Literal {
+class lString: public Literal {
 public:
-  String() = default;
-  ~String() = default;
+  lString() = default;
+  virtual ~lString() = default;
 
-  String(std::string str) {
+  lString(std::string str) {
     this->str = std::move(str);
   }
 
   Literal* Copy() override {
-    return new String(str);
+    return new lString(str);
   }
 
   std::string ToString() override {
-    return "string";
+    return "lstring";
   }
   std::string str;
 };
 
-class Undefined: public Literal {
+class lUndefined: public Literal {
 public:
-  Undefined() = default;
-  ~Undefined() = default;
+  lUndefined() = default;
+  virtual ~lUndefined() = default;
 
   Literal* Copy() override {
-    return new Undefined();
+    return new lUndefined();
   }
 
   std::string ToString() override {
-    return "undefined";
+    return "lundefined";
   }
 };
 

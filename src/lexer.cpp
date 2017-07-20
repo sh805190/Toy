@@ -15,7 +15,7 @@ std::vector<Token> Lexer::GetTokenVector() {
   }
 
   tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", new Literal(), line));
-  return tokenVector;
+  return std::move(tokenVector);
 }
 
 void Lexer::ScanToken() {
@@ -145,7 +145,7 @@ void Lexer::ScanIdentifier() {
 
   //identifier
   if (keywords.find(text) == keywords.end()) {
-    AddToken(IDENTIFIER, new String(text));
+    AddToken(IDENTIFIER, new lString(text));
   }
   else {
     //keyword
@@ -162,7 +162,7 @@ void Lexer::ScanNumber() {
   }
 
   double d = atof(source.substr(start, current-start).c_str());
-  AddToken(NUMBER, new Number(d));
+  AddToken(NUMBER, new lNumber(d));
 }
 
 void Lexer::ScanReference() {
@@ -170,7 +170,7 @@ void Lexer::ScanReference() {
   while(Match('*')) {
     starCount++;
   }
-  AddToken(STAR, new Number(starCount));
+  AddToken(STAR, new lNumber(starCount));
 }
 
 void Lexer::ScanString() {
@@ -198,7 +198,7 @@ void Lexer::ScanString() {
   std::string str = source.substr(start+1, current-start-2); //-2 for the quotes
 
   //unescape the string before adding the token
-  AddToken(STRING, new String(UnescapeString(str)) );
+  AddToken(STRING, new lString(UnescapeString(str)) );
 }
 
 std::string Lexer::UnescapeString(std::string str) {

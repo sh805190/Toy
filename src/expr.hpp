@@ -36,19 +36,22 @@ public:
   virtual void Visit(Unary*) = 0;
   virtual void Visit(Value*) = 0;
   virtual void Visit(Variable*) = 0;
-  int line = -1
 };
 
 class Expr {
 public:
+  Expr() = default;
+  Expr(int ln) { line = ln; }
   virtual void Accept(ExprVisitor* visitor) {
     visitor->Visit(this);
   }
+  int line = -1;
 };
 
 class Array: public Expr {
 public:
-  Array(std::vector<Expr*> exprVector) {
+  Array(int ln, std::vector<Expr*> exprVector) {
+this->line = ln;
     this->exprVector = exprVector;
   }
 
@@ -61,8 +64,8 @@ public:
 
 class Assign: public Expr {
 public:
-  Assign(Token op, Expr* target, Expr* value) {
-    this->op = op;
+  Assign(int ln, Expr* target, Expr* value) {
+this->line = ln;
     this->target = target;
     this->value = value;
   }
@@ -71,14 +74,14 @@ public:
     visitor->Visit(this);
   }
 
-  Token op;
   Expr* target;
   Expr* value;
 };
 
 class Binary: public Expr {
 public:
-  Binary(Expr* lhs, Token op, Expr* rhs) {
+  Binary(int ln, Expr* lhs, Token op, Expr* rhs) {
+this->line = ln;
     this->lhs = lhs;
     this->op = op;
     this->rhs = rhs;
@@ -95,7 +98,8 @@ public:
 
 class Class: public Expr {
 public:
-  Class(Block* block) {
+  Class(int ln, Block* block) {
+this->line = ln;
     this->block = block;
   }
 
@@ -108,7 +112,8 @@ public:
 
 class Function: public Expr {
 public:
-  Function(std::vector<std::string> parameterVector, Block* block) {
+  Function(int ln, std::vector<std::string> parameterVector, Block* block) {
+this->line = ln;
     this->parameterVector = parameterVector;
     this->block = block;
   }
@@ -123,7 +128,8 @@ public:
 
 class Grouping: public Expr {
 public:
-  Grouping(Expr* inner) {
+  Grouping(int ln, Expr* inner) {
+this->line = ln;
     this->inner = inner;
   }
 
@@ -136,7 +142,8 @@ public:
 
 class Index: public Expr {
 public:
-  Index(Expr* array, Expr* index) {
+  Index(int ln, Expr* array, Expr* index) {
+this->line = ln;
     this->array = array;
     this->index = index;
   }
@@ -151,7 +158,8 @@ public:
 
 class Invocation: public Expr {
 public:
-  Invocation(Expr* expr, std::vector<Expr*> exprVector) {
+  Invocation(int ln, Expr* expr, std::vector<Expr*> exprVector) {
+this->line = ln;
     this->expr = expr;
     this->exprVector = exprVector;
   }
@@ -166,7 +174,8 @@ public:
 
 class Logical: public Expr {
 public:
-  Logical(Expr* lhs, Token op, Expr* rhs) {
+  Logical(int ln, Expr* lhs, Token op, Expr* rhs) {
+this->line = ln;
     this->lhs = lhs;
     this->op = op;
     this->rhs = rhs;
@@ -183,7 +192,8 @@ public:
 
 class Unary: public Expr {
 public:
-  Unary(Token op, Expr* rhs) {
+  Unary(int ln, Token op, Expr* rhs) {
+this->line = ln;
     this->op = op;
     this->rhs = rhs;
   }
@@ -198,7 +208,8 @@ public:
 
 class Value: public Expr {
 public:
-  Value(Literal value) {
+  Value(int ln, Literal* value) {
+this->line = ln;
     this->value = value;
   }
 
@@ -206,12 +217,13 @@ public:
     visitor->Visit(this);
   }
 
-  Literal value;
+  Literal* value;
 };
 
 class Variable: public Expr {
 public:
-  Variable(Token name) {
+  Variable(int ln, Token name) {
+this->line = ln;
     this->name = name;
   }
 

@@ -151,7 +151,7 @@ void ASTReaderPrefix::Visit(Unary* expr) {
 }
 
 void ASTReaderPrefix::Visit(Value* expr) {
-  std::cout << expr->value.ToString();
+  std::cout << expr->value->ToString();
 }
 
 void ASTReaderPrefix::Visit(Variable* expr) {
@@ -318,7 +318,7 @@ void ASTReaderPostfix::Visit(Unary* expr) {
 }
 
 void ASTReaderPostfix::Visit(Value* expr) {
-  std::cout << expr->value.ToString();
+  std::cout << expr->value->ToString();
 }
 
 void ASTReaderPostfix::Visit(Variable* expr) {

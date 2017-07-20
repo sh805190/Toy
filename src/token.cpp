@@ -36,14 +36,23 @@ Token::~Token() {
 }
 
 Token& Token::operator=(const Token& rhs) {
+  delete this->literal;
+  this->literal = nullptr;
+
   this->type = rhs.type;
   this->lexeme = rhs.lexeme;
-  this->literal = rhs.literal->Copy();
+  if (rhs.literal) {
+    this->literal = rhs.literal->Copy();
+  }
   this->line = rhs.line;
+
   return *this;
 }
 
 Token& Token::operator=(Token&& rhs) {
+  delete this->literal;
+  this->literal = nullptr;
+
   this->type = rhs.type;
   this->lexeme = rhs.lexeme;
   this->literal = rhs.literal;
