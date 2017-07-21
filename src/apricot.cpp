@@ -1,6 +1,7 @@
-#include "error_handler.hpp"
 #include "ast_deleter.hpp"
 #include "ast_reader.hpp"
+#include "error_handler.hpp"
+#include "garbage_collector.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "stmt.hpp"
@@ -31,6 +32,9 @@ void run(std::string source) {
     ErrorHandler::SetErrorCount(0);
   }
 }
+std::cout << "Literal::count = " << Literal::count << std::endl;
+std::cout << "Collected: " << GarbageCollector<Literal>::Collect() << std::endl;
+std::cout << "Collected: " << GarbageCollector<Literal>::GetSize() << std::endl;
 std::cout << "Literal::count = " << Literal::count << std::endl;
 }
 

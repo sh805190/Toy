@@ -221,6 +221,9 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vec
   os << std::endl;
 
   //declare the includes
+  os << "#include \"garbage_collector.hpp\"" << std::endl;
+  os << std::endl;
+
   os << "#include <map>" << std::endl;
   os << "#include <string>" << std::endl;
   os << "#include <vector>" << std::endl;
@@ -238,8 +241,8 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vec
   os << "  };" << std::endl;
   os << std::endl;
 
-  os << "  " << baseName << "() { count++; }" << std::endl;
-  os << "  virtual ~" << baseName << "() { count--; }" << std::endl << std::endl;
+  os << "  " << baseName << "() { count++; GarbageCollector<Literal>::Push(this); }" << std::endl;
+  os << "  virtual ~" << baseName << "() { count--; GarbageCollector<Literal>::Pop(this); }" << std::endl << std::endl;
   os << "  virtual Literal* Copy() {" << std::endl;
   os << "    Literal* l = new Literal();" << std::endl;
   os << "    l->type = type;" << std::endl;

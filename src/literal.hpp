@@ -11,6 +11,8 @@ class lReference;
 class lString;
 class lUndefined;
 
+#include "garbage_collector.hpp"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -21,8 +23,8 @@ public:
     LARRAY, LBOOLEAN, LCLASS, LFUNCTION, LNUMBER, LOBJECT, LREFERENCE, LSTRING, LUNDEFINED, 
   };
 
-  Literal() { count++; }
-  virtual ~Literal() { count--; }
+  Literal() { count++; GarbageCollector<Literal>::Push(this); }
+  virtual ~Literal() { count--; GarbageCollector<Literal>::Pop(this); }
 
   virtual Literal* Copy() {
     Literal* l = new Literal();
