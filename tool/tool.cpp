@@ -112,6 +112,25 @@ std::string toLower(std::string s) {
   return output;
 }
 
+std::string unescapeString(std::string str) {
+  std::string ret;
+
+  for (int i = 0; i < str.size(); i++) {
+    if (str[i] == '\\') {
+      if (str[i+1] == '\\') { ret += '\\'; i++; }
+      else if (str[i+1] == '"') {ret += '"'; i++;}
+      else if (str[i+1] == 'b') {ret += '\b'; i++;}
+      else if (str[i+1] == 'n') {ret += '\n'; i++;}
+      else if (str[i+1] == 'r') {ret += '\r'; i++;}
+      else if (str[i+1] == 't') {ret += '\t'; i++;}
+    }
+    else {
+      ret += str[i];
+    }
+  }
+  return ret;
+}
+
 void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<std::string, std::string>> data) {
   //print the basics
   os << "#pragma once" << std::endl;
@@ -165,7 +184,7 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
 
     //set the member values
     std::vector<std::string> members = splitString(p.second, " ,");
-    os << "this->line = ln;" << std::endl;
+    os << "    this->line = ln;" << std::endl;
     for (int i = 0; i < members.size(); i += 2) { //+2, since the type declaration is mixed in
       os << "    this->" << members[i+1] << " = " << members[i+1] << ";" << std::endl;
     }
@@ -189,7 +208,7 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   }
 }
 
-void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pair<std::string, std::string>> data) {
+void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vector<std::string>> data) {
   //print the basics
   os << "#pragma once" << std::endl;
   os << std::endl;
@@ -197,7 +216,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
   //forward declare the literal classes
   os << "class " << baseName << ";" << std::endl;
   for (auto& p : data) {
-    os << "class " << p.first << ";" << std::endl;
+    os << "class " << p[0] << ";" << std::endl;
   }
   os << std::endl;
 
@@ -213,7 +232,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
   os << "  enum class Type {" << std:: endl;
   os << "    ";
   for (auto& p : data) {
-    os << toUpper(p.first) << ", ";
+    os << toUpper(p[0]) << ", ";
   }
   os << std::endl;
   os << "  };" << std::endl;
@@ -221,9 +240,14 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
 
   os << "  " << baseName << "() { count++; }" << std::endl;
   os << "  virtual ~" << baseName << "() { count--; }" << std::endl << std::endl;
-  os << "  virtual Literal* Copy() { return new Literal(); }" << std::endl;
-  os << "  virtual std::string ToString() { return \"LITERAL\"; }" << std::endl;
-
+  os << "  virtual Literal* Copy() {" << std::endl;
+  os << "    Literal* l = new Literal();" << std::endl;
+  os << "    l->type = type;" << std::endl;
+  os << "    return l;" << std::endl;
+  os << "  }" << std::endl << std::endl;
+  os << "  virtual std::string ToString() {" << std::endl;
+  os << "    return \"LITERAL\";" << std::endl;
+  os << "  }" << std::endl << std::endl;
   os << "  Type type;" << std::endl;
   os << "  //debugging" << std::endl;
   os << "  static int count;" << std::endl;
@@ -232,20 +256,20 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
   //declare each child class
   for (auto& p : data) {
     //parsing
-    std::vector<std::string> memberDeclarations = splitString(p.second, "/");
-    std::vector<std::string> memberNames = splitString(p.second, " /");
+    std::vector<std::string> memberDeclarations = splitString(p[1], "/");
+    std::vector<std::string> memberNames = splitString(p[1], " /");
 
-    os << "class " << p.first << ": public " << baseName << " {" << std::endl;
+    os << "class " << p[0] << ": public " << baseName << " {" << std::endl;
     os << "public:" << std::endl;
 
     //defaults
-    os << "  " << p.first << "() = default;" << std::endl;
-    os << "  virtual ~" << p.first << "() = default;" << std::endl;
+    os << "  " << p[0] << "() = default;" << std::endl;
+    os << "  virtual ~" << p[0] << "() = default;" << std::endl;
     os << std::endl;
 
     if (memberDeclarations.size()) {
       //parameter constructor
-      os << "  " << p.first << "(";
+      os << "  " << p[0] << "(";
       for (int i = 0; i < memberDeclarations.size(); ) {
         os << memberDeclarations[i];
         i++;
@@ -262,19 +286,21 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::pai
 
     //define the methods
     os << "  Literal* Copy() override {" << std::endl;
-    os << "    return new " << p.first << "(";
+    os << "    Literal* l = new " << p[0] << "(";
     for (int i = 0; i < memberNames.size(); ) {
       os << memberNames[i+1];
       i += 2;
       if (i < memberNames.size()) os << ",";
     }
     os << ");" << std::endl;
+    os << "    l->type = type;" << std::endl;
+    os << "    return l;" << std::endl;
     os << "  }" << std::endl;
     os << std::endl;
 
     os << "  std::string ToString() override {" << std::endl;
-    os << "    return \""  << toLower(p.first) << "\";" << std::endl;
-    os << "  }" << std::endl;
+    os << "    " << p[2] << ";" << std::endl;
+    os << "  }" << std::endl << std::endl;
 
     //define the members
     for (std::string m : memberDeclarations) {
@@ -333,15 +359,15 @@ int run(int argc, std::vector<std::string> argv) {
   //Literal
   else if (!strcmp(argv[1].c_str(), "literal")) {
     defineLiteral(os, "Literal", {
-      {"lArray", "std::vector<Literal*> array"},
-      {"lBoolean", "bool boolean"},
-      {"lClass", "std::map<std::string,Literal*> members"},
-      {"lFunction", "std::vector<std::string> parameters/ void* block"},
-      {"lNumber", "double number"},
-      {"lObject", "std::map<std::string,Literal*> members"},
-      {"lReference", "Literal* reference"},
-      {"lString", "std::string str"},
-      {"lUndefined", ""},
+      {"lArray", "std::vector<Literal*> array", "std::string output = \"[\";for (Literal* ptr : array){output += ptr->ToString();output += \",\";}return output + \"]\""},
+      {"lBoolean", "bool boolean", "return std::to_string(boolean)"},
+      {"lClass", "std::map<std::string,Literal*> members", "std::string output = \"class {\";for (auto& it : members) {output += it.first + \":\";output += it.second->ToString();output += \",\";}return output + \"}\""},
+      {"lFunction", "std::vector<std::string> parameters/ void* block", "std::string output = \"function(\";for (std::string s : parameters) {output += s;output += \",\";}return output + \") {...}\""},
+      {"lNumber", "double number", "return std::to_string(number)"},
+      {"lObject", "std::map<std::string,Literal*> members", "std::string output = \"object {\"; for (auto& it : members) {output += it.first; output += \",\";}return output + \"}\""},
+      {"lReference", "Literal* reference", "return std::string() + \"&\" + reference->ToString()"},
+      {"lString", "std::string str", "return str"},
+      {"lUndefined", "", "return \"undefined\""},
     });
   }
 

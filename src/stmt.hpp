@@ -43,7 +43,7 @@ public:
 class Block: public Stmt {
 public:
   Block(int ln, std::vector<Stmt*> stmtVector) {
-this->line = ln;
+    this->line = ln;
     this->stmtVector = stmtVector;
   }
 
@@ -57,7 +57,7 @@ this->line = ln;
 class Break: public Stmt {
 public:
   Break(int ln) {
-this->line = ln;
+    this->line = ln;
   }
 
   void Accept(StmtVisitor* visitor) override {
@@ -69,7 +69,7 @@ this->line = ln;
 class Continue: public Stmt {
 public:
   Continue(int ln) {
-this->line = ln;
+    this->line = ln;
   }
 
   void Accept(StmtVisitor* visitor) override {
@@ -81,7 +81,7 @@ this->line = ln;
 class Expression: public Stmt {
 public:
   Expression(int ln, Expr* expr) {
-this->line = ln;
+    this->line = ln;
     this->expr = expr;
   }
 
@@ -95,7 +95,7 @@ this->line = ln;
 class If: public Stmt {
 public:
   If(int ln, Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
-this->line = ln;
+    this->line = ln;
     this->condition = condition;
     this->thenBranch = thenBranch;
     this->elseBranch = elseBranch;
@@ -113,7 +113,7 @@ this->line = ln;
 class Return: public Stmt {
 public:
   Return(int ln, Expr* result) {
-this->line = ln;
+    this->line = ln;
     this->result = result;
   }
 
@@ -127,7 +127,7 @@ this->line = ln;
 class Var: public Stmt {
 public:
   Var(int ln, Token name, Expr* initializer) {
-this->line = ln;
+    this->line = ln;
     this->name = name;
     this->initializer = initializer;
   }
@@ -143,7 +143,7 @@ this->line = ln;
 class While: public Stmt {
 public:
   While(int ln, Expr* condition, Stmt* branch) {
-this->line = ln;
+    this->line = ln;
     this->condition = condition;
     this->branch = branch;
   }

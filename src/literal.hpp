@@ -24,8 +24,16 @@ public:
   Literal() { count++; }
   virtual ~Literal() { count--; }
 
-  virtual Literal* Copy() { return new Literal(); }
-  virtual std::string ToString() { return "LITERAL"; }
+  virtual Literal* Copy() {
+    Literal* l = new Literal();
+    l->type = type;
+    return l;
+  }
+
+  virtual std::string ToString() {
+    return "LITERAL";
+  }
+
   Type type;
   //debugging
   static int count;
@@ -41,12 +49,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lArray(array);
+    Literal* l = new lArray(array);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "larray";
+    std::string output = "[";for (Literal* ptr : array){output += ptr->ToString();output += ",";}return output + "]";
   }
+
   std::vector<Literal*> array;
 };
 
@@ -60,12 +71,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lBoolean(boolean);
+    Literal* l = new lBoolean(boolean);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lboolean";
+    return std::to_string(boolean);
   }
+
   bool boolean;
 };
 
@@ -79,12 +93,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lClass(members);
+    Literal* l = new lClass(members);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lclass";
+    std::string output = "class {";for (auto& it : members) {output += it.first + ":";output += it.second->ToString();output += ",";}return output + "}";
   }
+
   std::map<std::string,Literal*> members;
 };
 
@@ -99,12 +116,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lFunction(parameters,block);
+    Literal* l = new lFunction(parameters,block);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lfunction";
+    std::string output = "function(";for (std::string s : parameters) {output += s;output += ",";}return output + ") {...}";
   }
+
   std::vector<std::string> parameters;
    void* block;
 };
@@ -119,12 +139,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lNumber(number);
+    Literal* l = new lNumber(number);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lnumber";
+    return std::to_string(number);
   }
+
   double number;
 };
 
@@ -138,12 +161,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lObject(members);
+    Literal* l = new lObject(members);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lobject";
+    std::string output = "object {"; for (auto& it : members) {output += it.first; output += ",";}return output + "}";
   }
+
   std::map<std::string,Literal*> members;
 };
 
@@ -157,12 +183,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lReference(reference);
+    Literal* l = new lReference(reference);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lreference";
+    return std::string() + "&" + reference->ToString();
   }
+
   Literal* reference;
 };
 
@@ -176,12 +205,15 @@ public:
   }
 
   Literal* Copy() override {
-    return new lString(str);
+    Literal* l = new lString(str);
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lstring";
+    return str;
   }
+
   std::string str;
 };
 
@@ -191,11 +223,14 @@ public:
   virtual ~lUndefined() = default;
 
   Literal* Copy() override {
-    return new lUndefined();
+    Literal* l = new lUndefined();
+    l->type = type;
+    return l;
   }
 
   std::string ToString() override {
-    return "lundefined";
+    return "undefined";
   }
+
 };
 

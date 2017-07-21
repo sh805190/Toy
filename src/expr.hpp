@@ -51,7 +51,7 @@ public:
 class Array: public Expr {
 public:
   Array(int ln, std::vector<Expr*> exprVector) {
-this->line = ln;
+    this->line = ln;
     this->exprVector = exprVector;
   }
 
@@ -65,7 +65,7 @@ this->line = ln;
 class Assign: public Expr {
 public:
   Assign(int ln, Expr* target, Expr* value) {
-this->line = ln;
+    this->line = ln;
     this->target = target;
     this->value = value;
   }
@@ -81,7 +81,7 @@ this->line = ln;
 class Binary: public Expr {
 public:
   Binary(int ln, Expr* lhs, Token op, Expr* rhs) {
-this->line = ln;
+    this->line = ln;
     this->lhs = lhs;
     this->op = op;
     this->rhs = rhs;
@@ -99,7 +99,7 @@ this->line = ln;
 class Class: public Expr {
 public:
   Class(int ln, Block* block) {
-this->line = ln;
+    this->line = ln;
     this->block = block;
   }
 
@@ -113,7 +113,7 @@ this->line = ln;
 class Function: public Expr {
 public:
   Function(int ln, std::vector<std::string> parameterVector, Block* block) {
-this->line = ln;
+    this->line = ln;
     this->parameterVector = parameterVector;
     this->block = block;
   }
@@ -129,7 +129,7 @@ this->line = ln;
 class Grouping: public Expr {
 public:
   Grouping(int ln, Expr* inner) {
-this->line = ln;
+    this->line = ln;
     this->inner = inner;
   }
 
@@ -143,7 +143,7 @@ this->line = ln;
 class Index: public Expr {
 public:
   Index(int ln, Expr* array, Expr* index) {
-this->line = ln;
+    this->line = ln;
     this->array = array;
     this->index = index;
   }
@@ -159,7 +159,7 @@ this->line = ln;
 class Invocation: public Expr {
 public:
   Invocation(int ln, Expr* expr, std::vector<Expr*> exprVector) {
-this->line = ln;
+    this->line = ln;
     this->expr = expr;
     this->exprVector = exprVector;
   }
@@ -175,7 +175,7 @@ this->line = ln;
 class Logical: public Expr {
 public:
   Logical(int ln, Expr* lhs, Token op, Expr* rhs) {
-this->line = ln;
+    this->line = ln;
     this->lhs = lhs;
     this->op = op;
     this->rhs = rhs;
@@ -193,7 +193,7 @@ this->line = ln;
 class Unary: public Expr {
 public:
   Unary(int ln, Token op, Expr* rhs) {
-this->line = ln;
+    this->line = ln;
     this->op = op;
     this->rhs = rhs;
   }
@@ -209,7 +209,7 @@ this->line = ln;
 class Value: public Expr {
 public:
   Value(int ln, Literal* value) {
-this->line = ln;
+    this->line = ln;
     this->value = value;
   }
 
@@ -223,7 +223,7 @@ this->line = ln;
 class Variable: public Expr {
 public:
   Variable(int ln, Token name) {
-this->line = ln;
+    this->line = ln;
     this->name = name;
   }
 
