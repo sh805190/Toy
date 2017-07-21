@@ -10,6 +10,7 @@ class Return;
 class Var;
 class While;
 
+#include "garbage_collector.hpp"
 #include "expr.hpp"
 #include "stmt.hpp"
 #include "token.hpp"
@@ -32,12 +33,15 @@ public:
 
 class Stmt {
 public:
-  Stmt() = default;
-  Stmt(int ln) { line = ln; }
+  Stmt() { count++; GarbageCollector<Stmt>::Push(this); }
+  Stmt(int ln) { line = ln; count++; GarbageCollector<Stmt>::Push(this); }
+  ~Stmt() { count--; GarbageCollector<Stmt>::Pop(this); }
+
   virtual void Accept(StmtVisitor* visitor) {
     visitor->Visit(this);
   }
   int line = -1;
+  static int count;
 };
 
 class Block: public Stmt {

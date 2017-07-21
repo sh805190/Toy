@@ -492,7 +492,10 @@ Stmt* Parser::ScanBlock() {
   while(!IsAtEnd() && tokenVector[current].GetType() != RIGHT_BRACE) {
     //copy the main scanning loop
     try {
-      stmtVector.push_back(ScanStatement());
+      Stmt* stmt = ScanStatement();
+      if (stmt) {
+        statementVector.push_back(stmt);
+      }
     }
     catch (ParserError pe) {
       ErrorHandler::Error(pe.GetLine(), pe.GetErrMsg());

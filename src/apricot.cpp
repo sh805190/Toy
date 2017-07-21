@@ -32,10 +32,13 @@ void run(std::string source) {
     ErrorHandler::SetErrorCount(0);
   }
 }
+std::cout << "Literals Collected: " << GarbageCollector<Literal>::Collect() << std::endl;
+std::cout << "Stmt Collected: " << GarbageCollector<Stmt>::Collect() << std::endl;
+std::cout << "Expr Collected: " << GarbageCollector<Expr>::Collect() << std::endl;
+
 std::cout << "Literal::count = " << Literal::count << std::endl;
-std::cout << "Collected: " << GarbageCollector<Literal>::Collect() << std::endl;
-std::cout << "Collected: " << GarbageCollector<Literal>::GetSize() << std::endl;
-std::cout << "Literal::count = " << Literal::count << std::endl;
+std::cout << "Stmt::count = " << Stmt::count << std::endl;
+std::cout << "Expr::count = " << Expr::count << std::endl;
 }
 
 void runPrompt() {

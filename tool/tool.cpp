@@ -143,6 +143,7 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   }
 
   os << std::endl;
+  os << "#include \"garbage_collector.hpp\"" << std::endl;
   os << "#include \"expr.hpp\"" << std::endl;
   os << "#include \"stmt.hpp\"" << std::endl;
   os << "#include \"token.hpp\"" << std::endl;
@@ -164,12 +165,15 @@ void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<st
   //print the base class
   os << "class " << baseName << " {" << std::endl;
   os << "public:" << std::endl;
-  os << "  " << baseName << "() = default;" << std::endl;
-  os << "  " << baseName << "(int ln) { line = ln; }" << std::endl;
+  os << "  " << baseName << "() { count++; GarbageCollector<" << baseName << ">::Push(this); }" << std::endl;
+  os << "  " << baseName << "(int ln) { line = ln; count++; GarbageCollector<" << baseName << ">::Push(this); }" << std::endl;
+  os << "  ~" << baseName << "() { count--; GarbageCollector<" << baseName << ">::Pop(this); }" << std::endl;
+  os << std::endl;
   os << "  virtual void Accept(" << baseName << "Visitor* visitor) {" << std::endl;
   os << "    visitor->Visit(this);" << std::endl;
   os << "  }" << std::endl;
   os << "  int line = -1;" << std::endl;
+  os << "  static int count;" << std::endl;
   os << "};" << std::endl;
 
   //define each AST class

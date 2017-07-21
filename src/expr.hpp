@@ -14,6 +14,7 @@ class Unary;
 class Value;
 class Variable;
 
+#include "garbage_collector.hpp"
 #include "expr.hpp"
 #include "stmt.hpp"
 #include "token.hpp"
@@ -40,12 +41,15 @@ public:
 
 class Expr {
 public:
-  Expr() = default;
-  Expr(int ln) { line = ln; }
+  Expr() { count++; GarbageCollector<Expr>::Push(this); }
+  Expr(int ln) { line = ln; count++; GarbageCollector<Expr>::Push(this); }
+  ~Expr() { count--; GarbageCollector<Expr>::Pop(this); }
+
   virtual void Accept(ExprVisitor* visitor) {
     visitor->Visit(this);
   }
   int line = -1;
+  static int count;
 };
 
 class Array: public Expr {
