@@ -255,7 +255,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vec
   os << "  virtual std::string ToString() {" << std::endl;
   os << "    return \"LITERAL\";" << std::endl;
   os << "  }" << std::endl << std::endl;
-  os << "  Type type;" << std::endl;
+  os << "  Type type = Type::LUNDEFINED;" << std::endl;
   os << "  //debugging" << std::endl;
   os << "  static int count;" << std::endl;
   os << "};" << std::endl << std::endl;
@@ -270,7 +270,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vec
     os << "public:" << std::endl;
 
     //defaults
-    os << "  " << p[0] << "() = default;" << std::endl;
+    os << "  " << p[0] << "() { type = Type::" << toUpper(p[0]) << "; }" << std::endl;
     os << "  virtual ~" << p[0] << "() = default;" << std::endl;
     os << std::endl;
 
@@ -285,6 +285,7 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vec
         }
       }
       os << ") {" << std::endl;
+      os << "    type = Type::" << toUpper(p[0]) << ";" << std::endl;
       for (int i = 0; i < memberNames.size(); i += 2) {
         os << "    this->" << memberNames[i+1] << " = std::move(" << memberNames[i+1] << ");" << std::endl;
       }
@@ -367,7 +368,7 @@ int run(int argc, std::vector<std::string> argv) {
   else if (!strcmp(argv[1].c_str(), "literal")) {
     defineLiteral(os, "Literal", {
       {"lArray", "std::vector<Literal*> array", "std::string output = \"[\";for (Literal* ptr : array){output += ptr->ToString();output += \",\";}return output + \"]\""},
-      {"lBoolean", "bool boolean", "return std::to_string(boolean)"},
+      {"lBoolean", "bool boolean", "return boolean ? \"true\" : \"false\""},
       {"lClass", "std::map<std::string,Literal*> members", "std::string output = \"class {\";for (auto& it : members) {output += it.first + \":\";output += it.second->ToString();output += \",\";}return output + \"}\""},
       {"lFunction", "std::vector<std::string> parameters/ void* block", "std::string output = \"function(\";for (std::string s : parameters) {output += s;output += \",\";}return output + \") {...}\""},
       {"lNumber", "double number", "return std::to_string(number)"},

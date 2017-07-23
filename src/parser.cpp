@@ -165,7 +165,7 @@ Stmt* Parser::ScanFor() {
     stmtVector.push_back(initializer);
   }
   if (increment) { //append to the block before inserting into the While
-    dynamic_cast<Block*>(block)->stmtVector.push_back(new Expression(increment->line, increment));
+    static_cast<Block*>(block)->stmtVector.push_back(new Expression(increment->line, increment));
   }
   stmtVector.push_back(new While(tok.GetLine(), condition, block));
 
@@ -338,7 +338,7 @@ Expr* Parser::ScanFactor() {
     Token op = tokenVector[current-1];
 
     //account for reference notation screwing with arithmetic
-    if (op.GetType() == STAR && dynamic_cast<lNumber*>(op.GetLiteral())->number != 1) {
+    if (op.GetType() == STAR && static_cast<lNumber*>(op.GetLiteral())->number != 1) {
       throw ParserError(op.GetLine(), "Too many characters in '" + op.GetLexeme() + "' (did you mean to use a reference?)");
     }
 
@@ -494,7 +494,7 @@ Stmt* Parser::ScanBlock() {
     try {
       Stmt* stmt = ScanStatement();
       if (stmt) {
-        statementVector.push_back(stmt);
+        stmtVector.push_back(stmt);
       }
     }
     catch (ParserError pe) {
@@ -517,7 +517,7 @@ Expr* Parser::ScanClass() {
   int ln = tokenVector[current-1].GetLine(); //from the class keyword
 
   //Get the block
-  Block* block = dynamic_cast<Block*>(ScanBlock());
+  Block* block = static_cast<Block*>(ScanBlock());
 
   //ensure all statements are var declarations
   for (Stmt* ptr : block->stmtVector) {
@@ -556,7 +556,7 @@ Expr* Parser::ScanFunction() {
   //get the block
   Stmt* block = ScanBlock();
 
-  return new Function(ln, formalParameters, dynamic_cast<Block*>(block));
+  return new Function(ln, formalParameters, static_cast<Block*>(block));
 }
 
 Expr* Parser::ScanSpecial() {

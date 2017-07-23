@@ -36,17 +36,18 @@ public:
     return "LITERAL";
   }
 
-  Type type;
+  Type type = Type::LUNDEFINED;
   //debugging
   static int count;
 };
 
 class lArray: public Literal {
 public:
-  lArray() = default;
+  lArray() { type = Type::LARRAY; }
   virtual ~lArray() = default;
 
   lArray(std::vector<Literal*> array) {
+    type = Type::LARRAY;
     this->array = std::move(array);
   }
 
@@ -65,10 +66,11 @@ public:
 
 class lBoolean: public Literal {
 public:
-  lBoolean() = default;
+  lBoolean() { type = Type::LBOOLEAN; }
   virtual ~lBoolean() = default;
 
   lBoolean(bool boolean) {
+    type = Type::LBOOLEAN;
     this->boolean = std::move(boolean);
   }
 
@@ -79,7 +81,7 @@ public:
   }
 
   std::string ToString() override {
-    return std::to_string(boolean);
+    return boolean ? "true" : "false";
   }
 
   bool boolean;
@@ -87,10 +89,11 @@ public:
 
 class lClass: public Literal {
 public:
-  lClass() = default;
+  lClass() { type = Type::LCLASS; }
   virtual ~lClass() = default;
 
   lClass(std::map<std::string,Literal*> members) {
+    type = Type::LCLASS;
     this->members = std::move(members);
   }
 
@@ -109,10 +112,11 @@ public:
 
 class lFunction: public Literal {
 public:
-  lFunction() = default;
+  lFunction() { type = Type::LFUNCTION; }
   virtual ~lFunction() = default;
 
   lFunction(std::vector<std::string> parameters, void* block) {
+    type = Type::LFUNCTION;
     this->parameters = std::move(parameters);
     this->block = std::move(block);
   }
@@ -133,10 +137,11 @@ public:
 
 class lNumber: public Literal {
 public:
-  lNumber() = default;
+  lNumber() { type = Type::LNUMBER; }
   virtual ~lNumber() = default;
 
   lNumber(double number) {
+    type = Type::LNUMBER;
     this->number = std::move(number);
   }
 
@@ -155,10 +160,11 @@ public:
 
 class lObject: public Literal {
 public:
-  lObject() = default;
+  lObject() { type = Type::LOBJECT; }
   virtual ~lObject() = default;
 
   lObject(std::map<std::string,Literal*> members) {
+    type = Type::LOBJECT;
     this->members = std::move(members);
   }
 
@@ -177,10 +183,11 @@ public:
 
 class lReference: public Literal {
 public:
-  lReference() = default;
+  lReference() { type = Type::LREFERENCE; }
   virtual ~lReference() = default;
 
   lReference(Literal* reference) {
+    type = Type::LREFERENCE;
     this->reference = std::move(reference);
   }
 
@@ -199,10 +206,11 @@ public:
 
 class lString: public Literal {
 public:
-  lString() = default;
+  lString() { type = Type::LSTRING; }
   virtual ~lString() = default;
 
   lString(std::string str) {
+    type = Type::LSTRING;
     this->str = std::move(str);
   }
 
@@ -221,7 +229,7 @@ public:
 
 class lUndefined: public Literal {
 public:
-  lUndefined() = default;
+  lUndefined() { type = Type::LUNDEFINED; }
   virtual ~lUndefined() = default;
 
   Literal* Copy() override {

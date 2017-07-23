@@ -173,8 +173,8 @@ DEBUGGING(std::cout << "Deleting Unary: "  << expr << std::endl);
 }
 
 void ASTDeleter::Visit(Value* expr) {
-DEBUGGING(std::cout << "Deleting Value.literal: "  << expr << std::endl);
-  delete expr->value;
+//DEBUGGING(std::cout << "Deleting Value.literal: "  << expr << std::endl);
+//  delete expr->value;
 DEBUGGING(std::cout << "Deleting Value: "  << expr << std::endl);
   delete expr;
 }

@@ -15,7 +15,8 @@ public:
   void Evaluate(Expr*);
 
   bool GetReturnCalled();
-  Literal GetResult();
+  Literal* SetResult(Literal* ptr);
+  Literal* GetResult();
 
   //visit methods
   void Visit(Stmt*) override;
@@ -44,16 +45,16 @@ public:
 
 private:
   //helpers
-  void CallFunction(Literal func, std::vector<Literal> literalVector, Literal* = nullptr);
-  void CreateObject(Literal, std::vector<Literal> literalVector);
-  bool IsEqual(Literal, Literal);
-  void CheckOperandsAreNumbers(Token op, Literal, Literal);
-  bool IsTruthy(Literal);
-  Literal Dereference(Literal);
+  void CallFunction(int line, lFunction* func, std::vector<Literal*> literalVector, lObject* self = nullptr);
+  void CreateObject(int line, lClass* prototype, std::vector<Literal*> literalVector);
+  bool IsEqual(Literal* lhs, Literal* rhs);
+  void CheckOperandsAreNumbers(Token op, Literal* lhs, Literal* rhs);
+  bool IsTruthy(Literal*);
+  Literal* Dereference(Literal*);
 
   //members
   Environment* environment = nullptr;
-  Literal result;
+  Literal* result = nullptr;
 
   //block contexts
   bool breakCalled = false;

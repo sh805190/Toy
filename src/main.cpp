@@ -19,17 +19,16 @@ void run(std::string source) {
   std::vector<Stmt*> statements = parser.GetStmtVector();
 
   for (Stmt* stmt : statements) {
-//    ASTDuplicator duplicator;
-
-//reader.Print(stmt);
-//std::cout << std::endl;
+std::cout << "outer reader:";
+reader.Print(stmt);
+std::cout << std::endl;
 
     interpreter.Execute(stmt);
     deleter.DeleteAST(stmt);
 
     //handle returns
     if (interpreter.GetReturnCalled()) {
-      std::cout << "Final value: " << interpreter.GetResult().ToString() << std::endl;
+      std::cout << "Final value: " << interpreter.GetResult()->ToString() << std::endl;
       break;
     }
   }
