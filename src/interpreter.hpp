@@ -45,8 +45,6 @@ public:
 
 private:
   //helpers
-  void CallFunction(int line, lFunction* func, std::vector<Literal*> literalVector, lObject* self = nullptr);
-  void CreateObject(int line, lClass* prototype, std::vector<Literal*> literalVector);
   bool IsEqual(Literal* lhs, Literal* rhs);
   void CheckOperandsAreNumbers(Token op, Literal* lhs, Literal* rhs);
   bool IsTruthy(Literal*);

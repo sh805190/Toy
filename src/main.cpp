@@ -9,9 +9,10 @@
 #include <fstream>
 #include <iostream>
 
-ASTDeleter deleter;
-ASTReaderPrefix reader;
-Interpreter interpreter;
+static Interpreter* interpreter = nullptr;
+
+static ASTDeleter deleter;
+static ASTReader reader;
 
 void run(std::string source) {
   Lexer lexer(source);
@@ -19,30 +20,27 @@ void run(std::string source) {
   std::vector<Stmt*> statements = parser.GetStmtVector();
 
   for (Stmt* stmt : statements) {
-std::cout << "outer reader:";
-reader.Print(stmt);
-std::cout << std::endl;
 
-    interpreter.Execute(stmt);
+    //debugging
+    std::cout << "READER:";
+    reader.Print(stmt);
+    std::cout << std::endl;
+
+    interpreter->Execute(stmt);
     deleter.DeleteAST(stmt);
 
     //handle returns
-    if (interpreter.GetReturnCalled()) {
-      std::cout << "Final value: " << interpreter.GetResult()->ToString() << std::endl;
+    if (interpreter->GetReturnCalled()) {
+      std::cout << "Final value: " << interpreter->GetResult()->ToString() << std::endl;
       break;
     }
-  }
-
-  if (ErrorHandler::GetErrorCount()) {
-    std::cout << "Total errors found: " << ErrorHandler::GetErrorCount() << std::endl;
-    ErrorHandler::SetErrorCount(0);
   }
 }
 
 void runPrompt() {
   char buffer[1024];
 
-  for (;;) {
+  while (!interpreter->GetReturnCalled()) {
     std::cout << ">";
     std::cin.getline(buffer, 1024);
     run(buffer);
@@ -50,6 +48,9 @@ void runPrompt() {
 }
 
 int main(int argc, char* argv[]) {
+  //create within this "scope"
+  interpreter = new Interpreter();
+
   if (argc == 1) {
     runPrompt();
   }
@@ -62,6 +63,22 @@ int main(int argc, char* argv[]) {
     is.close();
 
     run(source);
+  }
+
+  //delete within this "scope"
+  delete interpreter;
+
+  //error checking
+  if (Literal::count || Stmt::count || Expr::count) {
+    ErrorHandler::Error(-1, "Memory leak detected");
+    std::cout << "Literals Collected: " << GarbageCollector<Literal>::Collect() << std::endl;
+    std::cout << "Stmt Collected: " << GarbageCollector<Stmt>::Collect() << std::endl;
+    std::cout << "Expr Collected: " << GarbageCollector<Expr>::Collect() << std::endl;
+  }
+
+  if (ErrorHandler::GetErrorCount()) {
+    std::cout << "Total errors found: " << ErrorHandler::GetErrorCount() << std::endl;
+    ErrorHandler::SetErrorCount(0);
   }
 
   return 0; 

@@ -79,6 +79,7 @@ Stmt* Parser::ScanStatement() {
       ret = ScanWhile();
     break;
 
+    //allow block scoping
     case LEFT_BRACE:
       ret = ScanBlock();
       skipSemicolon = true;
@@ -423,7 +424,7 @@ Expr* Parser::ScanBinding() {
     expr = new Binary(op.GetLine(), expr, op, rhs);
   }
 
-/*    //accessing a member of a reference
+/*    /TODO: accessing a member of a reference
     else if (Match(MINUS_GREATER)) {
       //syntactic sugar
       Token op = tokenVector[current-1];

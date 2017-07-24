@@ -3,7 +3,7 @@
 #include "error_handler.hpp"
 
 Lexer::Lexer(std::string s): source(s) {
-  //
+  //EMPTY
 }
 
 std::vector<Token> Lexer::GetTokenVector() {
@@ -14,8 +14,8 @@ std::vector<Token> Lexer::GetTokenVector() {
     ScanToken();
   }
 
-  tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", new Literal(), line));
-  return std::move(tokenVector);
+  tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", nullptr, line));
+  return tokenVector;
 }
 
 void Lexer::ScanToken() {
@@ -29,8 +29,8 @@ void Lexer::ScanToken() {
     case '[': AddToken(LEFT_BRACKET); break;
     case ']': AddToken(RIGHT_BRACKET); break;
     case '+': AddToken(PLUS); break;
+    case '-': AddToken(MINUS); break;
     case '&': AddToken(AMPERSAND); break;
-    case ':': AddToken(COLON); break;
     case ',': AddToken(COMMA); break;
     case '.': AddToken(DOT); break;
     case ';': AddToken(SEMICOLON); break;
@@ -43,7 +43,6 @@ void Lexer::ScanToken() {
     case '=': AddToken(Match('=') ? EQUAL_EQUAL : EQUAL); break;
     case '<': AddToken(Match('=') ? LESS_EQUAL : LESS); break;
     case '>': AddToken(Match('=') ? GREATER_EQUAL : GREATER); break;
-    case '-': AddToken(Match('>') ? MINUS_GREATER : MINUS); break;
 
     //eat comments
     case '/':
@@ -80,7 +79,7 @@ void Lexer::ScanToken() {
 
 //helpers
 void Lexer::AddToken(TokenType type) {
-  AddToken(type, new Literal());
+  AddToken(type, nullptr);
 }
 
 void Lexer::AddToken(TokenType type, Literal* literal) {
@@ -140,7 +139,7 @@ void Lexer::ScanIdentifier() {
   //find the end of the identifier
   while(IsAlpha(source[current]) || IsDigit(source[current])) Advance();
 
-  //check for reserved words
+  //get the lexeme
   std::string text = source.substr(start, current-start);
 
   //identifier
@@ -195,7 +194,7 @@ void Lexer::ScanString() {
   Advance();
 
   //get the escaped string
-  std::string str = source.substr(start+1, current-start-2); //-2 for the quotes
+  std::string str = source.substr(start+1, current-start-2); //+1 and -2 for the quotes
 
   //unescape the string before adding the token
   AddToken(STRING, new lString(UnescapeString(str)) );
