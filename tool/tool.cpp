@@ -371,7 +371,7 @@ int run(int argc, std::vector<std::string> argv) {
       {"lBoolean", "bool boolean", "return boolean ? \"true\" : \"false\""},
       {"lClass", "std::map<std::string,Literal*> members", "std::string output = \"class {\";for (auto& it : members) {output += it.first + \":\";output += it.second->ToString();output += \",\";}return output + \"}\""},
       {"lFunction", "std::vector<std::string> parameters/ void* block", "std::string output = \"function(\";for (std::string s : parameters) {output += s;output += \",\";}return output + \") {...}\""},
-      {"lNumber", "double number", "return std::to_string(number)"},
+      {"lNumber", "double number", "std::string s = std::to_string(number); s = s.substr(0, s.find_last_not_of('0') + 1); if (s[s.size()-1] == '.') s = s.substr(0, s.size()-1); return s"},
       {"lObject", "std::map<std::string,Literal*> members", "std::string output = \"object {\"; for (auto& it : members) {output += it.first; output += \",\";}return output + \"}\""},
       {"lReference", "Literal* reference", "return std::string() + \"&\" + reference->ToString()"},
       {"lString", "std::string str", "return str"},
