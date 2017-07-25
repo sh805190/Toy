@@ -1,14 +1,5 @@
-var i = 0;
 
-while(i < 10) {
-  "iterator";
-//  continue;
-  i = i + 1;
-}
 
-while (true) {
-  break;
-}
+var b = true or 2;
 
-"result";
-i;
+return b;

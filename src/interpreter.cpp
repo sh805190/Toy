@@ -113,8 +113,15 @@ void Interpreter::Visit(Expression* stmt) {
 }
 
 void Interpreter::Visit(If* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "If is not yet implemented");
+  Evaluate(stmt->condition);
+  if (IsTruthy(GetResult())) {
+    Execute(stmt->thenBranch);
+  }
+  else {
+    if (stmt->elseBranch) {
+      Execute(stmt->elseBranch);
+    }
+  }
 }
 
 void Interpreter::Visit(Return* stmt) {
@@ -306,13 +313,45 @@ void Interpreter::Visit(Invocation* expr) {
 }
 
 void Interpreter::Visit(Logical* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Logical is not yet implemented");
+  //evaluate the left side
+  Evaluate(expr->lhs);
+
+  switch(expr->op.GetType()) {
+    case AND:
+      if (IsTruthy(GetResult())) {
+        Evaluate(expr->rhs);
+      }
+    break;
+
+    case OR:
+      if (!IsTruthy(GetResult())) {
+        Evaluate(expr->rhs);
+      }
+    break;
+
+    default:
+      throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected logical operator '" + expr->op.GetLexeme() + "' found");
+  }
 }
 
 void Interpreter::Visit(Unary* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Unary is not yet implemented");
+  Evaluate(expr->rhs);
+
+  switch(expr->op.GetType()) {
+    case MINUS:
+      if (GetResult()->type != Literal::Type::LNUMBER) {
+        throw RuntimeError(expr->op.GetLine(), "Can only negate a number");
+      }
+      SetResult(new lNumber( static_cast<lNumber*>(GetResult())->number ));
+    break;
+
+    case BANG:
+      SetResult(new lBoolean( !IsTruthy(GetResult()) ));
+    break;
+
+    default:
+      throw RuntimeError(expr->line, std::string() + "Unexpected unary operator '" + expr->op.GetLexeme() + "' found");
+  }
 }
 
 void Interpreter::Visit(Value* expr) {

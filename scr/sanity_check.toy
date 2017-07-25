@@ -167,9 +167,11 @@ while(true) {
 }
 
 //the continue keyword is used to return to the beginning of a loop
-for (var n = 0; n < 10; n = n + 1) {
-  continue;
-  print("This line will never be reached\n");
+var n = 0;
+while (true) {
+  n = n + 1;
+  if (n < 10) continue;
+  break;
 }
 
 //the for loop is syntactic sugar for a while loop
@@ -218,6 +220,26 @@ while(n < 10) {
   print("\n");
   n = n + 1;
 }
+
+//-----------------------------------------------------------------------------
+
+//there are some operators with their own meanings too
+
+//the minus operator, when placed before a number, will negate that number
+
+a = -42;
+a = -a;
+
+//the bang operator will negate a value
+
+a = true;
+b = !a; //b = false
+
+//the logical operators also support short circuiting
+
+a = false and "incorrect result";
+a = "correct result" or "incorrect result";
+print(a);
 
 //-----------------------------------------------------------------------------
 
