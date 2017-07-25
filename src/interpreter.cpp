@@ -60,6 +60,17 @@ Literal* Interpreter::GetResult() {
   return result;
 }
 
+bool Interpreter::SetFlag(std::string s, bool b) {
+  return useFlag[s] = b;
+}
+
+bool Interpreter::GetFlag(std::string s) {
+  if (useFlag.find(s) == useFlag.end()) {
+    return useFlag[s] = false;
+  }
+  return useFlag[s];
+}
+
 void Interpreter::Visit(Stmt* stmt) {
   //should never happen
   throw RuntimeError(stmt->line, "Empty statement in AST"); 
@@ -132,6 +143,26 @@ void Interpreter::Visit(Return* stmt) {
   }
 
   returnCalled = true;
+}
+
+void Interpreter::Visit(Use* stmt) {
+  //catch all for generic commands
+  if (stmt->command.GetType() == IDENTIFIER) { //TODO: specialized types
+    if (stmt->command.GetLexeme() == "version") {
+      CheckVersion(stmt->line, stmt->command.GetLiteral());
+    }
+
+    SetFlag(stmt->command.GetLiteral()->ToString(), true);
+    return;
+  }
+
+  //handle modules
+  else if (stmt->command.GetType() == STRING) {
+    LoadModule(stmt->command.GetLiteral()->ToString());
+    return;
+  }
+
+  throw RuntimeError(stmt->line, "Unknown command passed to use statement");
 }
 
 void Interpreter::Visit(Var* stmt) {
@@ -424,3 +455,88 @@ Literal* Interpreter::Dereference(Literal* literal) {
   }
   return literal;
 }
+
+void Interpreter::CheckVersion(int line, Literal* literal) {
+  switch(literal->type) {
+    case Literal::Type::LNUMBER: {
+      double d = static_cast<lNumber*>(literal)->number;
+
+      if (d == 0.0) return;
+
+      throw RuntimeError(line, std::string() + "Incorrect toy version detected (can't run version " + literal->ToString() + ")");
+    }
+    break;
+
+    //specialized versions
+    case Literal::Type::LSTRING:
+      throw RuntimeError(line, std::string() + "Unrecognized version '" + literal->ToString() + "'");
+    break;
+  }
+}
+
+#include "ast_deleter.hpp"
+#include "lexer.hpp"
+#include "parser.hpp"
+
+#include <fstream>
+
+void Interpreter::LoadModule(std::string moduleName) {
+  if (LoadBuiltinModule(moduleName)) return;
+
+  //load the file
+  std::string source;
+
+  std::ifstream is(moduleName, std::fstream::in);
+
+  if (!is.is_open()) {
+    throw RuntimeError(-1, std::string() + "Could not open module '" + moduleName + "'");
+  }
+
+  getline(is, source, '\0');
+  is.close();
+
+  //mock the environment
+  Environment* env = new Environment(nullptr);
+
+  ASTDeleter deleter;
+
+  Lexer lexer(source);
+  Parser parser(lexer.GetTokenVector(), true);
+  std::vector<Stmt*> stmtVector = parser.GetStmtVector();
+
+  Interpreter interpreter(nullptr, env);
+
+  int errorCount = ErrorHandler::GetErrorCount();
+
+  //run the code
+  for (Stmt* stmt : stmtVector) {
+    //if panic state
+    if (ErrorHandler::GetErrorCount() - errorCount && interpreter.GetFlag("panic")) {
+      throw RuntimeError(-1, std::string() + "Panic state found in module '" + moduleName + "'");
+    }
+
+    //execute
+    interpreter.Execute(stmt);
+    deleter.DeleteAST(stmt);
+
+    //handle returns
+    if (interpreter.GetReturnCalled()) {
+      SetResult(interpreter.GetResult()->Copy());
+      break;
+    }
+  }
+
+  //if error state
+  if (ErrorHandler::GetErrorCount() - errorCount) {
+    throw RuntimeError(-1, std::string() + "Error state found in module '" + moduleName + "'");
+  }
+
+  //absorb the result
+  environment->Absorb(env);
+}
+
+bool Interpreter::LoadBuiltinModule(std::string moduleName) {
+  //TODO
+  return false;
+}
+

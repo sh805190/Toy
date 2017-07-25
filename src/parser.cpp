@@ -4,7 +4,7 @@
 #include "expr_visitors.hpp"
 #include "stmt_visitors.hpp"
 
-Parser::Parser(std::vector<Token> t): tokenVector(t) {
+Parser::Parser(std::vector<Token> t, bool b): tokenVector(t), moduleFlag(b) {
   //EMPTY
 }
 
@@ -17,9 +17,16 @@ std::vector<Stmt*> Parser::GetStmtVector() {
 
   while(!IsAtEnd()) {
     try {
+      //build each statement tree
       Stmt* stmt = ScanStatement();
       if (stmt) {
         statementVector.push_back(stmt);
+      }
+
+      //module check
+      if (moduleFlag && !moduleFound) {
+        ErrorHandler::Error(-1, "Refusing to load an undeclared module");
+        return {};
       }
     }
     catch (ParserError pe) {
@@ -213,8 +220,20 @@ Stmt* Parser::ScanIf() {
 }
 
 Stmt* Parser::ScanModule() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Token &tok = Advance(); //skip module keyword
+  if (moduleFlag) {
+    if (current != 1) {
+      throw ParserError(tok.GetLine(), "The module declaration must be the first statement");
+    }
+
+    moduleFound = true;
+  }
+  else {
+    throw ParserError(tok.GetLine(), "Can't run a module as the root file");
+  }
+
+  //erm...
+  return nullptr;
 }
 
 Stmt* Parser::ScanReturn() {
@@ -228,8 +247,30 @@ Stmt* Parser::ScanReturn() {
 }
 
 Stmt* Parser::ScanUse() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
+  Token& tok = Advance(); //skip use keyword
+  Token& command = Advance();
+
+  //Grammar: SPECIAL
+
+  //settings
+  if (command.GetType() == IDENTIFIER && command.GetLexeme() == "panic") {
+    return new Use(tok.GetLine(), command);
+  }
+  if (command.GetType() == IDENTIFIER && command.GetLexeme() == "strict") {
+    return new Use(tok.GetLine(), command);
+  }
+  if (command.GetType() == IDENTIFIER && command.GetLexeme() == "version") {
+    //collect the version number too
+    Token& versionNo = Advance();
+    return new Use(tok.GetLine(), Token(IDENTIFIER, command.GetLexeme(), versionNo.GetLiteral()->Copy(), command.GetLine()));
+  }
+
+  //loading modules
+  if (command.GetType() == STRING) {
+    return new Use(tok.GetLine(), command);
+  }
+
+  throw ParserError(tok.GetLine(), "Couldn't read use statement");
 }
 
 Stmt* Parser::ScanVar() {
@@ -558,11 +599,6 @@ Expr* Parser::ScanFunction() {
   Stmt* block = ScanBlock();
 
   return new Function(ln, formalParameters, static_cast<Block*>(block));
-}
-
-Expr* Parser::ScanSpecial() {
-  //TODO
-  throw ParserError(tokenVector[current].GetLine(), std::string() + "'" + tokenVector[current].GetLexeme() + "' not yet implemented");
 }
 
 //helpers

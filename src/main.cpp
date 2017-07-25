@@ -20,6 +20,10 @@ void run(std::string source) {
   std::vector<Stmt*> statements = parser.GetStmtVector();
 
   for (Stmt* stmt : statements) {
+    //if panic state
+    if (ErrorHandler::GetErrorCount() && interpreter->GetFlag("panic")) {
+      return;
+    }
 
     //debugging
     std::cout << "READER:";
@@ -43,7 +47,7 @@ void run(std::string source) {
 void runPrompt() {
   char buffer[1024];
 
-  while (!interpreter->GetReturnCalled()) {
+  while (!interpreter->GetReturnCalled() && !(ErrorHandler::GetErrorCount() && interpreter->GetFlag("panic")) ) {
     std::cout << ">";
     std::cin.getline(buffer, 1024);
     run(buffer);
@@ -66,6 +70,11 @@ int main(int argc, char* argv[]) {
     is.close();
 
     run(source);
+  }
+
+  //check for panic state
+  if (ErrorHandler::GetErrorCount() && interpreter->GetFlag("panic")) {
+    std::cout << "Panic state detected" << std::endl;
   }
 
   //delete within this "scope"

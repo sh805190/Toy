@@ -37,6 +37,10 @@ public:
     type = RETURN;
   }
 
+  void Visit(Use* stmt) {
+    type = USE;
+  }
+
   void Visit(Var* stmt) {
     type = VAR;
   }

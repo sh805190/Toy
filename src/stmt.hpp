@@ -7,6 +7,7 @@ class Continue;
 class Expression;
 class If;
 class Return;
+class Use;
 class Var;
 class While;
 
@@ -27,6 +28,7 @@ public:
   virtual void Visit(Expression*) = 0;
   virtual void Visit(If*) = 0;
   virtual void Visit(Return*) = 0;
+  virtual void Visit(Use*) = 0;
   virtual void Visit(Var*) = 0;
   virtual void Visit(While*) = 0;
 };
@@ -126,6 +128,20 @@ public:
   }
 
   Expr* result;
+};
+
+class Use: public Stmt {
+public:
+  Use(int ln, Token command) {
+    this->line = ln;
+    this->command = command;
+  }
+
+  void Accept(StmtVisitor* visitor) override {
+    visitor->Visit(this);
+  }
+
+  Token command;
 };
 
 class Var: public Stmt {

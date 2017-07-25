@@ -1,5 +1,9 @@
 
+use panic;
+use strict;
+use version 0;
 
-var b = true or 2;
+//module;
 
-return b;
+var greeting = "hello world";
+

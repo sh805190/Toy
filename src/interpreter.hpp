@@ -15,9 +15,14 @@ public:
   void Evaluate(Expr*);
 
   bool GetReturnCalled();
+
   Literal* SetResult(Literal* ptr);
   Literal* GetResult();
 
+  bool SetFlag(std::string, bool);
+  bool GetFlag(std::string);
+
+private:
   //visit methods
   void Visit(Stmt*) override;
   void Visit(Block*) override;
@@ -26,6 +31,7 @@ public:
   void Visit(Expression*) override;
   void Visit(If*) override;
   void Visit(Return*) override;
+  void Visit(Use*) override;
   void Visit(Var*) override;
   void Visit(While*) override;
 
@@ -43,16 +49,20 @@ public:
   void Visit(Value*) override;
   void Visit(Variable*) override;
 
-private:
   //helpers
   bool IsEqual(Literal* lhs, Literal* rhs);
   void CheckOperandsAreNumbers(Token op, Literal* lhs, Literal* rhs);
   bool IsTruthy(Literal*);
   Literal* Dereference(Literal*);
 
+  void CheckVersion(int line, Literal*);
+  void LoadModule(std::string);
+  bool LoadBuiltinModule(std::string);
+
   //members
   Environment* environment = nullptr;
   Literal* result = nullptr;
+  std::map<std::string, bool> useFlag;
 
   //block contexts
   bool breakCalled = false;

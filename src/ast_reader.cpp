@@ -58,6 +58,13 @@ void ASTReader::Visit(Return* stmt) {
   }
 }
 
+void ASTReader::Visit(Use* stmt) {
+  std::cout << "use " << stmt->command.GetLexeme();
+  if (stmt->command.GetLiteral()) {
+    std::cout << " " << stmt->command.GetLiteral()->ToString();
+  }
+}
+
 void ASTReader::Visit(Var* stmt) {
   std::cout << "Declare " << stmt->name.GetLexeme();
   //TODO: check back on this

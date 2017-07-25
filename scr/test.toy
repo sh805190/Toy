@@ -1,5 +1,4 @@
 //use this file to invoke sanity_check.toy
 
-use "sanity_check.toy";
-
+use "scr/sanity_check.toy";
 

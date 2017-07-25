@@ -50,6 +50,12 @@ Literal* Environment::GetRef(Token name) {
   return literalMap[name.GetLexeme()];
 }
 
+void Environment::Absorb(Environment* env) {
+  for (auto p : env->literalMap) {
+    Define(Token(IDENTIFIER, p.first, nullptr, -1), p.second);
+  }
+}
+
 Environment* Environment::GetParent() {
   return parent;
 }

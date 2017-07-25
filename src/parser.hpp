@@ -8,7 +8,7 @@
 class Parser {
 public:
   Parser() = delete;
-  Parser(std::vector<Token> tokens);
+  Parser(std::vector<Token> tokens, bool isModule = false);
   ~Parser();
 
   std::vector<Stmt*> GetStmtVector();
@@ -45,7 +45,6 @@ private:
   Stmt* ScanBlock();
   Expr* ScanClass();
   Expr* ScanFunction();
-  Expr* ScanSpecial();
 
   //helpers
   Token& Advance();
@@ -58,6 +57,8 @@ private:
   std::vector<Token> tokenVector;
   int current = 0;
   bool skipSemicolon = false;
+  bool moduleFlag;
+  bool moduleFound = false;
 
   class ParserError {
   public:

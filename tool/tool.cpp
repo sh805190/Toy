@@ -360,6 +360,7 @@ int run(int argc, std::vector<std::string> argv) {
       {"Expression", "Expr* expr"},
       {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},
       {"Return", "Expr* result"},
+      {"Use", "Token command"},
       {"Var", "Token name, Expr* initializer"},
       {"While", "Expr* condition, Stmt* branch"}
     });

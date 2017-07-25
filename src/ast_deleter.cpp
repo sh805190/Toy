@@ -66,10 +66,15 @@ DEBUGGING(std::cout << "Deleting Return: " << stmt << std::endl);
   delete stmt;
 }
 
+void ASTDeleter::Visit(Use* stmt) {
+DEBUGGING(std::cout << "Deleting Use: " << stmt << std::endl);
+  delete stmt;
+}
+
 void ASTDeleter::Visit(Var* stmt) {
 DEBUGGING(std::cout << "Deleting Var.initializer: " << stmt->initializer << std::endl);
   DeleteAST(stmt->initializer);
-DEBUGGING(std::cout << "Deleting Return: " << stmt << std::endl);
+DEBUGGING(std::cout << "Deleting Var: " << stmt << std::endl);
   delete stmt;
 }
 

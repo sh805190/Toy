@@ -35,7 +35,7 @@ use version 0;
 use "standard";
 
 //'use' can also load external files as modules, by specifying their file name
-use "external.toy";
+use "src/external.toy";
 
 //please note that module names are surrounded by double quote marks, making them strings
 //the module's environment is incorporated into the current environment

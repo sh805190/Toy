@@ -17,6 +17,7 @@ public:
   Literal* GetVar(Token name);
   Literal* GetRef(Token name);
 
+  void Absorb(Environment*);
   Environment* GetParent();
 
   std::map<std::string, Literal*>* GetLiteralMap();

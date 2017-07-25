@@ -65,6 +65,10 @@ void ASTDuplicator::Visit(Return* stmt) {
   resultStmt = new Return(stmt->line, resultExpr);
 }
 
+void ASTDuplicator::Visit(Use* stmt) {
+  resultStmt = new Use(stmt->line, stmt->command);
+}
+
 void ASTDuplicator::Visit(Var* stmt) {
   DuplicateAST(stmt->initializer);
   resultStmt = new Var(stmt->line, stmt->name, resultExpr);
