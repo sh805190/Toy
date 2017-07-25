@@ -29,6 +29,9 @@ void run(std::string source) {
     interpreter->Execute(stmt);
     deleter.DeleteAST(stmt);
 
+    //debugging
+    std::cout << "INTERPRETER:" << interpreter->GetResult()->ToString() << std::endl;
+
     //handle returns
     if (interpreter->GetReturnCalled()) {
       std::cout << "Final value: " << interpreter->GetResult()->ToString() << std::endl;

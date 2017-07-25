@@ -120,8 +120,72 @@ void Interpreter::Visit(Assign* expr) {
 }
 
 void Interpreter::Visit(Binary* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Binary is not yet implemented");
+  //evaluate each side
+  Evaluate(expr->lhs);
+  Literal* lhs = GetResult()->Copy();
+  Evaluate(expr->rhs);
+  Literal* rhs = GetResult()->Copy();
+
+  //take action based on the operator
+  switch(expr->op.GetType()) {
+    //equality operators
+    case EQUAL_EQUAL:
+      SetResult(new lBoolean(IsEqual(lhs, rhs)));
+    break;
+
+    case BANG_EQUAL:
+      SetResult(new lBoolean(!IsEqual(lhs, rhs)));
+    break;
+
+    //comparison operators
+    case LESS:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lBoolean(static_cast<lNumber*>(lhs)->number < static_cast<lNumber*>(rhs)->number));
+    break;
+
+    case LESS_EQUAL:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lBoolean(static_cast<lNumber*>(lhs)->number <= static_cast<lNumber*>(rhs)->number));
+    break;
+
+    case GREATER:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lBoolean(static_cast<lNumber*>(lhs)->number > static_cast<lNumber*>(rhs)->number));
+    break;
+
+    case GREATER_EQUAL:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lBoolean(static_cast<lNumber*>(lhs)->number >= static_cast<lNumber*>(rhs)->number));
+    break;
+
+    //arithmatic operators
+    case PLUS:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lNumber(static_cast<lNumber*>(lhs)->number + static_cast<lNumber*>(rhs)->number));
+    break;
+
+    case MINUS:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lNumber(static_cast<lNumber*>(lhs)->number - static_cast<lNumber*>(rhs)->number));
+    break;
+
+    case STAR:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lNumber(static_cast<lNumber*>(lhs)->number * static_cast<lNumber*>(rhs)->number));
+    break;
+
+    case SLASH:
+      CheckOperandsAreNumbers(expr->op, lhs, rhs);
+      SetResult(new lNumber(static_cast<lNumber*>(lhs)->number / static_cast<lNumber*>(rhs)->number));
+    break;
+
+    default:
+      throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
+  }
+
+  //cleanup
+  delete lhs;
+  delete rhs;
 }
 
 void Interpreter::Visit(Class* expr) {
