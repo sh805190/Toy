@@ -66,8 +66,30 @@ void Interpreter::Visit(Stmt* stmt) {
 }
 
 void Interpreter::Visit(Block* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "Block is not yet implemented");
+  environment = new Environment(environment);
+
+  try {
+    for (Stmt* stmtPtr : stmt->stmtVector) {
+      Execute(stmtPtr);
+
+      //stop block execution if...
+      if (breakCalled || continueCalled || returnCalled) break;
+    }
+  }
+  catch(RuntimeError& e) {
+    //in case of emergencies, decrease the scope
+    Environment* env = environment;
+    environment = env->GetParent();
+    delete env;
+
+    //continue up the callstack
+    throw(e);
+  }
+
+  //decrease the scope
+  Environment* env = environment;
+  environment = env->GetParent();
+  delete env;
 }
 
 void Interpreter::Visit(Break* stmt) {
