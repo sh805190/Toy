@@ -131,7 +131,6 @@ void Interpreter::Visit(Assign* expr) {
       Token name = static_cast<Variable*>(expr->target)->name;
       Evaluate(expr->value);
       environment->Assign(name, GetResult());
-      SetResult(nullptr);
     }
     break;
 
@@ -181,8 +180,17 @@ void Interpreter::Visit(Binary* expr) {
 
     //arithmatic operators
     case PLUS:
-      CheckOperandsAreNumbers(expr->op, lhs, rhs);
-      SetResult(new lNumber(static_cast<lNumber*>(lhs)->number + static_cast<lNumber*>(rhs)->number));
+      //special checks for the PLUS operators, to support string concatenation
+      if (lhs->type == Literal::Type::LNUMBER && rhs->type == Literal::Type::LNUMBER) {
+        SetResult(new lNumber(static_cast<lNumber*>(lhs)->number + static_cast<lNumber*>(rhs)->number));
+      }
+      else if (lhs->type == Literal::Type::LSTRING && rhs->type == Literal::Type::LSTRING) {
+        //concatenate strings
+        SetResult(new lString(static_cast<lString*>(lhs)->str + static_cast<lString*>(rhs)->str));
+      }
+      else {
+        throw RuntimeError(expr->line, std::string() + "Operands of '" + expr->op.GetLexeme() + "' must be both numbers or both strings");
+      }
     break;
 
     case MINUS:
@@ -255,10 +263,6 @@ void Interpreter::Visit(Variable* expr) {
 
 //helpers
 bool Interpreter::IsEqual(Literal* lhs, Literal* rhs) {
-  //dereference references
-  lhs = Dereference(lhs);
-  rhs = Dereference(rhs);
-
   //check for undefined values
   if (lhs->type == Literal::Type::LUNDEFINED) {
     //'undefined' returns true only when compared to itself
@@ -291,10 +295,6 @@ bool Interpreter::IsEqual(Literal* lhs, Literal* rhs) {
 }
 
 void Interpreter::CheckOperandsAreNumbers(Token op, Literal* lhs, Literal* rhs) {
-  //dereference references
-  lhs = Dereference(lhs);
-  rhs = Dereference(rhs);
-
   if (lhs->type == Literal::Type::LNUMBER && rhs->type == Literal::Type::LNUMBER) {
     return;
   }
@@ -303,9 +303,6 @@ void Interpreter::CheckOperandsAreNumbers(Token op, Literal* lhs, Literal* rhs) 
 }
 
 bool Interpreter::IsTruthy(Literal* literal) {
-  //dereference references
-  literal = Dereference(literal);
-
   if (literal->type == Literal::Type::LUNDEFINED) {
     return false;
   }

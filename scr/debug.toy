@@ -12,6 +12,7 @@ a = 2;
 
 a = a + a;
 
-"result";
+a = "Hello";
 
-a;
+a = a + " world";
+
