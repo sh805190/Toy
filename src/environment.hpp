@@ -10,6 +10,7 @@ class Environment {
 public:
   Environment() = default;
   Environment(Environment* parent);
+  ~Environment();
 
   Literal* Define(Token name, Literal* value);
   Literal* Assign(Token name, Literal* value);

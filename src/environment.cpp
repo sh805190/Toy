@@ -6,7 +6,15 @@ Environment::Environment(Environment* parent) {
   this->parent = parent;
 }
 
+Environment::~Environment() {
+  //clean up the literals
+  for (auto p : literalMap) {
+    delete p.second;
+  }
+}
+
 Literal* Environment::Define(Token name, Literal* value) {
+  //TODO: Does the name really need to be a token?
   if (literalMap.find(name.GetLexeme()) != literalMap.end()) {
     throw RuntimeError(name.GetLine(), std::string() + "Can't redeclare the variable '" + name.GetLexeme() + "'");
   }

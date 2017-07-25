@@ -95,8 +95,14 @@ void Interpreter::Visit(Return* stmt) {
 }
 
 void Interpreter::Visit(Var* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "Var is not yet implemented");
+  //declaring a variable
+  if (stmt->initializer) {
+    Evaluate(stmt->initializer);
+    environment->Define(stmt->name, GetResult());
+  }
+  else {
+    environment->Define(stmt->name, nullptr);
+  }
 }
 
 void Interpreter::Visit(While* stmt) {
@@ -115,8 +121,23 @@ void Interpreter::Visit(Array* expr) {
 }
 
 void Interpreter::Visit(Assign* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Assign is not yet implemented");
+  //get the assignment target type
+  TokenTypeGetter typeGetter;
+  expr->target->Accept(&typeGetter);
+
+  //use a switch statement this time!
+  switch(typeGetter.GetType()) {
+    case IDENTIFIER: {
+      Token name = static_cast<Variable*>(expr->target)->name;
+      Evaluate(expr->value);
+      environment->Assign(name, GetResult());
+      SetResult(nullptr);
+    }
+    break;
+
+    default:
+      throw RuntimeError(expr->target->line, std::string() + "Unknown or unimplemented type on left hand side of assignment (type ID " + std::to_string(typeGetter.GetType()) + ")");
+  }
 }
 
 void Interpreter::Visit(Binary* expr) {
@@ -223,12 +244,13 @@ void Interpreter::Visit(Unary* expr) {
 }
 
 void Interpreter::Visit(Value* expr) {
+  //the literal value
   SetResult(expr->value);
 }
 
 void Interpreter::Visit(Variable* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Variable is not yet implemented");
+  //retreive the value based on the variable name
+  SetResult(environment->GetVar(expr->name));
 }
 
 //helpers
