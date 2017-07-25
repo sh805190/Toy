@@ -93,13 +93,19 @@ void Interpreter::Visit(Block* stmt) {
 }
 
 void Interpreter::Visit(Break* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "Break is not yet implemented");
+  if (loopDepth <= 0) {
+    throw RuntimeError(stmt->line, std::string() + "Break called with a loop depth of " + std::to_string(loopDepth));
+  }
+
+  breakCalled = true;
 }
 
 void Interpreter::Visit(Continue* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "Continue is not yet implemented");
+  if (loopDepth <= 0) {
+    throw RuntimeError(stmt->line, std::string() + "Continue called with a loop depth of " + std::to_string(loopDepth));
+  }
+
+  continueCalled = true;
 }
 
 void Interpreter::Visit(Expression* stmt) {
@@ -112,8 +118,13 @@ void Interpreter::Visit(If* stmt) {
 }
 
 void Interpreter::Visit(Return* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "Return is not yet implemented");
+  SetResult(nullptr); //explicitly undefined
+
+  if (stmt->result) {
+    Evaluate(stmt->result);
+  }
+
+  returnCalled = true;
 }
 
 void Interpreter::Visit(Var* stmt) {
@@ -128,8 +139,39 @@ void Interpreter::Visit(Var* stmt) {
 }
 
 void Interpreter::Visit(While* stmt) {
-  //TODO
-  throw RuntimeError(stmt->line, "While is not yet implemented");
+  loopDepth++; //diagnostics
+
+  for (;;) {
+    //block contexts
+    if (breakCalled) {
+      breakCalled = false; //one level
+      loopDepth--;
+      break;
+    }
+
+    if (returnCalled) {
+      loopDepth--;
+      return; //don't reset the context flags
+     }
+
+    continueCalled = false;
+
+    //if we should run another loop
+    Evaluate(stmt->condition);
+
+    if (!IsTruthy(GetResult())) {
+      loopDepth--;
+      break;
+    }
+
+    //execute the loop once
+    Execute(stmt->branch);
+  }
+
+  //reset the flags after a block
+  breakCalled = false;
+  continueCalled = false;
+  returnCalled = false;
 }
 
 void Interpreter::Visit(Expr* expr) {
@@ -275,7 +317,7 @@ void Interpreter::Visit(Unary* expr) {
 
 void Interpreter::Visit(Value* expr) {
   //the literal value
-  SetResult(expr->value);
+  SetResult(expr->value->Copy());
 }
 
 void Interpreter::Visit(Variable* expr) {

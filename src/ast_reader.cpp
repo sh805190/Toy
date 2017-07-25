@@ -153,9 +153,9 @@ void ASTReader::Visit(Unary* expr) {
 }
 
 void ASTReader::Visit(Value* expr) {
-  std::cout << expr->value->ToString();
+  std::cout << expr->value->ToString() << " {VAL} ";
 }
 
 void ASTReader::Visit(Variable* expr) {
-  std::cout << expr->name.GetLexeme();
+  std::cout << expr->name.GetLexeme() << " {VAR} ";
 }

@@ -42,7 +42,7 @@ Literal* Environment::GetVar(Token name) {
 Literal* Environment::GetRef(Token name) {
   if (literalMap.find(name.GetLexeme()) == literalMap.end()) {
     if (parent) {
-      return parent->GetVar(name);
+      return parent->GetRef(name);
     }
     throw RuntimeError(name.GetLine(), std::string() + "Undeclared variable '" + name.GetLexeme() + "' found");
   }
