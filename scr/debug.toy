@@ -1,9 +1,8 @@
+module;
 
 use panic;
 use strict;
 use version 0;
-
-//module;
 
 var greeting = "hello world";
 

@@ -35,7 +35,7 @@ use version 0;
 use "standard";
 
 //'use' can also load external files as modules, by specifying their file name
-use "src/external.toy";
+use "scr/external.toy";
 
 //please note that module names are surrounded by double quote marks, making them strings
 //the module's environment is incorporated into the current environment
@@ -61,11 +61,16 @@ a = "hello world";
 //an array is defined by surrounding a number of values (or variables) with brackets
 var array = [1, 2, 3];
 
+//you can assign to or access individual elements of an array using the brackets notation (arrays are zero indexed)
+
+var i = array[1];
+array[1] = 5;
+
 //arrays have a number of built in member functions
 
 array.size(); //get the size of the array
 array.insert(0, 4); //insert at position 0 the value 4, pushing back the rest
-array.erase(0); //erase the value at position 0
+array.erase(1); //erase the value at position 1
 
 //booleans have one of two values
 //all values besides false and undefined are considered truthy
@@ -73,12 +78,15 @@ var boolean = true;
 boolean = false;
 
 //built ins are indistinguishable from functions. They are accessable via built in modules (such as standard), and cannot be created by the programmer
+//built ins are implemented in the same language as the interpreter, rather than toy
 print("Hello World\n");
 
 //classes are collections of variable declarations that can be invoked to create objects, acting much like prototypes
 //classes can have functions called "create" and "destroy", which act as the constructor and destructor respectfully
+//you can access an object from inside member functions using the "this" keyword
+
 var Car = class {
-  var create = function() { this.speed = 42; };
+  var create = function() { (*this).speed = 42; };
   var destroy = function() {};
   var speed = 0;
 };
@@ -214,7 +222,7 @@ print(f());
 
 //finally, the while keyword is a basic loop, which will continue as long as it's condition is true
 
-var n = 0;
+n = 0;
 while(n < 10) {
   print(n);
   print("\n");

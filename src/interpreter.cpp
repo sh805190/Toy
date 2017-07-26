@@ -2,8 +2,10 @@
 
 #include "error_handler.hpp"
 #include "expr_visitors.hpp"
+#include "run.hpp"
 #include "runtime_error.hpp"
 
+#include <fstream>
 #include <functional>
 
 Interpreter::Interpreter(Environment* parent, Environment* forced) {
@@ -213,8 +215,8 @@ void Interpreter::Visit(While* stmt) {
 }
 
 void Interpreter::Visit(Expr* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Expr is not yet implemented");
+  //empty = undefined
+  SetResult(nullptr);
 }
 
 void Interpreter::Visit(Array* expr) {
@@ -474,18 +476,14 @@ void Interpreter::CheckVersion(int line, Literal* literal) {
   }
 }
 
-#include "ast_deleter.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
-
-#include <fstream>
-
 void Interpreter::LoadModule(std::string moduleName) {
   if (LoadBuiltinModule(moduleName)) return;
 
+  //error handling
+  int errorCount = ErrorHandler::GetErrorCount();
+
   //load the file
   std::string source;
-
   std::ifstream is(moduleName, std::fstream::in);
 
   if (!is.is_open()) {
@@ -498,41 +496,31 @@ void Interpreter::LoadModule(std::string moduleName) {
   //mock the environment
   Environment* env = new Environment(nullptr);
 
-  ASTDeleter deleter;
+  //run the file in a sub-interpreter
+  Interpreter* interpreter = new Interpreter(nullptr, env);
+  run(source, interpreter, true);
 
-  Lexer lexer(source);
-  Parser parser(lexer.GetTokenVector(), true);
-  std::vector<Stmt*> stmtVector = parser.GetStmtVector();
+  //check for panic state
+  if (ErrorHandler::GetErrorCount() - errorCount && interpreter->GetFlag("panic")) {
+    delete interpreter;
+    throw RuntimeError(-1, std::string() + "Panic state detected in module '" + moduleName + "'");
+  }
 
-  Interpreter interpreter(nullptr, env);
-
-  int errorCount = ErrorHandler::GetErrorCount();
-
-  //run the code
-  for (Stmt* stmt : stmtVector) {
-    //if panic state
-    if (ErrorHandler::GetErrorCount() - errorCount && interpreter.GetFlag("panic")) {
-      throw RuntimeError(-1, std::string() + "Panic state found in module '" + moduleName + "'");
-    }
-
-    //execute
-    interpreter.Execute(stmt);
-    deleter.DeleteAST(stmt);
-
-    //handle returns
-    if (interpreter.GetReturnCalled()) {
-      SetResult(interpreter.GetResult()->Copy());
-      break;
-    }
+  //handle returns
+  if (interpreter->GetReturnCalled()) {
+    SetResult(interpreter->GetResult()->Copy());
   }
 
   //if error state
   if (ErrorHandler::GetErrorCount() - errorCount) {
-    throw RuntimeError(-1, std::string() + "Error state found in module '" + moduleName + "'");
+    throw RuntimeError(-1, std::string() + "Error state detected in module '" + moduleName + "'");
   }
 
   //absorb the result
   environment->Absorb(env);
+
+  //the interpeter will delete the environment itself
+  delete interpreter;
 }
 
 bool Interpreter::LoadBuiltinModule(std::string moduleName) {
