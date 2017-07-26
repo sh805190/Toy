@@ -1,8 +1,17 @@
-module;
-
-use panic;
+//use panic;
 use strict;
 use version 0;
 
-var greeting = "hello world";
+var a = 1;
 
+var b = &a;
+
+var c = &b;
+
+**c = 2;
+
+var d = *b;
+
+"result";
+
+a;

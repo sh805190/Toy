@@ -238,6 +238,41 @@ void Interpreter::Visit(Assign* expr) {
     }
     break;
 
+    case STAR: {
+      //dereference on lhs of assignment
+      Unary* target = static_cast<Unary*>(expr->target);
+
+      //get the star count and base literal
+      int starCount = static_cast<lNumber*>( target->op.GetLiteral() )->number;
+      Literal* literal = environment->GetRef(static_cast<Variable*>(target->rhs)->name);
+
+      //dig down
+      std::string starLexeme;
+      while(starCount > 0) {
+        //display
+        starLexeme += "*";
+
+        //check that the literal is a reference
+        if (literal->type != Literal::Type::LREFERENCE) {
+          std::string varName = static_cast<Variable*>(target->rhs)->name.GetLexeme();
+          throw RuntimeError(expr->line, std::string() + "Expression '" + starLexeme + varName + "' is not a variable");
+        }
+
+        //set the literal reference via one level of indirection
+        if (starCount == 1) {
+          Evaluate(expr->value);
+          delete static_cast<lReference*>(literal)->reference;
+          static_cast<lReference*>(literal)->reference = GetResult()->Copy();
+          break;
+        }
+
+        //one level of dereference
+        literal = static_cast<lReference*>(literal)->reference;
+        starCount--;
+      }
+    }
+    break;
+
     default:
       throw RuntimeError(expr->target->line, std::string() + "Unknown or unimplemented type on left hand side of assignment (type ID " + std::to_string(typeGetter.GetType()) + ")");
   }
@@ -246,9 +281,13 @@ void Interpreter::Visit(Assign* expr) {
 void Interpreter::Visit(Binary* expr) {
   //evaluate each side
   Evaluate(expr->lhs);
-  Literal* lhs = GetResult()->Copy();
+  Literal* lhsResult = GetResult()->Copy();
   Evaluate(expr->rhs);
-  Literal* rhs = GetResult()->Copy();
+  Literal* rhsResult = GetResult()->Copy();
+
+  //dereference
+  Literal* lhs = Dereference(lhsResult);
+  Literal* rhs = Dereference(rhsResult);
 
   //take action based on the operator
   switch(expr->op.GetType()) {
@@ -313,12 +352,15 @@ void Interpreter::Visit(Binary* expr) {
     break;
 
     default:
+      //emergency cleanup
+      delete lhsResult;
+      delete rhsResult;
       throw RuntimeError(expr->op.GetLine(), std::string() + "Unexpected binary operator '" + expr->op.GetLexeme() + "'");
   }
 
   //cleanup
-  delete lhs;
-  delete rhs;
+  delete lhsResult;
+  delete rhsResult;
 }
 
 void Interpreter::Visit(Class* expr) {
@@ -380,6 +422,34 @@ void Interpreter::Visit(Unary* expr) {
 
     case BANG:
       SetResult(new lBoolean( !IsTruthy(GetResult()) ));
+    break;
+
+    case AMPERSAND:
+      SetResult( new lReference(environment->GetRef( static_cast<Variable*>(expr->rhs)->name )) );
+    break;
+
+    case STAR: {
+      //dereference in an expression (rhs of assignment, etc.)
+      std::string starLexeme;
+      int starCount = static_cast<lNumber*>(expr->op.GetLiteral())->number;
+      Literal* literal = GetResult();
+      while(starCount > 0) {
+        //display
+        starLexeme += "*";
+
+        //check that the literal type is a reference
+        if (literal->type != Literal::Type::LREFERENCE) {
+          Variable* variable = static_cast<Variable*>(expr->rhs);
+          throw RuntimeError(expr->line, std::string() + "Expression '" + starLexeme + variable->name.GetLexeme() + "' is not a variable");
+        }
+
+        //one level of dereference
+        literal = static_cast<lReference*>(literal)->reference;
+        starCount--;
+      }
+
+      SetResult(literal->Copy());
+    }
     break;
 
     default:
