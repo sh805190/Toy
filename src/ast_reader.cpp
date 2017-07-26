@@ -1,5 +1,7 @@
 #include "ast_reader.hpp"
 
+#include "literal.hpp"
+
 #include <iostream>
 
 void ASTReader::Print(Stmt* stmt) {

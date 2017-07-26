@@ -1,5 +1,7 @@
 #include "token.hpp"
 
+#include "literal.hpp"
+
 Token::Token() {
   type = UNDEFINED;
   lexeme = "";

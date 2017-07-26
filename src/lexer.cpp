@@ -15,7 +15,7 @@ std::vector<Token> Lexer::GetTokenVector() {
   }
 
   tokenVector.push_back(Token(END_OF_FILE, "END_OF_FILE", nullptr, line));
-  return tokenVector;
+  return std::move(tokenVector);
 }
 
 void Lexer::ScanToken() {

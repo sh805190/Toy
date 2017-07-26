@@ -1,8 +1,8 @@
 #pragma once
 
-#include "token_type.hpp"
+class Literal;
 
-#include "literal.hpp"
+#include "token_type.hpp"
 
 #include <string>
 

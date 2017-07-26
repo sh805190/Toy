@@ -1,5 +1,7 @@
 #include "ast_deleter.hpp"
 
+#include "literal.hpp"
+
 #include <iostream>
 
 #define DEBUGGING(x) ;

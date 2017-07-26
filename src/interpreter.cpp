@@ -220,8 +220,12 @@ void Interpreter::Visit(Expr* expr) {
 }
 
 void Interpreter::Visit(Array* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Array is not yet implemented");
+  std::vector<Literal*> literalVector;
+  for (Expr* ptr : expr->exprVector) {
+    Evaluate(ptr);
+    literalVector.push_back(GetResult()->Copy());
+  }
+  SetResult(new lArray(literalVector));
 }
 
 void Interpreter::Visit(Assign* expr) {
@@ -235,6 +239,66 @@ void Interpreter::Visit(Assign* expr) {
       Token name = static_cast<Variable*>(expr->target)->name;
       Evaluate(expr->value);
       environment->Assign(name, GetResult());
+    }
+    break;
+
+    case INDEX: {
+      //ugly lambda
+      auto setter = [&](lArray* array, lNumber* index, Literal* value, int line) -> Literal* {
+        //error checking
+        if (array->type != Literal::Type::LARRAY) {
+          throw RuntimeError(line, "Expected an array to the left of '[' operator"); 
+        }
+
+        if (index->type != Literal::Type::LNUMBER) {
+          throw RuntimeError(line, "Unexpected type between '[' and ']' operators (expected number)"); 
+        }
+
+        //bounds check
+        if (index->number < 0 || index->number >= array->array.size()) {
+          throw RuntimeError(line, "Array index out of bounds");
+        }
+
+        //finally, set the element's value
+        delete array->array[(int)(index->number)];
+        array->array[(int)(index->number)] = value->Copy();
+
+        //return
+        return array;
+      };
+
+      Index* index = static_cast<Index*>(expr->target);
+
+      //get the info about the lhs
+      TokenTypeGetter typeGetter;
+      index->array->Accept(&typeGetter);
+
+      switch(typeGetter.GetType()) {
+        case ARRAY: {
+          Evaluate(index->array);
+          Literal* array = GetResult()->Copy();
+          Evaluate(index->index);
+          Literal* index = GetResult()->Copy();
+          Evaluate(expr->value);
+          SetResult(setter(static_cast<lArray*>(array), static_cast<lNumber*>(index), GetResult(), expr->line)->Copy());
+          delete array;
+          delete index;
+        }
+        break;
+
+        case IDENTIFIER: {
+          Literal* array = environment->GetRef(static_cast<Variable*>(index->array)->name);
+          Evaluate(index->index);
+          Literal* index = GetResult()->Copy();
+          Evaluate(expr->value);
+          SetResult(setter(static_cast<lArray*>(array), static_cast<lNumber*>(index), GetResult(), expr->line)->Copy());
+          delete index;
+        }
+        break;
+
+        default:
+          throw RuntimeError(expr->line, std::string() + "Unexpected type found on lhs of index (type " + std::to_string((int)(typeGetter.GetType())) + ")");
+      }
     }
     break;
 
@@ -378,8 +442,32 @@ void Interpreter::Visit(Grouping* expr) {
 }
 
 void Interpreter::Visit(Index* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Index is not yet implemented");
+  //get the array
+  Evaluate(expr->array);
+
+  //error checking
+  if (GetResult()->type != Literal::Type::LARRAY) {
+    throw RuntimeError(expr->line, std::string() + "'" + GetResult()->ToString() + "' is not an array");
+  }
+
+  Literal* array = GetResult()->Copy();
+
+  //get the index
+  Evaluate(expr->index);
+
+  //error checking
+  if (GetResult()->type != Literal::Type::LNUMBER) {
+    throw RuntimeError(expr->line, std::string() + "Unexpected value type as index of array (expected number, got '" + GetResult()->ToString() + "')");
+  }
+
+  Literal* index = GetResult()->Copy();
+
+  //set result
+  SetResult(static_cast<lArray*>(array)->array[(int)(static_cast<lNumber*>(index)->number)]->Copy());
+
+  //cleanup
+  delete array;
+  delete index;
 }
 
 void Interpreter::Visit(Invocation* expr) {

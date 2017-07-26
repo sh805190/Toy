@@ -1,6 +1,7 @@
 #pragma once
 
 #include "expr.hpp"
+#include "literal.hpp"
 #include "token_type.hpp"
 
 class TokenTypeGetter: public ExprVisitor {

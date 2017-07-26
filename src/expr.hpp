@@ -14,7 +14,6 @@ class Unary;
 class Value;
 class Variable;
 
-#include "garbage_collector.hpp"
 #include "expr.hpp"
 #include "stmt.hpp"
 #include "token.hpp"
@@ -41,42 +40,29 @@ public:
 
 class Expr {
 public:
-  Expr() { count++; GarbageCollector<Expr>::Push(this); }
-  Expr(int ln) { line = ln; count++; GarbageCollector<Expr>::Push(this); }
-  ~Expr() { count--; GarbageCollector<Expr>::Pop(this); }
+  Expr();
+  Expr(int);
+  virtual ~Expr();
+  virtual void Accept(ExprVisitor* visitor);
 
-  virtual void Accept(ExprVisitor* visitor) {
-    visitor->Visit(this);
-  }
   int line = -1;
   static int count;
 };
 
 class Array: public Expr {
 public:
-  Array(int ln, std::vector<Expr*> exprVector) {
-    this->line = ln;
-    this->exprVector = exprVector;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Array(int ln, std::vector<Expr*> exprVector);
+  virtual ~Array();
+  void Accept(ExprVisitor* visitor) override;
 
   std::vector<Expr*> exprVector;
 };
 
 class Assign: public Expr {
 public:
-  Assign(int ln, Expr* target, Expr* value) {
-    this->line = ln;
-    this->target = target;
-    this->value = value;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Assign(int ln, Expr* target, Expr* value);
+  virtual ~Assign();
+  void Accept(ExprVisitor* visitor) override;
 
   Expr* target;
   Expr* value;
@@ -84,16 +70,9 @@ public:
 
 class Binary: public Expr {
 public:
-  Binary(int ln, Expr* lhs, Token op, Expr* rhs) {
-    this->line = ln;
-    this->lhs = lhs;
-    this->op = op;
-    this->rhs = rhs;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Binary(int ln, Expr* lhs, Token op, Expr* rhs);
+  virtual ~Binary();
+  void Accept(ExprVisitor* visitor) override;
 
   Expr* lhs;
   Token op;
@@ -102,29 +81,18 @@ public:
 
 class Class: public Expr {
 public:
-  Class(int ln, Block* block) {
-    this->line = ln;
-    this->block = block;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Class(int ln, Block* block);
+  virtual ~Class();
+  void Accept(ExprVisitor* visitor) override;
 
   Block* block;
 };
 
 class Function: public Expr {
 public:
-  Function(int ln, std::vector<std::string> parameterVector, Block* block) {
-    this->line = ln;
-    this->parameterVector = parameterVector;
-    this->block = block;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Function(int ln, std::vector<std::string> parameterVector, Block* block);
+  virtual ~Function();
+  void Accept(ExprVisitor* visitor) override;
 
   std::vector<std::string> parameterVector;
   Block* block;
@@ -132,29 +100,18 @@ public:
 
 class Grouping: public Expr {
 public:
-  Grouping(int ln, Expr* inner) {
-    this->line = ln;
-    this->inner = inner;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Grouping(int ln, Expr* inner);
+  virtual ~Grouping();
+  void Accept(ExprVisitor* visitor) override;
 
   Expr* inner;
 };
 
 class Index: public Expr {
 public:
-  Index(int ln, Expr* array, Expr* index) {
-    this->line = ln;
-    this->array = array;
-    this->index = index;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Index(int ln, Expr* array, Expr* index);
+  virtual ~Index();
+  void Accept(ExprVisitor* visitor) override;
 
   Expr* array;
   Expr* index;
@@ -162,15 +119,9 @@ public:
 
 class Invocation: public Expr {
 public:
-  Invocation(int ln, Expr* expr, std::vector<Expr*> exprVector) {
-    this->line = ln;
-    this->expr = expr;
-    this->exprVector = exprVector;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Invocation(int ln, Expr* expr, std::vector<Expr*> exprVector);
+  virtual ~Invocation();
+  void Accept(ExprVisitor* visitor) override;
 
   Expr* expr;
   std::vector<Expr*> exprVector;
@@ -178,16 +129,9 @@ public:
 
 class Logical: public Expr {
 public:
-  Logical(int ln, Expr* lhs, Token op, Expr* rhs) {
-    this->line = ln;
-    this->lhs = lhs;
-    this->op = op;
-    this->rhs = rhs;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Logical(int ln, Expr* lhs, Token op, Expr* rhs);
+  virtual ~Logical();
+  void Accept(ExprVisitor* visitor) override;
 
   Expr* lhs;
   Token op;
@@ -196,15 +140,9 @@ public:
 
 class Unary: public Expr {
 public:
-  Unary(int ln, Token op, Expr* rhs) {
-    this->line = ln;
-    this->op = op;
-    this->rhs = rhs;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Unary(int ln, Token op, Expr* rhs);
+  virtual ~Unary();
+  void Accept(ExprVisitor* visitor) override;
 
   Token op;
   Expr* rhs;
@@ -212,28 +150,18 @@ public:
 
 class Value: public Expr {
 public:
-  Value(int ln, Literal* value) {
-    this->line = ln;
-    this->value = value;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Value(int ln, Literal* value);
+  virtual ~Value();
+  void Accept(ExprVisitor* visitor) override;
 
   Literal* value;
 };
 
 class Variable: public Expr {
 public:
-  Variable(int ln, Token name) {
-    this->line = ln;
-    this->name = name;
-  }
-
-  void Accept(ExprVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Variable(int ln, Token name);
+  virtual ~Variable();
+  void Accept(ExprVisitor* visitor) override;
 
   Token name;
 };

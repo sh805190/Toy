@@ -251,6 +251,19 @@ print(a);
 
 //-----------------------------------------------------------------------------
 
+//another feature is that you can chain functions and arrays
+
+f = function() {
+  var f = function() {
+    var array = [1, 2, 3];
+    return array;
+  };
+  var array = [1, f, 3];
+  return array;
+};
+
+f()[1]()[1] == 2;
+
 //that should be all...
 
 return;

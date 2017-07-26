@@ -13,6 +13,10 @@ Parser::~Parser() {
 }
 
 std::vector<Stmt*> Parser::GetStmtVector() {
+  for (auto it : statementVector) {
+    delete it;
+  }
+
   statementVector.clear();
 
   while(!IsAtEnd()) {
@@ -35,7 +39,7 @@ std::vector<Stmt*> Parser::GetStmtVector() {
       Synchronize();
     }
   }
-  return statementVector;
+  return std::move(statementVector);
 }
 
 //rules
@@ -254,10 +258,10 @@ Stmt* Parser::ScanUse() {
 
   //settings
   if (command.GetType() == IDENTIFIER && command.GetLexeme() == "panic") {
-    return new Use(tok.GetLine(), command);
+    return new Use(tok.GetLine(), Token(command));
   }
   if (command.GetType() == IDENTIFIER && command.GetLexeme() == "strict") {
-    return new Use(tok.GetLine(), command);
+    return new Use(tok.GetLine(), Token(command));
   }
   if (command.GetType() == IDENTIFIER && command.GetLexeme() == "version") {
     //collect the version number too
@@ -267,7 +271,7 @@ Stmt* Parser::ScanUse() {
 
   //loading modules
   if (command.GetType() == STRING) {
-    return new Use(tok.GetLine(), command);
+    return new Use(tok.GetLine(), Token(command));
   }
 
   throw ParserError(tok.GetLine(), "Couldn't read use statement");

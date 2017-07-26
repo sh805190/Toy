@@ -11,7 +11,6 @@ class Use;
 class Var;
 class While;
 
-#include "garbage_collector.hpp"
 #include "expr.hpp"
 #include "stmt.hpp"
 #include "token.hpp"
@@ -35,81 +34,52 @@ public:
 
 class Stmt {
 public:
-  Stmt() { count++; GarbageCollector<Stmt>::Push(this); }
-  Stmt(int ln) { line = ln; count++; GarbageCollector<Stmt>::Push(this); }
-  ~Stmt() { count--; GarbageCollector<Stmt>::Pop(this); }
+  Stmt();
+  Stmt(int);
+  virtual ~Stmt();
+  virtual void Accept(StmtVisitor* visitor);
 
-  virtual void Accept(StmtVisitor* visitor) {
-    visitor->Visit(this);
-  }
   int line = -1;
   static int count;
 };
 
 class Block: public Stmt {
 public:
-  Block(int ln, std::vector<Stmt*> stmtVector) {
-    this->line = ln;
-    this->stmtVector = stmtVector;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Block(int ln, std::vector<Stmt*> stmtVector);
+  virtual ~Block();
+  void Accept(StmtVisitor* visitor) override;
 
   std::vector<Stmt*> stmtVector;
 };
 
 class Break: public Stmt {
 public:
-  Break(int ln) {
-    this->line = ln;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
-
- };
+  Break(int ln);
+  virtual ~Break();
+  void Accept(StmtVisitor* visitor) override;
+};
 
 class Continue: public Stmt {
 public:
-  Continue(int ln) {
-    this->line = ln;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
-
- };
+  Continue(int ln);
+  virtual ~Continue();
+  void Accept(StmtVisitor* visitor) override;
+};
 
 class Expression: public Stmt {
 public:
-  Expression(int ln, Expr* expr) {
-    this->line = ln;
-    this->expr = expr;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Expression(int ln, Expr* expr);
+  virtual ~Expression();
+  void Accept(StmtVisitor* visitor) override;
 
   Expr* expr;
 };
 
 class If: public Stmt {
 public:
-  If(int ln, Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
-    this->line = ln;
-    this->condition = condition;
-    this->thenBranch = thenBranch;
-    this->elseBranch = elseBranch;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  If(int ln, Expr* condition, Stmt* thenBranch, Stmt* elseBranch);
+  virtual ~If();
+  void Accept(StmtVisitor* visitor) override;
 
   Expr* condition;
   Stmt* thenBranch;
@@ -118,43 +88,27 @@ public:
 
 class Return: public Stmt {
 public:
-  Return(int ln, Expr* result) {
-    this->line = ln;
-    this->result = result;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Return(int ln, Expr* result);
+  virtual ~Return();
+  void Accept(StmtVisitor* visitor) override;
 
   Expr* result;
 };
 
 class Use: public Stmt {
 public:
-  Use(int ln, Token command) {
-    this->line = ln;
-    this->command = command;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Use(int ln, Token command);
+  virtual ~Use();
+  void Accept(StmtVisitor* visitor) override;
 
   Token command;
 };
 
 class Var: public Stmt {
 public:
-  Var(int ln, Token name, Expr* initializer) {
-    this->line = ln;
-    this->name = name;
-    this->initializer = initializer;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  Var(int ln, Token name, Expr* initializer);
+  virtual ~Var();
+  void Accept(StmtVisitor* visitor) override;
 
   Token name;
   Expr* initializer;
@@ -162,15 +116,9 @@ public:
 
 class While: public Stmt {
 public:
-  While(int ln, Expr* condition, Stmt* branch) {
-    this->line = ln;
-    this->condition = condition;
-    this->branch = branch;
-  }
-
-  void Accept(StmtVisitor* visitor) override {
-    visitor->Visit(this);
-  }
+  While(int ln, Expr* condition, Stmt* branch);
+  virtual ~While();
+  void Accept(StmtVisitor* visitor) override;
 
   Expr* condition;
   Stmt* branch;

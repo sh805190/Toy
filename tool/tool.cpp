@@ -131,134 +131,197 @@ std::string unescapeString(std::string str) {
   return ret;
 }
 
-void defineAST(std::ofstream& os, std::string baseName, std::vector<std::pair<std::string, std::string>> data) {
+void defineAST(std::ofstream& header, std::ofstream& source, std::string headerName, std::string baseName, std::vector<std::vector<std::string>> data) {
   //print the basics
-  os << "#pragma once" << std::endl;
-  os << std::endl;
+  header << "#pragma once" << std::endl;
+  header << std::endl;
+
+  source << "#include \"" << headerName.substr(headerName.find_first_of('/')+1, std::string::npos) << "\"" << std::endl << std::endl;
+
+  source << "int " << baseName << "::count = 0;" << std::endl << std::endl;
 
   //forward declare the AST classes
-  os << "class " << baseName << ";" << std::endl;
+  header << "class " << baseName << ";" << std::endl;
   for (auto& p : data) {
-    os << "class " << p.first << ";" << std::endl;
+    header << "class " << p[0] << ";" << std::endl;
   }
 
-  os << std::endl;
-  os << "#include \"garbage_collector.hpp\"" << std::endl;
-  os << "#include \"expr.hpp\"" << std::endl;
-  os << "#include \"stmt.hpp\"" << std::endl;
-  os << "#include \"token.hpp\"" << std::endl;
-  os << std::endl;
+  header << std::endl;
+  source << "#include \"garbage_collector.hpp\"" << std::endl;
+  header << "#include \"expr.hpp\"" << std::endl;
+  source << "#include \"literal.hpp\"" << std::endl;
+  header << "#include \"stmt.hpp\"" << std::endl;
+  header << "#include \"token.hpp\"" << std::endl;
+  header << std::endl;
+  source << std::endl;
 
-  os << "#include <string>" << std::endl;
-  os << "#include <vector>" << std::endl;
-  os << std::endl;
+  header << "#include <string>" << std::endl;
+  header << "#include <vector>" << std::endl;
+  header << std::endl;
 
   //print the visitor class
-  os << "class " << baseName << "Visitor {" << std::endl;
-  os << "public:" << std::endl;
-  os << "  virtual void Visit(" << baseName << "*) = 0;" << std::endl;
+  header << "class " << baseName << "Visitor {" << std::endl;
+  header << "public:" << std::endl;
+  header << "  virtual void Visit(" << baseName << "*) = 0;" << std::endl;
   for (auto& p : data) {
-    os << "  virtual void Visit(" << p.first << "*) = 0;" << std::endl;
+    header << "  virtual void Visit(" << p[0] << "*) = 0;" << std::endl;
   }
-  os << "};" << std::endl << std::endl;
+  header << "};" << std::endl << std::endl;
 
   //print the base class
-  os << "class " << baseName << " {" << std::endl;
-  os << "public:" << std::endl;
-  os << "  " << baseName << "() { count++; GarbageCollector<" << baseName << ">::Push(this); }" << std::endl;
-  os << "  " << baseName << "(int ln) { line = ln; count++; GarbageCollector<" << baseName << ">::Push(this); }" << std::endl;
-  os << "  ~" << baseName << "() { count--; GarbageCollector<" << baseName << ">::Pop(this); }" << std::endl;
-  os << std::endl;
-  os << "  virtual void Accept(" << baseName << "Visitor* visitor) {" << std::endl;
-  os << "    visitor->Visit(this);" << std::endl;
-  os << "  }" << std::endl;
-  os << "  int line = -1;" << std::endl;
-  os << "  static int count;" << std::endl;
-  os << "};" << std::endl;
+  header << "class " << baseName << " {" << std::endl;
+  header << "public:" << std::endl;
+
+  header << "  " << baseName << "();" << std::endl;
+  source << baseName << "::" << baseName << "() {" << std::endl;
+  source << "  count++;" << std::endl;
+  source << "  GarbageCollector<" << baseName << ">::Push(this);" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << "  " << baseName << "(int);" << std::endl;
+  source << baseName << "::" << baseName << "(int ln) {" << std::endl;
+  source << "  line = ln;" << std::endl;
+  source << "  count++;" << std::endl;
+  source << "  GarbageCollector<" << baseName << ">::Push(this);" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << "  virtual ~" << baseName << "();" << std::endl;
+  source << baseName << "::~" << baseName << "() {" << std::endl;
+  source << "  count--;" << std::endl;
+  source << "  GarbageCollector<" << baseName << ">::Pop(this);" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << "  virtual void Accept(" << baseName << "Visitor* visitor);" << std::endl;
+  source << "void " << baseName << "::" << "Accept(" << baseName << "Visitor* visitor) {" << std::endl;
+  source << "  visitor->Visit(this);" << std::endl;
+  source << "}" << std::endl;
+
+  header << std::endl;
+  header << "  int line = -1;" << std::endl;
+  header << "  static int count;" << std::endl;
+  header << "};" << std::endl;
 
   //define each AST class
   for(auto& p : data) {
     //print the opening
-    os << std::endl;
-    os << "class " << p.first << ": public " << baseName << " {" << std::endl;
-    os << "public:" << std::endl;
-    os << "  " << p.first << "(int ln";
-    if (p.second.size()) os << ", ";
-    os << p.second << ") {" << std::endl;
+    header << std::endl;
+    header << "class " << p[0] << ": public " << baseName << " {" << std::endl;
+    header << "public:" << std::endl;
+
+    header << "  " << p[0] << "(int ln";
+    source << p[0] << "::" << p[0] << "(int ln";
+    
+    if (p[1].size()) { header << ", "; source << ", "; };
+    header << p[1] << ");" << std::endl;
+    source << p[1] << ") {" << std::endl;
 
     //set the member values
-    std::vector<std::string> members = splitString(p.second, " ,");
-    os << "    this->line = ln;" << std::endl;
+    std::vector<std::string> members = splitString(p[1], " ,");
+    source << "    this->line = ln;" << std::endl;
     for (int i = 0; i < members.size(); i += 2) { //+2, since the type declaration is mixed in
-      os << "    this->" << members[i+1] << " = " << members[i+1] << ";" << std::endl;
+      source << "    this->" << members[i+1] << " = " << members[i+1] << ";" << std::endl;
     }
+    source << "  }" << std::endl << std::endl;
+
+    //create the destructor
+    header << "  virtual ~" << p[0] << "();" << std::endl;
+    source << p[0] << "::~" << p[0] << "() {" << std::endl;
+    source << "}" << std::endl << std::endl;
 
     //print the second part
-    os << "  }" << std::endl << std::endl;
-    os << "  void Accept(" << baseName << "Visitor* visitor) override {" << std::endl;
-    os << "    visitor->Visit(this);" << std::endl;
-    os << "  }" << std::endl;
+    header << "  void Accept(" << baseName << "Visitor* visitor) override;" << std::endl;
+    source << "void " << p[0] << "::Accept(" << baseName << "Visitor* visitor) {" << std::endl;
+    source << "  visitor->Visit(this);" << std::endl;
+    source << "}" << std::endl << std::endl;
 
     //print the members
-    os << std::endl;
-    members = splitString(p.second, ",");
-    os << " ";
+    members = splitString(p[1], ",");
+    if (members.size()) {
+      header << std::endl;
+      header << " ";
+    }
     for (std::string m : members) {
-      os << " " << m << ";" << std::endl;
+      header << " " << m << ";" << std::endl;
     }
 
     //close the class
-    os << "};" << std::endl;
+    header << "};" << std::endl;
   }
 }
 
-void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vector<std::string>> data) {
+void defineLiteral(std::ofstream& header, std::ofstream& source, std::string headerName, std::string baseName, std::vector<std::vector<std::string>> data) {
   //print the basics
-  os << "#pragma once" << std::endl;
-  os << std::endl;
+  header << "#pragma once" << std::endl;
+  header << std::endl;
 
-  //forward declare the literal classes
-  os << "class " << baseName << ";" << std::endl;
+  source << "#include \"" << headerName.substr(headerName.find_first_of('/')+1, std::string::npos) << "\"" << std::endl << std::endl;
+
+source << "int " << baseName << "::count = 0;" << std::endl << std::endl;
+
+  //forward declare the AST classes
+  header << "class " << baseName << ";" << std::endl;
   for (auto& p : data) {
-    os << "class " << p[0] << ";" << std::endl;
+    header << "class " << p[0] << ";" << std::endl;
   }
-  os << std::endl;
 
-  //declare the includes
-  os << "#include \"garbage_collector.hpp\"" << std::endl;
-  os << std::endl;
+  header << std::endl;
+  source << "#include \"garbage_collector.hpp\"" << std::endl;
+  source << "#include \"ast_deleter.hpp\"" << std::endl;
+  source << "#include \"ast_duplicator.hpp\"" << std::endl;
+  header << "#include \"expr.hpp\"" << std::endl;
+  source << "#include \"literal.hpp\"" << std::endl;
+  header << "#include \"stmt.hpp\"" << std::endl;
+  header << "#include \"token.hpp\"" << std::endl;
+  header << std::endl;
+  source << std::endl;
 
-  os << "#include <map>" << std::endl;
-  os << "#include <string>" << std::endl;
-  os << "#include <vector>" << std::endl;
-  os << std::endl;
+  header << "#include <map>" << std::endl;
+  header << "#include <string>" << std::endl;
+  header << "#include <vector>" << std::endl;
+  header << std::endl;
 
   //delcare the base class
-  os << "class " << baseName << " {" << std::endl;
-  os << "public:" << std::endl;
-  os << "  enum class Type {" << std:: endl;
-  os << "    ";
+  header << "class " << baseName << " {" << std::endl;
+  header << "public:" << std::endl;
+  header << "  enum class Type {" << std:: endl;
+  header << "    ";
   for (auto& p : data) {
-    os << toUpper(p[0]) << ", ";
+    header << toUpper(p[0]) << ", ";
   }
-  os << std::endl;
-  os << "  };" << std::endl;
-  os << std::endl;
+  header << std::endl;
+  header << "  };" << std::endl;
+  header << std::endl;
 
-  os << "  " << baseName << "() { count++; GarbageCollector<Literal>::Push(this); }" << std::endl;
-  os << "  virtual ~" << baseName << "() { count--; GarbageCollector<Literal>::Pop(this); }" << std::endl << std::endl;
-  os << "  virtual Literal* Copy() {" << std::endl;
-  os << "    Literal* l = new Literal();" << std::endl;
-  os << "    l->type = type;" << std::endl;
-  os << "    return l;" << std::endl;
-  os << "  }" << std::endl << std::endl;
-  os << "  virtual std::string ToString() {" << std::endl;
-  os << "    return \"LITERAL\";" << std::endl;
-  os << "  }" << std::endl << std::endl;
-  os << "  Type type = Type::LUNDEFINED;" << std::endl;
-  os << "  //debugging" << std::endl;
-  os << "  static int count;" << std::endl;
-  os << "};" << std::endl << std::endl;
+  header << "  " << baseName << "();" << std::endl;
+  source << baseName << "::" << baseName << "() {" << std::endl;
+  source << "  count++;" << std::endl;
+  source << "  GarbageCollector<Literal>::Push(this);" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << "  virtual ~" << baseName << "();" << std::endl;
+  source << baseName << "::~" << baseName << "() {" << std::endl;
+  source << "  count--;" << std::endl;
+  source << "  GarbageCollector<Literal>::Pop(this);" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << "  virtual Literal* Copy();" << std::endl;
+  source << "Literal* " << baseName << "::Copy() {" << std::endl;
+  source << "  Literal* l = new Literal();" << std::endl;
+  source << "  l->type = type;" << std::endl;
+  source << "  return l;" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << "  virtual std::string ToString();" << std::endl;
+  source << "std::string " << baseName << "::ToString() {" << std::endl;
+  source << "  return \"LITERAL\";" << std::endl;
+  source << "}" << std::endl << std::endl;
+
+  header << std::endl;
+
+  header << "  Type type = Type::LUNDEFINED;" << std::endl;
+  header << "  //debugging" << std::endl;
+  header << "  static int count;" << std::endl;
+  header << "};" << std::endl << std::endl;
 
   //declare each child class
   for (auto& p : data) {
@@ -266,140 +329,271 @@ void defineLiteral(std::ofstream& os, std::string baseName, std::vector<std::vec
     std::vector<std::string> memberDeclarations = splitString(p[1], "/");
     std::vector<std::string> memberNames = splitString(p[1], " /");
 
-    os << "class " << p[0] << ": public " << baseName << " {" << std::endl;
-    os << "public:" << std::endl;
+    header << "class " << p[0] << ": public " << baseName << " {" << std::endl;
+    header << "public:" << std::endl;
 
-    //defaults
-    os << "  " << p[0] << "() { type = Type::" << toUpper(p[0]) << "; }" << std::endl;
-    os << "  virtual ~" << p[0] << "() = default;" << std::endl;
-    os << std::endl;
+    //default constructor
+    header << "  " << p[0] << "();" << std::endl;
+    source << p[0] << "::" << p[0] << "() {" << std::endl;
+    source << "  type = Type::" << toUpper(p[0]) << ";" << std::endl;
+    source << "}" << std::endl << std::endl;
 
     if (memberDeclarations.size()) {
       //parameter constructor
-      os << "  " << p[0] << "(";
+      header << "  " << p[0] << "(";
+      source << p[0] << "::" << p[0] << "(";
+
       for (int i = 0; i < memberDeclarations.size(); ) {
-        os << memberDeclarations[i];
+        header << memberDeclarations[i];
+        source << memberDeclarations[i];
         i++;
         if (i < memberDeclarations.size()) {
-          os << ",";
+          header << ",";
+          source << ",";
         }
       }
-      os << ") {" << std::endl;
-      os << "    type = Type::" << toUpper(p[0]) << ";" << std::endl;
+
+      header << ");" << std::endl;
+      source << ") {" << std::endl;
+      source << "  type = Type::" << toUpper(p[0]) << ";" << std::endl;
       for (int i = 0; i < memberNames.size(); i += 2) {
-        os << "    this->" << memberNames[i+1] << " = std::move(" << memberNames[i+1] << ");" << std::endl;
+        source << "  this->" << memberNames[i+1] << " = std::move(" << memberNames[i+1] << ");" << std::endl;
       }
-      os << "  }" << std::endl << std::endl;
+      source << "}" << std::endl << std::endl;
     }
+
+    //destructor
+    header << "  virtual ~" << p[0] << "();" << std::endl;
+    source << p[0] << "::~" << p[0] << "() {" << std::endl;
+    source << "  " << p[2] << ";" << std::endl; //external specification
+    source << "}" << std::endl << std::endl;
 
     //define the methods
-    os << "  Literal* Copy() override {" << std::endl;
-    os << "    Literal* l = new " << p[0] << "(";
-    for (int i = 0; i < memberNames.size(); ) {
-      os << memberNames[i+1];
-      i += 2;
-      if (i < memberNames.size()) os << ",";
-    }
-    os << ");" << std::endl;
-    os << "    l->type = type;" << std::endl;
-    os << "    return l;" << std::endl;
-    os << "  }" << std::endl;
-    os << std::endl;
+    header << "  Literal* Copy() override;" << std::endl;
+    source << "Literal* " << p[0] << "::Copy() {" << std::endl;
 
-    os << "  std::string ToString() override {" << std::endl;
-    os << "    " << p[2] << ";" << std::endl;
-    os << "  }" << std::endl << std::endl;
+    source << "  " << p[3] << ";" << std::endl; //external specification
+
+    source << "}" << std::endl;
+    source << std::endl;
+
+    header << "  std::string ToString() override;" << std::endl;
+    source << "std::string " << p[0] << "::ToString() {" << std::endl;
+    source << "  " << p[4] << ";" << std::endl;
+    source << "}" << std::endl << std::endl;
 
     //define the members
+    if (memberDeclarations.size()) {
+      header << std::endl;
+    }
+
     for (std::string m : memberDeclarations) {
-      os << "  " << m << ";" << std::endl;
+      header << "  " << m << ";" << std::endl;
     }
 
     //finish
-    os << "};" << std::endl << std::endl;
+    header << "};" << std::endl << std::endl;
   }
 }
 
-int run(int argc, std::vector<std::string> argv) {
-  //ensure the correct usage
-  if (argc != 3) {
-    std::cout << "Usage: " << argv[0] << " OP fname" << std::endl;
-    return 0;
+int run(int argc, std::string mode, std::string headerName, std::string sourceName) {
+  //open the specified files for writing
+  std::ofstream hf(headerName);
+  std::ofstream sf(sourceName);
+
+  if (!hf.is_open()) {
+    std::cerr << "Failed to open " << headerName << " for writing" << std::endl;
+    sf.close();
+    return 1;
   }
 
-  //open the specified file for writing
-  std::ofstream os(argv[2]);
-  if (!os.is_open()) {
-    std::cerr << "Failed to open " << argv[2] << " for writing" << std::endl;
+  if (!sf.is_open()) {
+    std::cerr << "Failed to open " << sourceName << " for writing" << std::endl;
+    hf.close();
     return 1;
   }
 
   //Expr
-  if (!strcmp(argv[1].c_str(), "expr")) {
-    defineAST(os, "Expr", {
-      {"Array", "std::vector<Expr*> exprVector"},
-      {"Assign", "Expr* target, Expr* value"}, 
-      {"Binary", "Expr* lhs, Token op, Expr* rhs"},
-      {"Class", "Block* block"},
-      {"Function", "std::vector<std::string> parameterVector, Block* block"},
-      {"Grouping", "Expr* inner"},
-      {"Index", "Expr* array, Expr* index"},
-      {"Invocation", "Expr* expr, std::vector<Expr*> exprVector"},
-      {"Logical", "Expr* lhs, Token op, Expr* rhs"},
-      {"Unary", "Token op, Expr* rhs"},
-      {"Value", "Literal* value"},
-      {"Variable", "Token name"}
+  if (mode == std::string("expr")) {
+    defineAST(hf, sf, headerName, "Expr", {
+      {
+        "Array",
+        "std::vector<Expr*> exprVector"
+      },
+      {
+        "Assign",
+        "Expr* target, Expr* value"
+      },
+      {
+        "Binary",
+        "Expr* lhs, Token op, Expr* rhs"
+      },
+      {
+        "Class",
+        "Block* block"
+      },
+      {
+        "Function",
+        "std::vector<std::string> parameterVector, Block* block"
+      },
+      {
+        "Grouping",
+        "Expr* inner"
+      },
+      {
+        "Index",
+        "Expr* array, Expr* index"
+      },
+      {
+        "Invocation",
+        "Expr* expr, std::vector<Expr*> exprVector"
+      },
+      {
+        "Logical",
+        "Expr* lhs, Token op, Expr* rhs"
+      },
+      {
+        "Unary",
+        "Token op, Expr* rhs"
+      },
+      {
+        "Value",
+        "Literal* value"
+      },
+      {
+        "Variable",
+        "Token name"
+      }
     });
   }
   //Stmt
-  else if (!strcmp(argv[1].c_str(), "stmt")) {
-    defineAST(os, "Stmt", {
-      {"Block", "std::vector<Stmt*> stmtVector"},
-      {"Break", ""},
-      {"Continue", ""},
-      {"Expression", "Expr* expr"},
-      {"If", "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"},
-      {"Return", "Expr* result"},
-      {"Use", "Token command"},
-      {"Var", "Token name, Expr* initializer"},
-      {"While", "Expr* condition, Stmt* branch"}
+  else if (mode == std::string("stmt")) {
+    defineAST(hf, sf, headerName, "Stmt", {
+      {
+        "Block",
+        "std::vector<Stmt*> stmtVector"
+      },
+      {
+        "Break",
+        ""
+      },
+      {
+        "Continue",
+        ""
+      },
+      {
+        "Expression",
+        "Expr* expr"
+      },
+      {
+        "If",
+        "Expr* condition, Stmt* thenBranch, Stmt* elseBranch"
+      },
+      {
+        "Return",
+        "Expr* result"
+      },
+      {
+        "Use",
+        "Token command"
+      },
+      {
+        "Var",
+        "Token name, Expr* initializer"
+      },
+      {
+        "While",
+        "Expr* condition, Stmt* branch"
+      }
     });
   }
   //Literal
-  else if (!strcmp(argv[1].c_str(), "literal")) {
-    defineLiteral(os, "Literal", {
-      {"lArray", "std::vector<Literal*> array", "std::string output = \"[\";for (Literal* ptr : array){output += ptr->ToString();output += \",\";}return output + \"]\""},
-      {"lBoolean", "bool boolean", "return boolean ? \"true\" : \"false\""},
-      {"lClass", "std::map<std::string,Literal*> members", "std::string output = \"class {\";for (auto& it : members) {output += it.first + \":\";output += it.second->ToString();output += \",\";}return output + \"}\""},
-      {"lFunction", "std::vector<std::string> parameters/ void* block", "std::string output = \"function(\";for (std::string s : parameters) {output += s;output += \",\";}return output + \") {...}\""},
-      {"lNumber", "double number", "std::string s = std::to_string(number); s = s.substr(0, s.find_last_not_of('0') + 1); if (s[s.size()-1] == '.') s = s.substr(0, s.size()-1); return s"},
-      {"lObject", "std::map<std::string,Literal*> members", "std::string output = \"object {\"; for (auto& it : members) {output += it.first; output += \",\";}return output + \"}\""},
-      {"lReference", "Literal* reference", "return std::string() + \"&\" + reference->ToString()"},
-      {"lString", "std::string str", "return str"},
-      {"lUndefined", "", "return \"undefined\""},
+  else if (mode == std::string("literal")) {
+    defineLiteral(hf, sf, headerName, "Literal", {
+      {
+        "lArray",
+        "std::vector<Literal*> array",
+        "for (Literal* ptr : array) delete ptr",
+        "lArray* ret = new lArray(); for (Literal* ptr : array) ret->array.push_back(ptr->Copy()); return ret",
+        "std::string output = \"[\";for (Literal* ptr : array){output += ptr->ToString();output += \",\";}return output + \"]\""
+      },
+      {
+        "lBoolean",
+        "bool boolean",
+        "",
+        "return new lBoolean(boolean)",
+        "return boolean ? \"true\" : \"false\""
+      },
+      {
+        "lClass",
+        "std::map<std::string,Literal*> members",
+        "for (auto p : members) delete p.second",
+        "lClass* ret = new lClass(); for (auto p : members) ret->members[p.first] = p.second->Copy(); return ret",
+        "std::string output = \"class {\";for (auto& it : members) {output += it.first + \":\";output += it.second->ToString();output += \",\";}return output + \"}\"" },
+      {
+        "lFunction",
+        "std::vector<std::string> parameters/ void* block",
+        "ASTDeleter deleter; deleter.DeleteAST(static_cast<Block*>(block))",
+        "ASTDuplicator dup; lFunction* ret = new lFunction(); ret->parameters = parameters; ret->block = static_cast<void*>(dup.DuplicateAST(static_cast<Block*>(block))); return ret",
+        "std::string output = \"function(\";for (std::string s : parameters) {output += s;output += \",\";}return output + \") {...}\""
+      },
+      {
+        "lNumber",
+        "double number",
+        "",
+        "return new lNumber(number)",
+        "std::string s = std::to_string(number); s = s.substr(0, s.find_last_not_of('0') + 1); if (s[s.size()-1] == '.') s = s.substr(0, s.size()-1); return s"
+      },
+      {
+        "lObject",
+        "std::map<std::string,Literal*> members",
+        "for (auto p : members) delete p.second",
+        "lObject* ret = new lObject(); for (auto p : members) ret->members[p.first] = p.second->Copy(); return ret",
+        "std::string output = \"object {\"; for (auto& it : members) {output += it.first; output += \",\";}return output + \"}\""
+      },
+      {
+        "lReference",
+        "Literal* reference",
+        "",
+        "return new lReference(reference)",
+        "return std::string() + \"&\" + reference->ToString()"
+      },
+      {
+        "lString",
+        "std::string str",
+        "",
+        "return new lString(str)",
+        "return str"
+      },
+      {
+        "lUndefined",
+        "",
+        "",
+        "return new lUndefined()",
+        "return \"undefined\""
+      },
     });
   }
 
   //no op
   else {
-    std::cerr << "NO OP" << std::endl;
-    os.close();
+    std::cerr << "NO OP: " << mode << std::endl;
+    hf.close();
+    sf.close();
     return 2;
   }
 
   //cleanup
-  os.close();
+  hf.close();
+  sf.close();
   return 0;
 }
 
 //lazy
 int main(int argc, char* argv[]) {
-  if (argc == 3) {
-    return run(argc, {argv[0], argv[1], argv[2]});
-  }
-  run(3,{argv[0], "expr", "src/expr.hpp"});
-  run(3,{argv[0], "stmt", "src/stmt.hpp"});
-  run(3,{argv[0], "literal", "src/literal.hpp"});
+  run(3, "expr", "src/expr.hpp", "src/expr.cpp");
+  run(3, "stmt", "src/stmt.hpp", "src/stmt.cpp");
+  run(3, "literal", "src/literal.hpp", "src/literal.cpp");
 
   return 0;
 }

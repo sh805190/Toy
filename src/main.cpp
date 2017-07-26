@@ -1,4 +1,5 @@
 #include "error_handler.hpp"
+#include "garbage_collector.hpp"
 #include "interpreter.hpp"
 #include "run.hpp"
 
@@ -41,9 +42,10 @@ int main(int argc, char* argv[]) {
   //error checking
   if (Literal::count || Stmt::count || Expr::count) {
     ErrorHandler::Error(-1, "Memory leak detected");
-    std::cout << "Literals Collected: " << GarbageCollector<Literal>::Collect() << std::endl;
+    //order of precedence
     std::cout << "Stmt Collected: " << GarbageCollector<Stmt>::Collect() << std::endl;
     std::cout << "Expr Collected: " << GarbageCollector<Expr>::Collect() << std::endl;
+    std::cout << "Literals Collected: " << GarbageCollector<Literal>::Collect() << std::endl;
   }
 
   if (ErrorHandler::GetErrorCount()) {
