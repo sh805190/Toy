@@ -58,6 +58,7 @@ private:
   void CheckVersion(int line, Literal*);
   void LoadModule(std::string);
   bool LoadBuiltinModule(std::string);
+  void CallFunction(int line, lFunction* func, std::vector<Literal*> literalVector, Literal* self = nullptr);
 
   //members
   Environment* environment = nullptr;

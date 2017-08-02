@@ -1,5 +1,6 @@
 #include "ast_duplicator.hpp"
 
+#include "literal.hpp"
 #include "runtime_error.hpp"
 
 Expr* ASTDuplicator::DuplicateAST(Expr* expr) {
@@ -164,7 +165,7 @@ void ASTDuplicator::Visit(Unary* expr) {
 }
 
 void ASTDuplicator::Visit(Value* expr) {
-  resultExpr = new Value(expr->line, expr->value);
+  resultExpr = new Value(expr->line, expr->value->Copy());
 }
 
 void ASTDuplicator::Visit(Variable* expr) {

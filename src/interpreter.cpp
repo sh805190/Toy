@@ -471,8 +471,51 @@ void Interpreter::Visit(Index* expr) {
 }
 
 void Interpreter::Visit(Invocation* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Invocation is not yet implemented");
+  //evaluate the call requirements
+  Evaluate(expr->expr);
+
+  //fallthrough logic
+  bool deleteCopy = false;
+  Literal* func = nullptr;
+
+  //determine what to do
+  switch(GetResult()->type) {
+    //invoke a reference
+    case Literal::Type::LREFERENCE: {
+      func = Dereference(GetResult());
+    }
+    //allow fallthrough
+
+    //invoke a function
+    case Literal::Type::LFUNCTION: {
+      if (!func) {
+        deleteCopy = true;
+        func = GetResult()->Copy();
+      }
+
+      //evaluate and record each parameter
+      std::vector<Literal*> literalVector;
+      for (Expr* ptr : expr->exprVector) {
+        Evaluate(ptr);
+        literalVector.push_back(GetResult()->Copy());
+      }
+
+      //execute
+      CallFunction(expr->line, static_cast<lFunction*>(func), literalVector);
+
+      //cleanup
+      for (Literal* ptr : literalVector) {
+        delete ptr;
+      }
+      if (deleteCopy) {
+        delete func;
+      }
+    }
+    break;
+
+    default:
+      throw RuntimeError(expr->line, std::string() + "'" + GetResult()->ToString() + "' is not a function");
+  }
 }
 
 void Interpreter::Visit(Logical* expr) {
@@ -686,3 +729,55 @@ bool Interpreter::LoadBuiltinModule(std::string moduleName) {
   return false;
 }
 
+void Interpreter::CallFunction(int line, lFunction* func, std::vector<Literal*> literalVector, Literal* self) {
+  //parameter count
+  if (func->parameters.size() != literalVector.size()) {
+    throw RuntimeError(line, std::string() + "Invalid number of arguments (expected " + std::to_string(func->parameters.size()) + ", got " + std::to_string(literalVector.size()) + ")");
+  }
+
+  //create the environment
+  Environment* env = new Environment();
+
+  //if calling on a method
+  if (self) {
+    env->Define(Token(REFERENCE, "this", nullptr, -1), self);
+  }
+
+  //recursion
+  env->Define(Token(IDENTIFIER, "recurse", nullptr, -1), func);
+
+  //copy into env
+  std::vector<std::string>::iterator paramIter = func->parameters.begin();
+  std::vector<Literal*>::iterator literalIter = literalVector.begin();
+
+  while(paramIter != func->parameters.end() && literalIter != literalVector.end()) {
+    env->Define(Token(IDENTIFIER, *paramIter, *literalIter, -1), *literalIter);
+    paramIter++;
+    literalIter++;
+  }
+
+  //begin execution
+  SetResult(nullptr);
+  Interpreter* interpreter = new Interpreter(nullptr, env);
+
+  for (Stmt* stmt : static_cast<Block*>(func->block)->stmtVector) {
+    interpreter->Execute(stmt);
+
+    //check for a call to return
+    if (interpreter->GetReturnCalled()) {
+      SetResult( deepCopy(interpreter->GetResult()) );
+      break;
+    }
+  }
+
+  //CHALLENGE: maintain references returned from functions that would otherwise be lost
+  //solution: all return values are deep copies
+  //CHALLENGE END
+
+  //finally
+  if (self) {
+    env->Assign(Token(IDENTIFIER, "this", nullptr, -1), nullptr);
+  }
+  env->Assign(Token(IDENTIFIER, "recurse", nullptr, -1), nullptr);
+  delete interpreter; //also deletes env
+}

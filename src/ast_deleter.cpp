@@ -131,7 +131,7 @@ DEBUGGING(std::cout << "Deleting Class: " << expr << std::endl);
 
 void ASTDeleter::Visit(Function* expr) {
 DEBUGGING(std::cout << "Deleting Function.block: " << expr->block << std::endl);
-  DeleteAST(expr->block);
+  DeleteAST(static_cast<Block*>(expr->block));
 DEBUGGING(std::cout << "Deleting Function: "  << expr << std::endl);
   delete expr;
 }
