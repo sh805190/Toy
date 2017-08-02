@@ -8,7 +8,7 @@ var f = function() {
     return a;
   };
 
-  var a = [1, &f, 3];
+  var a = [1, 2, 3];
   return a;
 };
 
@@ -16,7 +16,7 @@ var f = function() {
 f;
 "calling";
 f();
-//f()[1];
+f()[1];
 //f()[1]();
 //f()[1]()[1];
 

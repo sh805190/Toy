@@ -1,5 +1,6 @@
 #include "interpreter.hpp"
 
+#include "ast_duplicator.hpp"
 #include "error_handler.hpp"
 #include "expr_visitors.hpp"
 #include "run.hpp"
@@ -433,8 +434,9 @@ void Interpreter::Visit(Class* expr) {
 }
 
 void Interpreter::Visit(Function* expr) {
-  //TODO
-  throw RuntimeError(expr->line, "Function is not yet implemented");
+  //make the function into a literal
+  ASTDuplicator dup;
+  SetResult(new lFunction(expr->parameterVector, dup.DuplicateAST(static_cast<Block*>(expr->block)) ));
 }
 
 void Interpreter::Visit(Grouping* expr) {
@@ -765,7 +767,7 @@ void Interpreter::CallFunction(int line, lFunction* func, std::vector<Literal*> 
 
     //check for a call to return
     if (interpreter->GetReturnCalled()) {
-      SetResult( deepCopy(interpreter->GetResult()) );
+      SetResult( interpreter->GetResult()->Copy() );
       break;
     }
   }
