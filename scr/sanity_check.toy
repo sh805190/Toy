@@ -1,70 +1,126 @@
-//One line comments begin with '//' and end on a new line
+/*
 
-/* multiline comments begin with a '/' and a '*' and end with a '*' followed by
-a '/'. They can also be /* nested */ inside each other. And of course, they can
-take up multiple lines */
+This file contains the proposed "sanity check" for the Toy programming
+language. When loaded as a module, every part of this file should execute
+correctly for the implementation to be considered correct.
+
+Last edited 23rd Feb 2018
+
+*/
 
 //-----------------------------------------------------------------------------
 
-//modules must begin with the keyword 'module', followed by a semicolon. More on modules later.
+//One line comments begin with '//' and end on a new line.
+
+/* Multiline comments begin with a '/' and a '*' and end with a '*' followed by
+a '/'. They can also be /* nested */ inside each other. And of course, they can
+take up multiple lines. */
+
+//-----------------------------------------------------------------------------
+
+/* The list of keywords are:
+ * module
+ * true
+ * false
+ * use
+ * break
+ * continue
+ * for
+ * while
+ * function
+ * undefined
+*/
+
+/* The list of operators are:
+ * + - * / % !
+ * ++prefix
+ * --prefix
+ * postfix++
+ * postfix--
+*/
+
+//-----------------------------------------------------------------------------
+
+//Modules must begin with the keyword 'module', followed by a semicolon. A .toy
+//file is either a module or it isn't - there is no ambiguity.
 module;
 
-//a single statement consists of an expression, ending in a ';'
+//A single statement consists of an expression, ending in a ';'.
 true;
 
-//statements can be empty
+//Statements can be empty.
 ;
 
-//multiple statements can be written on one line
+//multiple statements can be written on one line.
 true; false;
 
 //-----------------------------------------------------------------------------
 
-//the 'use' keyword sets up the interpreter with various settings, and must be terminated with a ';'
+//The 'use' keyword sets up the interpreter with various settings, and must be
+//terminated with a ';'.
 
-//'panic' will tell the program not to continue if any errors are found. The default is to continue to try and find as many errors as possible.
+//'panic' will tell the program not to continue if any errors are found. The
+//default is to continue to try and find as many errors as possible.
 use panic;
 
-//'strict' restricts the language to using only features specified in the official documentation
+//'strict' restricts the language to using only features specified in the
+//official documentation.
 use strict;
 
-//'version' specifies what version of the toy language should be used. The program reserves the right to reject any version specification it doesn't like
+//'version' specifies what version of the toy language should be used. The
+//interpreter reserves the right to reject any version specification it doesn't
+//like.
 use version 0;
 
-//the 'use' keyword can enable built in modules, such as "standard"
+//The 'use' keyword can enable built in modules, such as "standard".
 use "standard";
 
-//'use' can also load external files as modules, by specifying their file name
-use "scr/external.toy";
+//'use' can also load external files as modules, by specifying their file name.
+//The paths are relative to the file loading them.
+use "external.toy";
 
-//please note that module names are surrounded by double quote marks, making them strings
-//the module's environment is incorporated into the current environment
+//Please note that module names are surrounded by double quote marks, making
+//them strings.
+
+//The module's environment is incorporated into the current environment -
+//naming conflicts will cause an error unless they're actually the same object.
 
 //-----------------------------------------------------------------------------
 
-//variables can be declared with the 'var' keyword
+//Variables can be declared with the 'var' keyword.
 var a;
 
-//variables can be assigned a value using an equals sign
+//Variables can be assigned a value using an equals sign.
 a = 42;
 
-//they can also be assigned during declaration
+//They can also be assigned during declaration.
 var b = 56;
 
-//variables are typeless, and are only a name. The value defines the type
+//Variables are typeless, and are only a name. The value defines the type.
 a = "hello world";
 
-//the types are: array, boolean, built in, class, function, number, object, reference, string and undefined.
+/* The types are:
+ * array
+ * boolean
+ * class
+ * function
+ * number
+ * object
+ * string
+ * undefined
+*/
 
 //-----------------------------------------------------------------------------
 
-//an array is defined by surrounding a number of values (or variables) with brackets
+//An array is defined by surrounding a number of values (or variables) with
+//brackets
 var array = [1, 2, 3];
 
-//you can assign to or access individual elements of an array using the brackets notation (arrays are zero indexed)
+//you can assign to or access individual elements of an array using the
+//brackets notation (arrays are zero indexed).
 
 var i = array[1];
-array[1] = 5;
+array[1] = 5; //'i' is still equal to 2
 
 //arrays have a number of built in member functions
 
@@ -72,28 +128,37 @@ array.size(); //get the size of the array
 array.insert(0, 4); //insert at position 0 the value 4, pushing back the rest
 array.erase(1); //erase the value at position 1
 
-//booleans have one of two values
-//all values besides false and undefined are considered truthy
+//-----------------------------------------------------------------------------
+
+//All values besides false, undefined and zero are considered truthy
+
+//Booleans have one of two values: 'true' or 'false'
 var boolean = true;
 boolean = false;
 
-//built ins are indistinguishable from functions. They are accessable via built in modules (such as standard), and cannot be created by the programmer
-//built ins are implemented in the same language as the interpreter, rather than toy
-print("Hello World\n");
+//-----------------------------------------------------------------------------
 
-//classes are collections of variable declarations that can be invoked to create objects, acting much like prototypes
-//classes can have functions called "create" and "destroy", which act as the constructor and destructor respectfully
-//you can access an object from inside member functions using the "this" keyword
+//Classes are collections of variable declarations that can be invoked to
+//create objects, acting much like prototypes. Classes can have functions
+//called "constructor" and "destructor", which act as the constructor and
+//destructor respectfully. You can access an object from inside member
+//functions using the "this" keyword. Classes cannot be altered after they are
+//created.
 
 var Car = class {
-  var create = function() { (*this).speed = 42; };
-  var destroy = function() {};
+  var constructor = function() { this.speed = 42; };
+  var destructor = function() {};
   var speed = 0;
 };
 
-//functions are pieces of code that can be reused.
-//to create a function, use the keyword 'function' followed by a '()' enclosed list of parameters. Finally, write the function code inside a pair of '{}'.
-//You can store a function in a variable, or call it immediately. To call a function, place a pair of '()' after the variable or function to "invoke" it.
+//-----------------------------------------------------------------------------
+
+//Functions are pieces of code that can be reused. To create a function, use
+//the keyword 'function' followed by a '()' enclosed list of parameters.
+//Finally, write the function code inside a pair of '{}'.
+
+//You can store a function in a variable, or call it immediately. To call a
+function, place a pair of '()' after the variable or function to "invoke" it.
 
 var add = function(x, y) {
   return x+y;
@@ -103,7 +168,7 @@ add(5, 6);
 
 function(x, y) { return x-y; }(1, 2);
 
-//you can call a function from within a function using the built-in variable 'recurse'
+//You can call a function from within itself using the keyword 'recurse'
 
 var r = function(i) {
   if (i <= 0) return i;
@@ -112,69 +177,57 @@ var r = function(i) {
 
 r(10);
 
-//numbers are decimal values, but they can be treated as integers.
+//-----------------------------------------------------------------------------
+
+//Numbers are decimal values, but they can be treated as integers.
 
 var number = 42;
 var pi = 3.141592;
 
-//numbers have a built in function that convers them to a string
+//Numbers have a built in function that converts them to a string.
 
 pi = pi.to_string();
 var e = 2.7.to_string();
 
-//objects are collections of variables, and are created by invoking a class
+//-----------------------------------------------------------------------------
+
+//Objects are collections of variables, and are created by invoking a class
 var c = Car(); //also calls the constructor
 print(c.speed); //should print 42
 
-//a reference shares the value of another variable
+//-----------------------------------------------------------------------------
 
-b = &a; //a is equal to b
-
-//you can reassign the base variable, and the reference will change too
-
-a = 144; //b = 144 too
-
-//you can access the base variable by dereferencingthe reference
-
-*b = 169; // a = 169 too
-
-//you can create references only one level at a time, but you can dereference as much as possible
-
-var concrete = 42;
-var ref1 = &concrete;
-var ref2 = &ref1;
-
-**ref2 = 56; //concrete = 56
-
-//string is a series of characters surrounded by double quotes
+//A string is a series of characters surrounded by double quotes.
 
 var str = "hello world";
 
-//strings can contain escaped characters, and can be concatenated
+//Strings can contain escaped characters, and can be concatenated.
 
 var hello = "hello";
 var world = hello + " world\n";
 
-//strings containing only decimal numbers can be converted to a number
+//Strings containing only decimal numbers can be converted to a number.
 
 str = "12.34";
 number = str.to_number();
 
-//every variable without a value is equal to 'undefined', and only 'undefined'
+//-----------------------------------------------------------------------------
+
+//Every variable without a value is equal to 'undefined', and only 'undefined'.
 
 var z;
 z == undefined;
 
 //-----------------------------------------------------------------------------
 
-//several keywords are used to define the kind of statement on that line
+//Several keywords are used to define the kind of statement on that line.
 
-//the break keyword is used to exit from loops
+//The 'break' keyword is used to exit from loops.
 while(true) {
   break;
 }
 
-//the continue keyword is used to return to the beginning of a loop
+//The 'continue' keyword is used to return to the beginning of a loop.
 var n = 0;
 while (true) {
   n = n + 1;
@@ -182,13 +235,14 @@ while (true) {
   break;
 }
 
-//the for loop is syntactic sugar for a while loop
+//The for loop is syntactic sugar for a while loop.
 for (var n = 0; n < 10; n = n + 1) {
   print(n);
   print("\n");
 }
 
-//the if statement will execute one of two possible branches, based on the truthiness of a condition
+//The if statement will execute one of two possible branches, based on the
+//truthiness of a condition.
 if (true) {
   print("This is the correct line to print\n");
 }
@@ -196,12 +250,14 @@ else {
   print("This line will never be reached\n");
 }
 
-//the if statement doesn't require an else clause
+//The if statement doesn't require an else clause.
 if (true) {
   print("This is the correct line to print\n");
 }
 
-//the return keyword is used to exit from a function, or a .toy file
+//The return keyword is used to exit from a function, or a .toy file, but is
+//not a necessity.
+
 f = function() {
   return;
   print("This line will never be reached\n");
@@ -209,7 +265,8 @@ f = function() {
 
 f();
 
-//the return keyword can also pass a value to the calling context
+//The return keyword can also pass a value to the calling context when used in
+//a function.
 
 f = function() {
   return 42;
@@ -220,7 +277,8 @@ print(f());
 
 //I'll demonstrate returning from a file at the end
 
-//finally, the while keyword is a basic loop, which will continue as long as it's condition is true
+//Finally, the while keyword is a basic loop, which will continue as long as
+//it's condition is true
 
 n = 0;
 while(n < 10) {
@@ -231,19 +289,19 @@ while(n < 10) {
 
 //-----------------------------------------------------------------------------
 
-//there are some operators with their own meanings too
+//There are some operators with their own meanings too.
 
-//the minus operator, when placed before a number, will negate that number
+//The minus operator, when placed before a number, will negate that number.
 
 a = -42;
 a = -a;
 
-//the bang operator will negate a value
+//The bang operator will negate a boolean expression.
 
 a = true;
 b = !a; //b = false
 
-//the logical operators also support short circuiting
+//The logical operators also support short circuiting.
 
 a = false and "incorrect result";
 a = "correct result" or "incorrect result";
