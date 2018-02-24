@@ -1,0 +1,85 @@
+//declare the board class
+var Board = class {
+	var constructor = function() {
+		this.array = [];
+
+		for (var i = 0; i < 3; i++) {
+			this.array.push_back([]);
+
+			for (var j = 0; j < 3; j++) {
+				this.array[i][j] = 0;
+			}
+		}
+	}
+
+	var array;
+}
+
+//declare the win conditions
+var checkWin = function(var _board) {
+	_board = _board.array;
+	var result = 0;
+
+	if (_board[0][0] && _board[0][0] == _board[0][1] && _board[0][0] == _board[0][2]) result = _board[0][0]; 
+	if (_board[1][0] && _board[1][0] == _board[1][1] && _board[1][0] == _board[1][2]) result = _board[1][0]; 
+	if (_board[2][0] && _board[2][0] == _board[2][1] && _board[2][0] == _board[2][2]) result = _board[2][0]; 
+
+	if (_board[0][0] && _board[0][0] == _board[1][0] && _board[0][0] == _board[2][0]) result = _board[0][0]; 
+	if (_board[0][1] && _board[0][1] == _board[1][1] && _board[0][1] == _board[2][1]) result = _board[0][1]; 
+	if (_board[0][2] && _board[0][2] == _board[1][2] && _board[0][2] == _board[2][2]) result = _board[0][2];
+
+	if (_board[0][0] && _board[0][0] == _board[1][1] && _board[0][0] == _board[2][2]) result = _board[0][0]; 
+	if (_board[0][2] && _board[0][2] == _board[1][1] && _board[0][2] == _board[2][0]) result = _board[0][2]; 
+
+	return result;
+}
+
+//run the game until a winner is found
+use "standard";
+
+var board = Board();
+var winner = 0;
+
+while(winner == 0) {
+	for (var i = 0; i < 3; i++) {
+		for (var j = 0; j < 3; j++) {
+			board.array[i][j] = random(3).floor();
+		}
+	}
+	winner = checkWin(board);
+}
+
+print("winner found!");
+
+/*
+
+Propositions 1: the '->' operator (from LHS to RHS)
+
+	for (var i = 0 -> 2)
+
+is equivalent to
+
+	for (var i = 0; i < 3; i++)
+
+Proposition 2: the 'eq' operator (if LHS == RHS then return LHS else return false end)
+
+	if (_board[0][0] eq _board[0][1] eq _board[0][2])
+
+is equivalent to
+
+	if (_board[0][0] && _board[0][0] == _board[0][1] && _board[0][0] == _board[0][2])
+
+Proposition 3: the => operator (shortcut for function)
+
+	x => x
+
+is equivalent to
+
+	function(x) {
+		return x;
+	}
+
+Note that if the last statement in a shortcut function is an expression
+statement, then the result of that expression is automatically returned.
+
+*/

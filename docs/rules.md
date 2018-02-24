@@ -41,6 +41,8 @@ This is a list of operators (single or double symbols) that are used in toy:
 >   (is greater than)
 <=  (is less than or equal to)
 >=  (is greater than or equal to)
+&&  (logical AND)
+||  (logical OR)
 +   (addition)
 -   (subtraction)
 *   (multiplication)
@@ -99,8 +101,8 @@ expression -> assignment;
 
 assignment     -> (call ".")? IDENTIFIER "=" assignment | logical_or | function | class;
 
-logical_or     -> logical_and ("or" logical_and)*;
-logical_and    -> equality ("and" equality)*;
+logical_or     -> logical_and ("||" logical_and)*;
+logical_and    -> equality ("&&" equality)*;
 equality       -> comparison ( ("==" | "!=") comparison)*;
 comparison     -> addition ( ("<" | "<=" | ">" | ">=") addition)*;
 addition       -> multiplication ( ("+" | "-") multiplication)*;
