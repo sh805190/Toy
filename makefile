@@ -9,7 +9,7 @@ OUTDIR=out
 all: $(OUTDIR)
 	$(MAKE) -C src
 
-debug: export CXXFLAGS+=-g
+debug: export CFLAGS+=-g
 debug: clean all
 
 $(OUTDIR):
