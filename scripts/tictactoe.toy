@@ -1,12 +1,14 @@
+use "standard";
+
 //declare the board class
 var Board = class {
 	var constructor = function() {
 		this.array = [];
 
-		for (var i = 0; i < 3; i++) {
+		for (var i = 0 .. 2) {
 			this.array.push_back([]);
 
-			for (var j = 0; j < 3; j++) {
+			for (var j = 0 .. 2) {
 				this.array[i][j] = 0;
 			}
 		}
@@ -18,31 +20,40 @@ var Board = class {
 //declare the win conditions
 var checkWin = function(var _board) {
 	_board = _board.array;
-	var result = 0;
+	var result = false;
 
-	if (_board[0][0] && _board[0][0] == _board[0][1] && _board[0][0] == _board[0][2]) result = _board[0][0]; 
-	if (_board[1][0] && _board[1][0] == _board[1][1] && _board[1][0] == _board[1][2]) result = _board[1][0]; 
-	if (_board[2][0] && _board[2][0] == _board[2][1] && _board[2][0] == _board[2][2]) result = _board[2][0]; 
+	var f = (x, y) => {
+		if (x == y) {
+			return x;
+		} else {
+			return false;
+		}
+	}
 
-	if (_board[0][0] && _board[0][0] == _board[1][0] && _board[0][0] == _board[2][0]) result = _board[0][0]; 
-	if (_board[0][1] && _board[0][1] == _board[1][1] && _board[0][1] == _board[2][1]) result = _board[0][1]; 
-	if (_board[0][2] && _board[0][2] == _board[1][2] && _board[0][2] == _board[2][2]) result = _board[0][2];
+	//check the columns
+	result = result || map(f, [ _board[0][0], _board[0][1], _board[0][2] ]));
+	result = result || map(f, [ _board[1][0], _board[1][1], _board[1][2] ]));
+	result = result || map(f, [ _board[2][0], _board[2][1], _board[2][2] ]));
 
-	if (_board[0][0] && _board[0][0] == _board[1][1] && _board[0][0] == _board[2][2]) result = _board[0][0]; 
-	if (_board[0][2] && _board[0][2] == _board[1][1] && _board[0][2] == _board[2][0]) result = _board[0][2]; 
+	//check the rows
+	result = result || map(f, [ _board[0][0], _board[1][0], _board[2][0] ]));
+	result = result || map(f, [ _board[0][1], _board[1][1], _board[2][1] ]));
+	result = result || map(f, [ _board[0][2], _board[1][2], _board[2][2] ]));
+
+	//check the diagonals
+	result = result || map(f, [ _board[0][0], _board[1][1], _board[2][2] ]));
+	result = result || map(f, [ _board[0][2], _board[1][1], _board[2][0] ]));
 
 	return result;
 }
 
 //run the game until a winner is found
-use "standard";
-
 var board = Board();
 var winner = 0;
 
-while(winner == 0) {
-	for (var i = 0; i < 3; i++) {
-		for (var j = 0; j < 3; j++) {
+while(winner == false) {
+	for (var i = 0 .. 2) {
+		for (var j = 0 .. 2) {
 			board.array[i][j] = random(3).floor();
 		}
 	}
@@ -50,36 +61,3 @@ while(winner == 0) {
 }
 
 print("winner found!");
-
-/*
-
-Propositions 1: the '->' operator (from LHS to RHS)
-
-	for (var i = 0 -> 2)
-
-is equivalent to
-
-	for (var i = 0; i < 3; i++)
-
-Proposition 2: the 'eq' operator (if LHS == RHS then return LHS else return false end)
-
-	if (_board[0][0] eq _board[0][1] eq _board[0][2])
-
-is equivalent to
-
-	if (_board[0][0] && _board[0][0] == _board[0][1] && _board[0][0] == _board[0][2])
-
-Proposition 3: the => operator (shortcut for function)
-
-	x => x
-
-is equivalent to
-
-	function(x) {
-		return x;
-	}
-
-Note that if the last statement in a shortcut function is an expression
-statement, then the result of that expression is automatically returned.
-
-*/

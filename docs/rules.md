@@ -34,6 +34,8 @@ This is a list of operators (single or double symbols) that are used in toy:
 ]   (right bracket)
 {   (left brace)
 }   (right brace)
+=>  (shortcut function)
+..  (range function) 'LHS .. RHS' will only take integers are parameters. It creates a function that returns every integer between LHS and RHS inclusive, and undefined afterwards.
 =   (assignment)
 ==  (is equal to)
 !=  (is not equal to)
@@ -78,7 +80,7 @@ useDecl -> "use" (panic | strict | version NUMBER | STRING);
 varDecl -> "var" IDENTIFIER ("=" expression)? ";";
 ```
 
-A statement is something that produces a side effect, without producing a binding.
+A statement is something that produces a side effect, without producing a binding. The second mode of forStmt is intended for use by the range operator, but can be used by any function.
 
 ```
 statement -> (exprStmt | breakStmt | continueStmt | forStmt | ifStmt | moduleStmt | returnStmt | whileStmt | block);
@@ -86,7 +88,7 @@ statement -> (exprStmt | breakStmt | continueStmt | forStmt | ifStmt | moduleStm
 exprStmt     -> expression ";";
 breakStmt    -> "break" ";";
 continueStmt -> "continue" ";";
-forStmt      -> "for" "(" (varDecl | exprStmt)? ";" expression? ";" expression? ")" statement;
+forStmt      -> "for" "(" (varDecl | exprStmt)? ";" expression? ";" expression? ")" statement | "var" IDENTIFIER "=" function;
 ifStmt       -> "if" "(" expression ")" statement ("else" statement)?;
 moduleStmt   -> "module" ";";
 returnStmt   -> "return" expression? ";";
@@ -113,11 +115,12 @@ call           -> primary ( "(" arguments? ")" | "." IDENTIFIER)*;
 primary        -> "true" | "false" | "undefined" | "this" | NUMBER | STRING | IDENTIFIER | "(" expression ")";
 ```
 
-These have been separated out for clarity. Please note that "recurse" is only valid within a function, and will otherwise raise an error.
+These have been separated out for clarity. Please note that "recurse" is only valid within a function, and will otherwise raise an error. Also, shortcut mode 3 and 4 will return the value of the expression.
 
 ```
-function   -> "function" "(" parameters? ")" block | recurse;
-class      -> "class" "{" varDecl "}";
+function   -> "function" "(" parameters? ")" block | shortcut | recurse;
+shortcut   -> "(" parameters? ")" "=>" block | parameters? "=>" block | "(" parameters? ")" "=>" expression | parameters? "=>" expression;
+class      -> "class" "{" varDecl* "}";
 recurse    -> "recurse" "("  arguments? ")" ("." call)?;
 parameters -> IDENTIFIER ("," IDENTIFIER)*;
 arguments  -> expression ("," expression)*;
