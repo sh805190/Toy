@@ -20,6 +20,7 @@ This is a list of keywords that are used in Toy:
 * else
 * false
 * for
+* foreach //reserved for future use
 * function
 * if
 * log
@@ -161,6 +162,7 @@ floor(i) //returns i rounded to the highest integer below i
 ceiling(i) //returns i rounded to the lowest integer above i
 round(i) //returns i rounded to the nearest integer
 map(array, func) //returns a copy of array with func applied to each element
+clock() //number of seconds as a fraction since the program began
 ```
 
 # Numbers
@@ -190,3 +192,68 @@ pop_back() //remove the last element and return it, indexed arrays only
 insert(index, value) //insert value at index, if array is indexed, other indexes are adjusted to make room
 delete(index) //delete value at index, if array is indexed, other indexes are adjusted to fill room
 ```
+
+# Functions
+
+A function is a block of code that can be reused. It is defined using the 'function' keyword or the shortcut syntax ( the '=>' operator), and acts as a first class object. If the last line of a shortcut function is an expression statement, then the result of that expression is returned. An incorrect number of arguments is an error.
+
+```
+var a = function(x) {
+	;
+}
+
+var b = (x) => {
+	;
+}
+
+var c = x => {
+	;
+}
+
+x => x;
+
+a(i);
+b(i);
+c(i);
+```
+
+# Classes
+
+A class is a series of variables bundled together, accessible with the '.' operator. All members of a class are avialable to all other members of that class i.e. functions. If a class has "constructor" as a function, it is called on object initialization; the same for "destructor" and cleanup. To instanciate a class as an object, it must be invoked just like a function. The object itself is accessible using the 'this' keyword as a variable. Classes are immutable after creation.
+
+This language explicitly disallows inheritance.
+
+```
+var Dog = class {
+	var constructor() {
+		tail.wag();
+	}
+
+	var tail = class {
+		var wag = function() {
+			;
+		}
+	}
+}
+
+var rover = Dog();
+```
+
+# Oddball Language
+
+This works:
+
+```
+var f = () => wag();
+
+var Dat = class {
+	var constructor = f;
+	var wag = () => {};
+}
+
+var Dat = class {
+	var constructor = f;
+	var wag = () => {};
+}
+```
+
