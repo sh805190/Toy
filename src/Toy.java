@@ -9,7 +9,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Toy {
-	static boolean hadError = false;
+	private static final Interpreter interpreter = new Interpreter();
+	private static boolean hadError = false;
+	private static boolean hadRuntimeError = false;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length > 1) {
@@ -24,6 +26,13 @@ public class Toy {
 	private static void runFile(String path) throws IOException {
 		byte[] bytes = Files.readAllBytes(Paths.get(path));
 		run(new String(bytes, Charset.defaultCharset()));
+		//error
+		if (hadError) {
+			System.exit(-1);
+		}
+		if (hadRuntimeError) {
+			System.exit(-2);
+		}
 	}
 
 	private static void runPrompt() throws IOException {
@@ -34,23 +43,22 @@ public class Toy {
 			System.out.print("> ");
 			run(reader.readLine());
 			hadError = false;
+			hadRuntimeError = false;
 		}
 	}
 
 	private static void run(String source) {
-		//error
-		if (hadError) {
-			System.exit(-1);
-		}
-
 		Scanner scanner = new Scanner(source);
 		Parser parser = new Parser(scanner.scanTokens());
 
 		Expr expression = parser.parse();
 
+		//syntax error
 		if (hadError) return;
 
-		System.out.println(new AstPrinter().print(expression));
+//		System.out.println(new AstPrinter().print(expression));
+
+		interpreter.interpret(expression);
 	}
 
 	public static void error(int line, String message) {
@@ -63,6 +71,11 @@ public class Toy {
 		} else {
 			report(token.line, " at '" + token.lexeme + "'", message);
 		}
+	}
+
+	public static void runtimeError(RuntimeError error) {
+		System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+		hadRuntimeError = true;
 	}
 
 	private static void report(int line, String where, String message) {

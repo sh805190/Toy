@@ -77,7 +77,7 @@ class Parser {
 	private Expr multiplication() {
 		Expr expr = prefix();
 
-		while(match(SLASH, STAR)) {
+		while(match(SLASH, STAR, MODULUS)) {
 			Token operator = previous();
 			Expr right = prefix();
 			expr = new Expr.Binary(expr, operator, right);
