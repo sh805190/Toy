@@ -22,8 +22,13 @@ class AstPrinter implements Expr.Visitor<String> {
 	}
 
 	@Override
-	public String visit(Expr.Unary expr) {
-		return parenthesize(expr.operator.lexeme, expr.right);
+	public String visit(Expr.Postfix expr) {
+		return parenthesize("x" + expr.operator.lexeme, expr.left);
+	}
+
+	@Override
+	public String visit(Expr.Prefix expr) {
+		return parenthesize(expr.operator.lexeme + "x", expr.right);
 	}
 
 	private String parenthesize(String name, Expr... exprs) {

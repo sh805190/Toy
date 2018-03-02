@@ -7,7 +7,8 @@ abstract class Expr {
 		R visit(Binary expr);
 		R visit(Grouping expr);
 		R visit(Literal expr);
-		R visit(Unary expr);
+		R visit(Postfix expr);
+		R visit(Prefix expr);
 	}
 
 	abstract <R> R accept(Visitor<R> visitor);
@@ -48,11 +49,24 @@ abstract class Expr {
 			return visitor.visit(this);
 		}
 	}
-	static class Unary extends Expr {
+	static class Postfix extends Expr {
+		final Expr left;
+		final Token operator;
+
+		Postfix(Expr left, Token operator) {
+			this.left = left;
+			this.operator = operator;
+		}
+
+		<R> R accept(Visitor<R> visitor) {
+			return visitor.visit(this);
+		}
+	}
+	static class Prefix extends Expr {
 		final Token operator;
 		final Expr right;
 
-		Unary(Token operator, Expr right) {
+		Prefix(Token operator, Expr right) {
 			this.operator = operator;
 			this.right = right;
 		}
