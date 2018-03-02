@@ -1,7 +1,7 @@
 #output
 OBJDIR=obj
 OUTDIR=../out
-OUT=jtoy.jar
+OUT=toybox.jar
 
 #targets
 all: $(OBJDIR)

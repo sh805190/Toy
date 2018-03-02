@@ -1,0 +1,63 @@
+use "standard";
+
+//declare the board class
+var Board = class {
+	var constructor = function() {
+		this.array = [];
+
+		for (var i = 0 .. 2) {
+			this.array.push_back([]);
+
+			for (var j = 0 .. 2) {
+				this.array[i][j] = 0;
+			}
+		}
+	}
+
+	var array;
+}
+
+//declare the win conditions
+var checkWin = function(var _board) {
+	_board = _board.array;
+	var result = false;
+
+	var f = (x, y) => {
+		if (x == y) {
+			return x;
+		} else {
+			return false;
+		}
+	}
+
+	//check the columns
+	result = result || map(f, [ _board[0][0], _board[0][1], _board[0][2] ]));
+	result = result || map(f, [ _board[1][0], _board[1][1], _board[1][2] ]));
+	result = result || map(f, [ _board[2][0], _board[2][1], _board[2][2] ]));
+
+	//check the rows
+	result = result || map(f, [ _board[0][0], _board[1][0], _board[2][0] ]));
+	result = result || map(f, [ _board[0][1], _board[1][1], _board[2][1] ]));
+	result = result || map(f, [ _board[0][2], _board[1][2], _board[2][2] ]));
+
+	//check the diagonals
+	result = result || map(f, [ _board[0][0], _board[1][1], _board[2][2] ]));
+	result = result || map(f, [ _board[0][2], _board[1][1], _board[2][0] ]));
+
+	return result;
+}
+
+//run the game until a winner is found
+var board = Board();
+var winner = 0;
+
+while(winner == false) {
+	for (var i = 0 .. 2) {
+		for (var j = 0 .. 2) {
+			board.array[i][j] = random(3).floor();
+		}
+	}
+	winner = checkWin(board);
+}
+
+print("winner found!");
