@@ -2,6 +2,14 @@
 
 This is the definition of Toy version 1. More features may be added at a later date.
 
+# Debugging
+
+For debugging and development purposes, I've added an extra statement, "log". This will print the parameter to the console, regardless of any changes.
+
+```
+log "Hello world!";
+```
+
 # Reserved keywords
 
 This is a list of keywords that are used in Toy:
@@ -14,6 +22,7 @@ This is a list of keywords that are used in Toy:
 * for
 * function
 * if
+* log
 * module
 * recurse
 * return
@@ -60,7 +69,7 @@ This is a list of operators (single or double symbols) that are used in toy:
 ;   (statement termination)
 ,   (separator)
 "   (surrounds strings)
-'   (surrounds single characters)
+\   (escape characters in strings)
 ```
 
 # Syntax
@@ -88,11 +97,12 @@ statement -> (exprStmt | breakStmt | continueStmt | forStmt | ifStmt | moduleStm
 exprStmt     -> expression ";";
 breakStmt    -> "break" ";";
 continueStmt -> "continue" ";";
-forStmt      -> "for" "(" (varDecl | exprStmt)? ";" expression? ";" expression? ")" statement | "var" IDENTIFIER "=" function;
+forStmt      -> "for" "(" (varDecl | exprStmt)? ";" expression? ";" expression? ")" statement | "for" "(" "var" IDENTIFIER "=" function ")" statement;
 ifStmt       -> "if" "(" expression ")" statement ("else" statement)?;
 moduleStmt   -> "module" ";";
 returnStmt   -> "return" expression? ";";
 whileStmt    -> "while" "(" expression ")" statement;
+logStmt      -> "log" string ";";
 block        -> "{" declaration* "}";
 ```
 
@@ -101,7 +111,7 @@ An expression evaluates to a value. Due to the number of unary and binary operat
 ```
 expression -> assignment;
 
-assignment     -> (call ".")? IDENTIFIER "=" assignment | logical_or | function | class;
+assignment     -> (call ".")? IDENTIFIER "=" assignment | logical_or;
 
 logical_or     -> logical_and ("||" logical_and)*;
 logical_and    -> equality ("&&" equality)*;
@@ -112,7 +122,7 @@ multiplication -> unary ( ("*" | "/") unary)*;
 
 unary          -> ("!" | "-") unary | call;
 call           -> primary ( "(" arguments? ")" | "." IDENTIFIER)*;
-primary        -> "true" | "false" | "undefined" | "this" | NUMBER | STRING | IDENTIFIER | "(" expression ")";
+primary        -> "true" | "false" | "undefined" | "this" | NUMBER | STRING | IDENTIFIER | "(" expression ")" | "[" (expression ("," expression)*)? "]" | function | class;
 ```
 
 These have been separated out for clarity. Please note that "recurse" is only valid within a function, and will otherwise raise an error. Also, shortcut mode 3 and 4 will return the value of the expression.
@@ -136,3 +146,47 @@ ALPHA -> 'a' ... 'z' | 'A' ... 'Z' | '_';
 DIGIT -> '0' ... '9';
 ```
 
+# Standard Library
+
+The following variables are introdcued into the namespace when calling 'use "standard";'. These act as the standard library.
+
+```
+print(str) //print to the console
+printf(str, array) //print formatted to the console
+scan() //returns input from the console
+scanf(str, array) //returns formatted input from the console as an array
+random(i) //produces a random number between 0 inclusive and 1 exclusive, and multiplies it by i
+copy(i) //returns a deep copy of i, regardless of what it is
+floor(i) //returns i rounded to the highest integer below i
+ceiling(i) //returns i rounded to the lowest integer above i
+round(i) //returns i rounded to the nearest integer
+map(array, func) //returns a copy of array with func applied to each element
+```
+
+# Numbers
+
+All numbers are double precision floating point values. They have the following built in functions.
+
+```
+x.floor() //rounds to the highest integer below x
+x.ceiling() //rounds to the lowest integer above x
+x.round() //rounds to the nearest integer
+```
+
+# Arrays
+
+Arrays by default use incremental indexes, but any value can act as a key; this makes arrays associative. Arrays have the following built in functions.
+
+```
+copy() //return a deep copy of this array
+map(func) //apply func to each element, storing the result in its place
+reduce(func) //"fold" the elements of an array, returning the result
+filter(func) //return an array that contains copies of all elements that makes func return true
+size() //return the size of the array
+push_front(e) //append e to the front, indexed arrays only
+push_back(e) //append e to the back, indexed arrays only
+pop_front() //remove the first element and return it, indexed arrays only
+pop_back() //remove the last element and return it, indexed arrays only
+insert(index, value) //insert value at index, if array is indexed, other indexes are adjusted to make room
+delete(index) //delete value at index, if array is indexed, other indexes are adjusted to fill room
+```
