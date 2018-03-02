@@ -246,12 +246,12 @@ This works:
 ```
 var f = () => wag();
 
-var Dat = class {
+var Cat = class {
 	var constructor = f;
 	var wag = () => {};
 }
 
-var Dat = class {
+var Dog = class {
 	var constructor = f;
 	var wag = () => {};
 }
