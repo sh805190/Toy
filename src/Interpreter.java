@@ -1,10 +1,15 @@
 package com.krgamestudios.toy;
 
-class Interpreter implements Expr.Visitor<Object> {
-	public void interpret(Expr expression) {
+import java.util.List;
+
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+	private Environment environment = new Environment();
+
+	public void interpret(List<Stmt> statements) {
 		try {
-			Object value = evaluate(expression);
-			System.out.println(stringify(value));
+			for (Stmt statement : statements) {
+				execute(statement);
+			}
 		} catch(RuntimeError error) {
 			Toy.runtimeError(error);
 		}
@@ -23,6 +28,46 @@ class Interpreter implements Expr.Visitor<Object> {
 		}
 
 		return object.toString();
+	}
+
+	//statements
+	@Override
+	public Void visit(Stmt.Block stmt) {
+		executeBlock(stmt.statements, new Environment(environment));
+		return null;
+	}
+
+	@Override
+	public Void visit(Stmt.Log stmt) {
+		Object value = evaluate(stmt.expression);
+		System.out.println(stringify(value));
+		return null;
+	}
+
+	@Override
+	public Void visit(Stmt.Var stmt) {
+		Object value = null;
+		if (stmt.initializer != null) {
+			value = evaluate(stmt.initializer);
+		}
+
+		environment.define(stmt.name, stmt.name.lexeme, value);
+		return null;
+	}
+
+	@Override
+	public Void visit(Stmt.Expression stmt) {
+		evaluate(stmt.expression);
+		return null;
+	}
+
+	//expressions
+	@Override
+	public Object visit(Expr.Assign expr) {
+		Object value = evaluate(expr.value);
+
+		environment.assign(expr.name, value);
+		return value;
 	}
 
 	@Override
@@ -133,6 +178,28 @@ class Interpreter implements Expr.Visitor<Object> {
 			default:
 				throw new RuntimeError(expr.operator, "Prefix expression expected.");
 		}
+	}
+
+	@Override
+	public Object visit(Expr.Variable expr) {
+		return environment.get(expr.name);
+	}
+
+	void executeBlock(List<Stmt> statements, Environment environment) {
+		Environment previous = this.environment;
+		try {
+			this.environment = environment;
+
+			for (Stmt statement : statements) {
+				execute(statement);
+			}
+		} finally {
+			this.environment = previous;
+		}
+	}
+
+	private void execute(Stmt stmt) {
+		stmt.accept(this);
 	}
 
 	private Object evaluate(Expr expr) {

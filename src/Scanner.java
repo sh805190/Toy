@@ -29,6 +29,7 @@ class Scanner {
 		keywords.put("true", TRUE);
 		keywords.put("undefined", UNDEFINED);
 		keywords.put("use", USE);
+		keywords.put("var", VAR);
 		keywords.put("while", WHILE);
 	}
 
@@ -85,8 +86,10 @@ class Scanner {
 					while(peek() != '\n' && !isAtEnd()) advance();
 				} else if (match('*')) {
 					//multi-line comments
-					for (;;) {
-						if (match('*') && match('/') || isAtEnd()) break;
+					while(!isAtEnd()) {
+						if (match('*') && match('/')) break;
+						if (peek() == '\n') line++;
+						advance();
 					}
 				} else {
 					addToken(SLASH);

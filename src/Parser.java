@@ -1,5 +1,6 @@
 package com.krgamestudios.toy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.krgamestudios.toy.TokenType.*;
@@ -14,20 +15,91 @@ class Parser {
 		this.tokens = tokens;
 	}
 
-	Expr parse() {
+	List<Stmt> parse() {
+		List<Stmt> statements = new ArrayList<>();
+		while(!isAtEnd()) {
+			statements.add(declaration());
+		}
+		return statements;
+	}
+
+	//declarations
+	private Stmt declaration() {
 		try {
-			return expression();
+			//TODO: use
+			if (match(VAR)) return varDeclaration();
+
+			return statement();
 		} catch(ParseError error) {
+			syncronize();
 			return null;
 		}
 	}
 
+	private Stmt varDeclaration() {
+		Token name = consume(IDENTIFIER, "Expected variable name.");
+
+		Expr initializer = null;
+		if (match(EQUAL)) {
+			initializer = expression();
+		}
+
+		consume(SEMICOLON, "Expected ';' after variable declaration.");
+		return new Stmt.Var(name, initializer);
+	}
+
+	//statements
+	private Stmt statement() {
+		if (match(LOG)) return logStatement();
+		if (match(LEFT_BRACE)) return new Stmt.Block(block());
+
+		return expressionStatement();
+	}
+
+	private List<Stmt> block() {
+		List<Stmt> statements = new ArrayList<>();
+
+		while (!check(RIGHT_BRACE) && !isAtEnd()) {
+			statements.add(declaration());
+		}
+
+		consume(RIGHT_BRACE, "Expected '}' after block.");
+		return statements;
+	}
+
+	private Stmt logStatement() {
+		Expr value = expression();
+		consume(SEMICOLON, "Expected ';' after value.");
+		return new Stmt.Log(value);
+	}
+
+	private Stmt expressionStatement() {
+		Expr expr = expression();
+		consume(SEMICOLON, "Expected ';' after expression.");
+		return new Stmt.Expression(expr);
+	}
+
+	//expressions
 	private Expr expression() {
 		return assignment();
 	}
 
 	private Expr assignment() {
-		return logicalOr();
+		Expr expr = logicalOr();
+
+		if (match(EQUAL)) {
+			Token equals = previous();
+			Expr value = assignment();
+
+			if (expr instanceof Expr.Variable) {
+				Token name = ((Expr.Variable)expr).name;
+				return new Expr.Assign(name, value);
+			}
+
+			error(equals, "Invalid assignment target.");
+		}
+
+		return expr;
 	}
 
 	private Expr logicalOr() {
@@ -121,6 +193,10 @@ class Parser {
 		}
 
 		//TODO: functions, classes
+
+		if (match(IDENTIFIER)) {
+			return new Expr.Variable(previous());
+		}
 
 		if (match(LEFT_PAREN)) {
 			Expr expr = expression();

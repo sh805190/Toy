@@ -42,6 +42,13 @@ public class Toy {
 		for (;;) {
 			System.out.print("> ");
 			run(reader.readLine());
+
+			if (hadError) {
+				System.out.println("parse error");
+			}
+			if (hadRuntimeError) {
+				System.out.println("runtime error");
+			}
 			hadError = false;
 			hadRuntimeError = false;
 		}
@@ -51,14 +58,14 @@ public class Toy {
 		Scanner scanner = new Scanner(source);
 		Parser parser = new Parser(scanner.scanTokens());
 
-		Expr expression = parser.parse();
+		List<Stmt> statements = parser.parse();
 
 		//syntax error
 		if (hadError) return;
 
 //		System.out.println(new AstPrinter().print(expression));
 
-		interpreter.interpret(expression);
+		interpreter.interpret(statements);
 	}
 
 	public static void error(int line, String message) {
