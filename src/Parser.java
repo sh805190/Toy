@@ -1,6 +1,7 @@
 package com.krgamestudios.toy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.krgamestudios.toy.TokenType.*;
@@ -50,10 +51,101 @@ class Parser {
 
 	//statements
 	private Stmt statement() {
+		if (match(BREAK)) return breakStatement();
+		if (match(FOR)) return forStatement();
+		if (match(IF)) return ifStatement();
 		if (match(LOG)) return logStatement();
+		if (match(WHILE)) return whileStatement();
 		if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
 		return expressionStatement();
+	}
+
+	private Stmt breakStatement() {
+		consume(SEMICOLON, "Expected ';' after break statement.");
+		return new Stmt.Break();
+	}
+
+	private Stmt forStatement() {
+		consume(LEFT_PAREN, "Expected '(' after 'for'.");
+
+		//initializer
+		Stmt initializer;
+		if (match(SEMICOLON)) {
+			initializer = null;
+		} else if (match(VAR)) {
+			initializer = varDeclaration();
+		} else {
+			initializer = expressionStatement();
+		}
+
+		//condition
+		Expr condition = null;
+		if (!check(SEMICOLON)) {
+			condition = expression();
+		}
+
+		consume(SEMICOLON, "Expected ';' after for loop condition.");
+
+		//increment
+		Expr increment = null;
+		if (!check(RIGHT_PAREN)) {
+			increment = expression();
+		}
+
+		consume(RIGHT_PAREN, "Expected ')' after for clauses.");
+
+		//body
+		Stmt body = statement();
+
+		//desugaring
+		if (increment != null) {
+			body = new Stmt.Block(Arrays.asList(
+				body,
+				new Stmt.Expression(increment)
+			));
+		}
+
+		if (condition == null) condition = new Expr.Literal(true);
+		body = new Stmt.While(condition, body);
+
+		if (initializer != null) {
+			body = new Stmt.Block(Arrays.asList(
+				initializer,
+				body
+			));
+		}
+
+		return body;
+	}
+
+	private Stmt ifStatement() {
+		consume(LEFT_PAREN, "Expected '(' after 'if'.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expected ')' after if condition.");
+
+		Stmt thenBranch = statement();
+		Stmt elseBranch = null;
+		if (match(ELSE)) {
+			elseBranch = statement();
+		}
+
+		return new Stmt.If(condition, thenBranch, elseBranch);
+	}
+
+	private Stmt logStatement() {
+		Expr value = expression();
+		consume(SEMICOLON, "Expected ';' after value.");
+		return new Stmt.Log(value);
+	}
+
+	private Stmt whileStatement() {
+		consume(LEFT_PAREN, "Expected '(' after 'while'.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expected ')' after while condition.");
+		Stmt body = statement();
+
+		return new Stmt.While(condition, body);
 	}
 
 	private List<Stmt> block() {
@@ -65,12 +157,6 @@ class Parser {
 
 		consume(RIGHT_BRACE, "Expected '}' after block.");
 		return statements;
-	}
-
-	private Stmt logStatement() {
-		Expr value = expression();
-		consume(SEMICOLON, "Expected ';' after value.");
-		return new Stmt.Log(value);
 	}
 
 	private Stmt expressionStatement() {
@@ -103,11 +189,27 @@ class Parser {
 	}
 
 	private Expr logicalOr() {
-		return logicalAnd();
+		Expr expr = logicalAnd();
+
+		while (match(OR)) {
+			Token operator = previous();
+			Expr right = logicalAnd();
+			expr = new Expr.Logical(expr, operator, right);
+		}
+
+		return expr;
 	}
 
 	private Expr logicalAnd() {
-		return equality();
+		Expr expr = equality();
+
+		while (match(AND)) {
+			Token operator = previous();
+			Expr right = equality();
+			expr = new Expr.Logical(expr, operator, right);
+		}
+
+		return expr;
 	}
 
 	private Expr equality() {

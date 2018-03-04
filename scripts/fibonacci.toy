@@ -1,0 +1,17 @@
+var a = 0;
+var b = 1;
+
+while (a < 10000) {
+  log a;
+  var temp = a;
+  a = b;
+  b = temp + b;
+	break;
+}
+
+if (true) {
+	log "Of course it's true.";
+}
+else {
+	false;
+}

@@ -18,6 +18,7 @@ public class GenerateAst {
 			"Binary   : Expr left, Token operator, Expr right",
 			"Grouping : Expr expression",
 			"Literal  : Object value",
+			"Logical  : Expr left, Token operator, Expr right",
 			"Postfix  : Expr left, Token operator",
 			"Prefix   : Token operator, Expr right",
 			"Variable : Token name"
@@ -25,9 +26,12 @@ public class GenerateAst {
 
 		defineAst(outputDir, "Stmt", Arrays.asList(
 			"Block      : List<Stmt> statements",
+			"Break      : ",
 			"Expression : Expr expression",
+			"If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
 			"Log        : Expr expression",
-			"Var        : Token name, Expr initializer"
+			"Var        : Token name, Expr initializer",
+			"While      : Expr condition, Stmt body"
 		));
 	}
 
@@ -65,6 +69,7 @@ public class GenerateAst {
 		//store parameters in fields
 		String[] fields = fieldList.split(", ");
 		for (String field : fields) {
+			if (field.trim().length() == 0) break;
 			field.trim();
 			writer.println("\t\tfinal " + field + ";");
 		}
@@ -74,6 +79,7 @@ public class GenerateAst {
 		//constructor
 		writer.println("\t\t" + className + "(" + fieldList + ") {");
 		for (String field : fields) {
+			if (field.trim().length() == 0) break;
 			String name = field.split(" ")[1];
 			writer.println("\t\t\tthis." + name + " = " + name + ";");
 		}

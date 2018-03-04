@@ -37,6 +37,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		return null;
 	}
 
+	public Void visit(Stmt.Break stmt) {
+System.out.println("INTERPRET BREAK");
+		return null;
+	}
+
+	@Override
+	public Void visit(Stmt.If stmt) {
+		if (isTruthy(evaluate(stmt.condition))) {
+			execute(stmt.thenBranch);
+		} else if (stmt.elseBranch != null) {
+			execute(stmt.elseBranch);
+		}
+		return null;
+	}
+
 	@Override
 	public Void visit(Stmt.Log stmt) {
 		Object value = evaluate(stmt.expression);
@@ -52,6 +67,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		}
 
 		environment.define(stmt.name, stmt.name.lexeme, value);
+		return null;
+	}
+
+	@Override
+	public Void visit(Stmt.While stmt) {
+		while(isTruthy(evaluate(stmt.condition))) {
+			execute(stmt.body);
+		}
 		return null;
 	}
 
@@ -139,6 +162,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Object visit(Expr.Literal expr) {
 		return expr.value;
+	}
+
+	@Override
+	public Object visit(Expr.Logical expr) {
+		Object left = evaluate(expr.left);
+
+		if (expr.operator.type == TokenType.OR) {
+			if (isTruthy(left)) return left;
+		} else {
+			if (!isTruthy(left)) return left;
+		}
+
+		return evaluate(expr.right);
 	}
 
 	@Override
